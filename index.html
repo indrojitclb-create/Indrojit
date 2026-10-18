@@ -1,0 +1,2220 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>মাইক্রোফাইন্যান্স ফিল্ড মনিটরিং ও রিপোর্টিং সিস্টেম</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+    }
+    .bg-red-green-pattern {
+      background: radial-gradient(circle at 15% 15%, #ef4444 0%, transparent 35%),
+                  radial-gradient(circle at 85% 85%, #dc2626 0%, transparent 40%),
+                  linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
+
+  <!-- ========================================== -->
+  <!-- 1. AUTHENTIC LOGIN SCREEN (লাল ও সবুজ থিম) -->
+  <!-- ========================================== -->
+  <div id="loginScreen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-red-green-pattern overflow-y-auto">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl border-4 border-emerald-500/30 overflow-hidden my-auto transition-all">
+      
+      <!-- Top Red-Green Brand Banner -->
+      <div class="bg-gradient-to-r from-red-600 via-rose-600 to-emerald-700 p-6 text-white text-center relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 w-28 h-28 bg-red-500 rounded-full opacity-30 pointer-events-none"></div>
+        <div class="absolute -left-8 -top-8 w-28 h-28 bg-emerald-400 rounded-full opacity-20 pointer-events-none"></div>
+
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl shadow-inner mb-3 border border-white/30">
+          📊
+        </div>
+        <h2 class="text-xl font-bold tracking-tight">ফিল্ড ডাটা মনিটরিং পোর্টাল</h2>
+        <p class="text-xs text-emerald-100 mt-1">শাখা, এরিয়া ও মাঠ পর্যায়ের তথ্যায়ন ব্যবস্থাপনা</p>
+        <div class="mt-2 inline-block px-3 py-0.5 rounded-full bg-red-700/80 text-[11px] font-semibold border border-red-400/50">
+          নিরাপদ লগইন সিস্টেম
+        </div>
+      </div>
+
+      <!-- Login Form Body -->
+      <div class="p-6 sm:p-8 space-y-5">
+        <div id="loginAlert" class="hidden p-3 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+          ⚠️ ইউজারনেম বা পাসওয়ার্ড সঠিক নয়!
+        </div>
+
+        <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <span>ইউজারনেম বা আইডি:</span>
+              <span class="text-[10px] text-slate-400 font-normal">যেমন: indrojit বা abdur</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm">👤</span>
+              <input type="text" id="loginUsername" required placeholder="ইউজারনেম লিখুন" class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition font-medium">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+              <span>পাসওয়ার্ড:</span>
+              <span class="text-[10px] text-slate-400 font-normal">গোপনীয় রাখুন</span>
+            </label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm">🔒</span>
+              <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition font-medium">
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-700 hover:from-emerald-700 hover:to-green-800 text-white rounded-xl font-bold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center space-x-2">
+            <span>লগইন করুন</span>
+            <span>➔</span>
+          </button>
+        </form>
+
+        <!-- Quick Credentials Hint for Testing (১-ক্লিক লগইন) -->
+        <div class="pt-4 border-t border-slate-100">
+          <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2.5 text-center">টেস্ট করার জন্য সরাসরি ক্লিক করুন:</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
+            <button onclick="fillLoginCredentials('indrojit')" class="p-2 rounded-lg bg-red-50 hover:bg-red-100 border border-red-200 text-left transition flex items-center space-x-1.5">
+              <span class="text-base">👑</span>
+              <div>
+                <div class="font-bold text-red-900 leading-tight">এডমিন (Indrojit)</div>
+                <div class="text-[10px] text-red-700">Khulna Region</div>
+              </div>
+            </button>
+
+            <button onclick="fillLoginCredentials('moderator')" class="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-300 text-left transition flex items-center space-x-1.5">
+              <span class="text-base">🛡️</span>
+              <div>
+                <div class="font-bold text-amber-900 leading-tight">মডারেটর</div>
+                <div class="text-[10px] text-amber-700">রিপোর্ট ভিউয়ার • খুলনা</div>
+              </div>
+            </button>
+
+            <button onclick="fillLoginCredentials('abdur')" class="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-left transition flex items-center space-x-1.5">
+              <span class="text-base">📝</span>
+              <div>
+                <div class="font-bold text-emerald-900 leading-tight">লেভেল ১ (সিও)</div>
+                <div class="text-[10px] text-emerald-700">আইডি: abdur</div>
+              </div>
+            </button>
+
+            <button onclick="fillLoginCredentials('rafiq')" class="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 border border-blue-200 text-left transition flex items-center space-x-1.5">
+              <span class="text-base">🏢</span>
+              <div>
+                <div class="font-bold text-blue-900 leading-tight">লেভেল ২ (শাখা ব্য.)</div>
+                <div class="text-[10px] text-blue-700">আইডি: rafiq</div>
+              </div>
+            </button>
+
+            <button onclick="fillLoginCredentials('tanvir')" class="p-2 rounded-lg bg-purple-50 hover:bg-purple-200 border border-purple-200 text-left transition flex items-center space-x-1.5 col-span-2 sm:col-span-1">
+              <span class="text-base">🗺️</span>
+              <div>
+                <div class="font-bold text-purple-900 leading-tight">লেভেল ৩ (এরিয়া ব্য.)</div>
+                <div class="text-[10px] text-purple-700">আইডি: tanvir</div>
+              </div>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="bg-slate-50 py-3 text-center border-t border-slate-100 text-[11px] text-slate-500">
+        প্রধান এডমিন: <b class="text-slate-700">Indrojit</b> • সম্পূর্ণ সুরক্ষিত পোর্টাল
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. MAIN APPLICATION (LOGGED IN VIEW)       -->
+  <!-- ========================================== -->
+  <div id="mainApp" class="flex-1 flex flex-col">
+
+    <!-- Top Red & Green Accent Header -->
+    <header class="bg-emerald-800 text-white shadow-md sticky top-0 z-40 border-b-2 border-red-500">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-red-600 flex items-center justify-center font-bold text-xl shadow">
+              📊
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h1 class="text-base sm:text-lg font-bold tracking-tight">ফিল্ড ডাটা মনিটরিং পোর্টাল</h1>
+                <span class="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-red-600 text-white">লাইভ</span>
+              </div>
+              <p class="text-[11px] text-emerald-200">শাখা, এরিয়া ও মাঠ পর্যায়ের তথ্যায়ন ব্যবস্থা</p>
+            </div>
+          </div>
+
+          <div class="flex items-center space-x-2 sm:space-x-3">
+            <!-- User Photo / Avatar -->
+            <div onclick="openProfileModal()" class="cursor-pointer flex items-center" title="ছবি ও প্রোফাইল পরিবর্তন">
+              <img id="headerUserAvatar" class="w-9 h-9 rounded-full border-2 border-white/80 object-cover shadow-sm hidden" src="" alt="Avatar">
+              <div id="headerUserAvatarFallback" class="w-9 h-9 rounded-full bg-red-600 flex items-center justify-center font-bold text-sm shadow border border-white/40">
+                👑
+              </div>
+            </div>
+
+            <div class="flex flex-col text-right">
+              <div class="flex items-center justify-end space-x-1.5">
+                <span id="headerUserName" class="text-sm font-bold text-white">Indrojit</span>
+                <span id="headerUserLevel" class="text-[10px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">প্রধান এডমিন</span>
+              </div>
+              <div id="headerLocationInfo" class="text-[11px] text-emerald-200 flex items-center justify-end space-x-2">
+                <!-- Dynamically filled by updateHeaderAndRoleUI() -->
+              </div>
+            </div>
+
+            <!-- Mobile App Guide Pill -->
+            <button onclick="openMobileGuideModal()" class="hidden md:flex px-2.5 py-1.5 bg-emerald-600/70 hover:bg-emerald-600 rounded-lg text-xs font-semibold transition items-center space-x-1 border border-emerald-400/40" title="মোবাইল এ্যাপ নির্দেশিকা">
+              <span>📱 মোবাইল এ্যাপ</span>
+            </button>
+
+            <button onclick="openProfileModal()" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition flex items-center space-x-1" title="পোস্টিং ও প্রোফাইল পরিবর্তন">
+              <span>✏️ পোস্টিং</span>
+            </button>
+
+            <!-- User Self Change Password Button -->
+            <button onclick="openChangePasswordModal()" class="px-2.5 py-1.5 bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-400/30 rounded-lg text-xs font-semibold transition flex items-center space-x-1" title="পাসওয়ার্ড পরিবর্তন করুন">
+              <span>🔑 পাসওয়ার্ড</span>
+            </button>
+
+            <button onclick="handleLogout()" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1 shadow" title="লগআউট করুন">
+              <span>🚪 লগআউট</span>
+            </button>
+          </div>
+        </div>
+
+        <nav class="flex space-x-1 border-t border-emerald-700/80 pt-2 pb-1 overflow-x-auto" id="mainNavigationTabs">
+          <button id="tabBtnEntry" onclick="switchTab('entry')" class="tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold bg-white text-emerald-800 shadow-sm transition flex items-center space-x-1.5">
+            <span>📝 দৈনিক ডাটা এন্ট্রি</span>
+          </button>
+          <button id="tabBtnReports" onclick="switchTab('reports')" class="tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold text-emerald-100 hover:bg-emerald-700/50 transition flex items-center space-x-1.5">
+            <span>📊 সার্বিক রিপোর্ট (ফিল্টার ও ওপেনিং)</span>
+          </button>
+          <button id="tabBtnAdmin" onclick="switchTab('admin')" class="hidden tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold text-emerald-100 hover:bg-emerald-700/50 transition flex items-center space-x-1.5">
+            <span>⚙️ এডমিন কন্ট্রোল সেন্টার</span>
+            <span class="text-[10px] px-1.5 py-0.2 rounded bg-red-600 text-white font-bold ml-1">লকড</span>
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+      <div id="disabledBanner" class="hidden mb-6 bg-rose-50 border-l-4 border-rose-500 p-4 rounded-r-xl shadow-sm">
+        <div class="flex items-center space-x-3">
+          <span class="text-2xl">⚠️</span>
+          <div>
+            <h3 class="text-sm font-bold text-rose-800">অ্যাক্সেস স্থগিত করা হয়েছে!</h3>
+            <p class="text-xs text-rose-700">এডমিন (Indrojit) কর্তৃক আপনার একাউন্টটি সাময়িকভাবে বাতিল বা নিষ্ক্রিয় করা হয়েছে। আপনি বর্তমানে কোনো ডাটা ইনপুট দিতে পারবেন না। প্রয়োজনে এডমিনের সাথে যোগাযোগ করুন।</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 1: DATA ENTRY TAB -->
+      <section id="tabContentEntry" class="space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200" id="currentLevelBadge">
+                লেভেল ১ (সিও)
+              </span>
+              <span class="text-xs text-slate-500">• আজকের এন্ট্রি ফর্ম</span>
+            </div>
+            <h2 class="text-xl font-bold text-slate-800 mt-1" id="formTitle">মাঠ পর্যায় দৈনিক তথ্য ইনপুট</h2>
+            <p class="text-xs text-slate-500" id="formSubtitle">আপনার নির্দিষ্ট প্রশ্নের সঠিক তথ্য প্রদান করে নিচে সাবমিট করুন।</p>
+          </div>
+
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center space-x-3 min-w-[240px]">
+            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+              📅
+            </div>
+            <div>
+              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">ইনপুট তারিখ (স্বয়ংক্রিয়)</span>
+              <div class="text-sm font-bold text-slate-800" id="displayAutoDate">১৫ অক্টোবর, ২০২৬</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 md:p-8">
+          <form id="dataInputForm" onsubmit="handleDataSubmit(event)" class="space-y-6">
+            <div id="questionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            </div>
+
+            <div class="border-t border-slate-100 pt-6">
+              <label class="block text-xs font-semibold text-slate-600 mb-2">মন্তব্য / বিশেষ তথ্য (ঐচ্ছিক):</label>
+              <textarea id="entryRemarks" rows="2" placeholder="প্রয়োজনীয় কোনো বিশেষ তথ্য থাকলে লিখুন..." class="w-full px-4 py-2.5 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition"></textarea>
+            </div>
+
+            <div class="flex items-center justify-end space-x-4 pt-4 border-t border-slate-100">
+              <button type="reset" class="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">
+                রিসেট
+              </button>
+              <button type="submit" id="submitBtn" class="px-7 py-2.5 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow hover:shadow-md transition flex items-center space-x-2">
+                <span>💾 ডাটা সাবমিট করুন</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- TAB 2: REPORTS VIEW TAB -->
+      <section id="tabContentReports" class="hidden space-y-6">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-xl font-bold text-slate-800">সার্বিক তথ্য ও কার্যবিবরণী রিপোর্ট</h2>
+              <p class="text-xs text-slate-500">সকল স্তরের কর্মকর্তার ইনপুটকৃত তথ্যের সমন্বিত প্রতিবেদন (সবার জন্য উন্মুক্ত)</p>
+            </div>
+            <button onclick="exportToCSV()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center space-x-2 w-fit">
+              <span>📥 এক্সেল / CSV ডাউনলোড</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">তারিখ নির্বাচন:</label>
+              <input type="date" id="filterDate" onchange="renderReportsTable()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">লেভেল ফিল্টার:</label>
+              <select id="filterLevel" onchange="renderReportsTable()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                <option value="all">সব লেভেল</option>
+                <option value="1">লেভেল ১ (সিও)</option>
+                <option value="2">লেভেল ২ (শাখা ব্যবস্থাপক)</option>
+                <option value="3">লেভেল ৩ (এরিয়া ব্যবস্থাপক)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">শাখার নাম ফিল্টার (ড্রপডাউন):</label>
+              <select id="filterBranchSelect" onchange="renderReportsTable()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                <option value="all">সকল শাখা</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">এরিয়ার নাম ফিল্টার (ড্রপডাউন):</label>
+              <select id="filterAreaSelect" onchange="renderReportsTable()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                <option value="all">সকল এরিয়া</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="openingDataSummaryCard" class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-2xl shadow-sm p-5 text-white">
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-3 mb-3">
+            <div class="flex items-center space-x-2">
+              <span class="text-xl">🎯</span>
+              <div>
+                <h3 class="text-sm font-bold">প্রারম্ভিক / ওপেনিং ডাটা ও টার্গেট বেসলাইন</h3>
+                <p class="text-[11px] text-emerald-200">এডমিন (Indrojit) কর্তৃক নির্ধারিত প্রারম্ভিক উদ্বৃত্ত ও মাসিক লক্ষ্যমাত্রা</p>
+              </div>
+            </div>
+            <span class="text-xs px-2.5 py-1 rounded bg-white/20 text-white font-semibold" id="openingBranchLabel">শাখা: মিরপুর শাখা</span>
+          </div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs" id="openingMetricsGrid">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="reportSummaryCards">
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <h3 class="text-sm font-bold text-slate-700">বিস্তারিত এন্ট্রি তালিকা (<span id="reportCount">০</span> টি পাওয়া গেছে)</h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200/80">
+                <tr>
+                  <th class="px-4 py-3">তারিখ</th>
+                  <th class="px-4 py-3">কর্মকর্তার নাম ও লেভেল</th>
+                  <th class="px-4 py-3">শাখা ও এরিয়া</th>
+                  <th class="px-4 py-3">ইনপুটকৃত তথ্যাবলী (প্রশ্নের উত্তর)</th>
+                  <th class="px-4 py-3 text-right">টাইমস্ট্যাম্প</th>
+                </tr>
+              </thead>
+              <tbody id="reportsTableBody" class="divide-y divide-slate-100">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: ADMIN MANAGEMENT PANEL (LOCKED) -->
+      <section id="tabContentAdmin" class="hidden space-y-6">
+        <div class="bg-gradient-to-r from-red-50 to-amber-50 border border-red-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div class="flex items-center space-x-3">
+            <span class="text-3xl">🛡️</span>
+            <div>
+              <h3 class="text-sm font-bold text-red-900">এডমিন কন্ট্রোল সেন্টার (লকড - শুধুমাত্র Indrojit)</h3>
+              <p class="text-xs text-red-700">নতুন শাখা/এরিয়া তৈরি, ওপেনিং ডাটা ইনপুট, ইউজারদের পাসওয়ার্ড রিসেট/পরিবর্তন এবং প্রশ্ন পরিচালনা করুন।</p>
+            </div>
+          </div>
+          <button onclick="resetToDefaultData()" class="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition border border-red-300 w-fit">
+            🔄 ডিফল্ট ডাটায় রিসেট
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <!-- Branch & Area Filter Master Lists (6 cols) -->
+          <div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-5">
+            <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-slate-800">শাখা ও এরিয়া তালিকা (ফিল্টার অপশন)</h3>
+                <p class="text-xs text-slate-400">নতুন নাম যোগ করলে রিপোর্ট ড্রপডাউনে তাৎক্ষণিক চলে আসবে</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                <label class="block text-xs font-bold text-slate-700">+ নতুন শাখার নাম:</label>
+                <div class="flex space-x-1.5">
+                  <input type="text" id="newBranchInput" placeholder="যেমন: ধানমন্ডি শাখা" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                  <button onclick="addNewBranch()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition whitespace-nowrap">যোগ</button>
+                </div>
+                <div class="text-[11px] text-slate-500 font-semibold mt-2">বর্তমান শাখাসমূহ:</div>
+                <div id="branchChipsContainer" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pt-1">
+                </div>
+              </div>
+
+              <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2">
+                <label class="block text-xs font-bold text-slate-700">+ নতুন এরিয়ার নাম:</label>
+                <div class="flex space-x-1.5">
+                  <input type="text" id="newAreaInput" placeholder="যেমন: ঢাকা দক্ষিণ" class="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                  <button onclick="addNewArea()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition whitespace-nowrap">যোগ</button>
+                </div>
+                <div class="text-[11px] text-slate-500 font-semibold mt-2">বর্তমান এরিয়াসমূহ:</div>
+                <div id="areaChipsContainer" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto pt-1">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Opening Data Configuration (6 cols) -->
+          <div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-4">
+            <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+              <div>
+                <h3 class="text-base font-bold text-slate-800">ওপেনিং / প্রারম্ভিক ডাটা ইনপুট</h3>
+                <p class="text-xs text-slate-400">প্রতিটি শাখার প্রারম্ভিক তথ্য ও টার্গেট নির্ধারণ করুন</p>
+              </div>
+              <button onclick="saveOpeningData()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition">
+                💾 সেভ করুন
+              </button>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">শাখা নির্বাচন করুন:</label>
+                <select id="openingBranchSelect" onchange="loadOpeningDataForBranch(this.value)" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+                </select>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">প্রারম্ভিক সদস্য সংখ্যা:</label>
+                  <input type="number" id="opMembers" placeholder="যেমন: ১২০০" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">প্রারম্ভিক খেলাপি ঋণ (টাকা):</label>
+                  <input type="number" id="opOverdue" placeholder="যেমন: ৩৫০,০০০" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">মোট ঋণ স্থিতি (Portfolio):</label>
+                  <input type="number" id="opPortfolio" placeholder="যেমন: ৪৫,০০,০০০" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-slate-600 mb-1">মাসিক আদায় টার্গেট (টাকা):</label>
+                  <input type="number" id="opTarget" placeholder="যেমন: ৫০০,০০০" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SECTION 2: USERS MANAGEMENT (WITH DIRECT PASSWORD RESET BY ADMIN) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          <div class="lg:col-span-12 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="text-xl">👥</span>
+                  <h3 class="text-base font-bold text-slate-800">ইউজার ম্যানেজমেন্ট ও পাসওয়ার্ড কন্ট্রোল</h3>
+                </div>
+                <p class="text-xs text-slate-500">কর্মকর্তা পাসওয়ার্ড ভুলে গেলে এডমিন (Indrojit) এখান থেকে বর্তমান পাসওয়ার্ড দেখতে এবং নতুন পাসওয়ার্ড সেট করে দিতে পারবেন।</p>
+              </div>
+              <button onclick="openNewUserModal()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl transition shadow flex items-center space-x-1.5 w-fit">
+                <span>+ নতুন কর্মী যোগ করুন</span>
+              </button>
+            </div>
+
+            <div id="usersListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            </div>
+          </div>
+
+          <!-- SECTION 3: QUESTIONS MANAGEMENT -->
+          <div class="lg:col-span-12 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <h3 class="text-base font-bold text-slate-800">ডায়নামিক প্রশ্নমালা ও লেভেল ব্যবস্থাপনা</h3>
+                <p class="text-xs text-slate-400">যেকোনো লেভেলের প্রশ্ন চালু/বন্ধ অথবা নতুন প্রশ্ন যোগ করুন</p>
+              </div>
+              <div class="flex items-center space-x-2">
+                <button onclick="openAddLevelModal()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold px-2.5 py-1.5 rounded-lg transition">
+                  + নতুন লেভেল
+                </button>
+                <button onclick="openAddQuestionModal()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-2.5 py-1.5 rounded-lg transition">
+                  + নতুন প্রশ্ন
+                </button>
+              </div>
+            </div>
+
+            <div class="flex items-center space-x-2 overflow-x-auto pb-1" id="questionLevelTabButtons">
+            </div>
+
+            <div id="questionsManageContainer" class="space-y-2.5">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODALS                                     -->
+  <!-- ========================================== -->
+
+  <!-- Modal 1: Edit Profile (Branch & Area / Region & Designation) -->
+  <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-800" id="profileModalTitle">পোস্টিং ও প্রোফাইল পরিবর্তন</h3>
+        <button onclick="closeProfileModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <p class="text-xs text-slate-500" id="profileModalSubtitle">আপনার বর্তমান তথ্য আপডেট করুন:</p>
+      <form onsubmit="saveProfileChanges(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">নাম:</label>
+          <input type="text" id="editUserName" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+        </div>
+
+        <!-- Field Staff Section (Branch & Area) -->
+        <div id="profileFieldStaffSection" class="space-y-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">শাখার নাম (অনুমোদিত তালিকা):</label>
+            <select id="editBranchSelect" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">এরিয়ার নাম (অনুমোদিত তালিকা):</label>
+            <select id="editAreaSelect" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </select>
+          </div>
+        </div>
+
+        <!-- Moderator & Admin Section (Region & Designation) -->
+        <div id="profileModAdminSection" class="hidden space-y-3">
+          <div id="profileDesignationField">
+            <label class="block text-xs font-semibold text-slate-600 mb-1">পদবী / ডেজিগনেশন:</label>
+            <input type="text" id="editUserDesignation" placeholder="যেমন: মনিটরিং অফিসার" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">অঞ্চল (Region):</label>
+            <input type="text" id="editUserRegion" placeholder="যেমন: Khulna Region" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-emerald-800">
+            <p id="profileAdminBranchHint" class="text-[10px] text-slate-400 mt-1 hidden">💡 প্রধান এডমিন হিসেবে আপনার কোনো নির্দিষ্ট শাখা নেই, আপনার আওতায় পুরো রিজিয়ন।</p>
+          </div>
+        </div>
+
+        <!-- Photo Upload Section -->
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <label class="block text-xs font-semibold text-slate-700">প্রোফাইল ছবি সংযুক্ত করুন (ঐচ্ছিক):</label>
+          <div class="flex items-center space-x-3">
+            <img id="editUserPhotoPreview" class="w-12 h-12 rounded-full border-2 border-emerald-500 object-cover hidden shadow-sm" alt="Preview">
+            <div id="editUserPhotoFallback" class="w-12 h-12 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xl font-bold border border-slate-300">
+              👤
+            </div>
+            <div class="flex-1">
+              <input type="file" id="editUserPhotoInput" accept="image/*" onchange="handlePhotoSelect(event)" class="text-xs text-slate-500 file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+              <p class="text-[10px] text-slate-400 mt-0.5">গ্যালারি বা ক্যামেরা থেকে ছবি সিলেক্ট করুন</p>
+            </div>
+            <button type="button" id="removePhotoBtn" onclick="removeSelectedPhoto()" class="hidden text-xs text-rose-500 hover:text-rose-700 font-bold px-2 py-1">✕ মুছুন</button>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeProfileModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">বাতিল</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">সংরক্ষণ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 1.2: Mobile App Install Guide Modal -->
+  <div id="mobileGuideModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-2xl">📱</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-800">মোবাইল এ্যাপ হিসেবে ব্যবহারের নিয়ম</h3>
+            <p class="text-[11px] text-slate-400">অ্যান্ড্রয়েড ও আইফোন উভয়ের জন্য প্রযোজ্য</p>
+          </div>
+        </div>
+        <button onclick="closeMobileGuideModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-600">
+        <div class="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 space-y-2">
+          <div class="font-bold text-emerald-900 text-sm flex items-center space-x-1.5">
+            <span>🤖 অ্যান্ড্রয়েড মোবাইলের ক্ষেত্রে (Chrome ব্রাউজার):</span>
+          </div>
+          <ol class="list-decimal pl-4 space-y-1.5 text-slate-700">
+            <li>মোবাইলের Google Chrome ব্রাউজারে লিংকটি খুলুন।</li>
+            <li>উপরে ডানে থাকা ৩-ডট (<b>⋮</b>) মেনু বাটনে চাপ দিন।</li>
+            <li>মেনু থেকে <b>"Install app"</b> অথবা <b>"Add to Home screen" (হোম স্ক্রিনে যোগ করুন)</b> চাপুন।</li>
+            <li><b>"Add"</b> চাপলেই আপনার মোবাইলের হোম স্ক্রিনে ফেসবুক বা ইউটিউবের মতো সরাসরি অ্যাপ আইকন চলে আসবে!</li>
+          </ol>
+        </div>
+
+        <div class="bg-blue-50 p-3.5 rounded-2xl border border-blue-200 space-y-2">
+          <div class="font-bold text-blue-900 text-sm flex items-center space-x-1.5">
+            <span>🍎 আইফোনের ক্ষেত্রে (Safari ব্রাউজার):</span>
+          </div>
+          <ol class="list-decimal pl-4 space-y-1.5 text-slate-700">
+            <li>Safari ব্রাউজারে লিংকটি ওপেন করুন।</li>
+            <li>নিচের মাঝের <b>Share (শেয়ার)</b> বাটনে চাপ দিন।</li>
+            <li>তালিকা থেকে <b>"Add to Home Screen"</b> চাপুন।</li>
+          </ol>
+        </div>
+
+        <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-amber-900">
+          💡 <b>সুবিধা:</b> হোম স্ক্রিনের আইকনে চাপ দিলে কোনো ব্রাউজারের ইউআরএল বার থাকবে না, ১০০% আসল মোবাইল অ্যাপের মতো ফুলস্ক্রিনে দ্রুত কাজ করবে!
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-2 border-t border-slate-100">
+        <button onclick="closeMobileGuideModal()" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow">বুঝেছি</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 1.5: User Self Change Password Modal -->
+  <div id="changePasswordModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">🔑</span>
+          <h3 class="text-base font-bold text-slate-800">পাসওয়ার্ড পরিবর্তন করুন</h3>
+        </div>
+        <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <div id="pwdAlert" class="hidden p-3 rounded-xl text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+      </div>
+
+      <form onsubmit="handlePasswordChangeSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">বর্তমান পাসওয়ার্ড:</label>
+          <input type="password" id="currentPasswordInput" required placeholder="আপনার বর্তমান পাসওয়ার্ড দিন" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">নতুন পাসওয়ার্ড:</label>
+          <input type="password" id="newPasswordInput" required placeholder="কমপক্ষে ৪ অক্ষরের নতুন পাসওয়ার্ড" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">নতুন পাসওয়ার্ড নিশ্চিত করুন:</label>
+          <input type="password" id="confirmNewPasswordInput" required placeholder="নতুন পাসওয়ার্ডটি পুনরায় লিখুন" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeChangePasswordModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">বাতিল</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">পাসওয়ার্ড পরিবর্তন করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 1.8: ADMIN DIRECT PASSWORD RESET MODAL (NEW) -->
+  <div id="adminUserResetModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">🛡️</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-800">কর্মীর পাসওয়ার্ড রিসেট ও পরিবর্তন</h3>
+            <p class="text-[11px] text-slate-400">এডমিন (Indrojit) কর্তৃক নিয়ন্ত্রণ</p>
+          </div>
+        </div>
+        <button onclick="closeAdminResetModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <!-- User Target Context Info -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1.5">
+        <div class="flex justify-between">
+          <span class="text-slate-500">কর্মকর্তার নাম:</span>
+          <b id="adminResetTargetName" class="text-slate-800 font-bold">আব্দুর রহমান</b>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">ইউজারনেম (আইডি):</span>
+          <b id="adminResetTargetUsername" class="text-slate-800 font-mono">abdur</b>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">পদবী / লেভেল:</span>
+          <span id="adminResetTargetLevel" class="font-semibold text-emerald-700">লেভেল ১ (সিও)</span>
+        </div>
+        <div class="flex justify-between border-t border-slate-200/70 pt-1.5">
+          <span class="text-slate-500">বর্তমান পাসওয়ার্ড:</span>
+          <b id="adminResetTargetCurrentPass" class="text-red-700 font-mono font-bold bg-red-50 px-2 py-0.5 rounded border border-red-200">1234</b>
+        </div>
+      </div>
+
+      <!-- Reset Form -->
+      <form onsubmit="handleAdminResetSubmit(event)" class="space-y-4">
+        <input type="hidden" id="adminResetTargetUserId">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">নতুন পাসওয়ার্ড লিখুন:</label>
+          <input type="text" id="adminResetNewPassInput" required placeholder="নতুন পাসওয়ার্ড দিন (যেমন: 1234 বা pass123)" class="w-full px-3 py-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-medium">
+        </div>
+
+        <!-- Quick Suggestions -->
+        <div>
+          <label class="block text-[11px] text-slate-400 mb-1 font-semibold">সহজ পাসওয়ার্ড দিতে ক্লিক করুন:</label>
+          <div class="flex space-x-2">
+            <button type="button" onclick="document.getElementById('adminResetNewPassInput').value='1234'" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-bold">1234</button>
+            <button type="button" onclick="document.getElementById('adminResetNewPassInput').value='5678'" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-bold">5678</button>
+            <button type="button" onclick="document.getElementById('adminResetNewPassInput').value='pass123'" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-mono font-bold">pass123</button>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAdminResetModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">বাতিল</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow">পাসওয়ার্ড সেভ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add New Question -->
+  <div id="addQuestionModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-800">নতুন প্রশ্ন যুক্ত করুন</h3>
+        <button onclick="closeAddQuestionModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <form onsubmit="saveNewQuestion(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">কোন লেভেলের জন্য:</label>
+          <select id="newQuestionLevel" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">প্রশ্নের বিবরণ / টাইটেল:</label>
+          <input type="text" id="newQuestionText" placeholder="যেমন: নতুন সদস্য সঞ্চয় আদায়" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ইনপুট টাইপ:</label>
+            <select id="newQuestionType" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <option value="number">সংখ্যা (Number)</option>
+              <option value="currency">টাকা (Amount)</option>
+              <option value="percentage">শতাংশ (%)</option>
+              <option value="text">টেক্সট (Text)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">একক / ইউনিট:</label>
+            <input type="text" id="newQuestionUnit" placeholder="যেমন: জন, টাকা, টি" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAddQuestionModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">বাতিল</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">যুক্ত করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Add New Level -->
+  <div id="addLevelModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-800">ভবিষ্যত সম্প্রসারণ: নতুন লেভেল যোগ</h3>
+        <button onclick="closeAddLevelModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <p class="text-xs text-slate-500">পরবর্তী পদবীর জন্য নতুন স্তর নির্ধারণ করুন (যেমন: লেভেল ৪ - জোনাল ম্যানেজার)</p>
+      <form onsubmit="saveNewLevel(event)" class="space-y-4">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">লেভেল নাম্বার:</label>
+          <input type="number" id="newLevelNumber" readonly class="w-full px-3 py-2 text-sm bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">লেভেলের নাম ও পদবী:</label>
+          <input type="text" id="newLevelName" placeholder="যেমন: জোনাল ম্যানেজার" required class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAddLevelModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">বাতিল</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">তৈরি করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Add New User (With Username & Password) -->
+  <div id="addUserModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-bold text-slate-800">নতুন ইউজার একাউন্ট তৈরি</h3>
+        <button onclick="closeAddUserModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+      <form onsubmit="saveNewUser(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">কর্মকর্তার নাম:</label>
+          <input type="text" id="newUserName" required placeholder="যেমন: সুমন হাওলাদার" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">ইউজারনেম (লগইন আইডি):</label>
+            <input type="text" id="newUserUsername" required placeholder="যেমন: sumon" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">লগইন পাসওয়ার্ড:</label>
+            <input type="text" id="newUserPassword" required placeholder="যেমন: 1234" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">ভূমিকা / ইউজার ক্যাটাগরি:</label>
+          <select id="newUserLevel" onchange="handleNewUserLevelChange()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+          </select>
+        </div>
+
+        <!-- Moderator specific fields: Designation & Region -->
+        <div id="newUserModFields" class="hidden space-y-2 bg-amber-50/70 p-3 rounded-xl border border-amber-200">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-bold text-amber-900 mb-1">পদবী / ডেজিগনেশন:</label>
+              <input type="text" id="newUserDesignation" placeholder="যেমন: মনিটরিং অফিসার" value="মনিটরিং অফিসার" class="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-amber-900 mb-1">অঞ্চল (Region):</label>
+              <input type="text" id="newUserRegion" placeholder="যেমন: Khulna Region" value="Khulna Region" class="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-semibold">
+            </div>
+          </div>
+          <p class="text-[10px] text-amber-800">📌 মডারেটরগণ শুধুমাত্র রিপোর্ট দেখতে ও ডাউনলোড করতে পারবেন। তারা কোনো দৈনিক ডাটা এন্ট্রি করবেন না।</p>
+        </div>
+
+        <!-- Field Staff specific fields: Branch & Area -->
+        <div id="newUserFieldStaffFields" class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">শাখার নাম:</label>
+            <select id="newUserBranchSelect" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">এরিয়ার নাম:</label>
+            <select id="newUserAreaSelect" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </select>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">বাতিল</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg">সংরক্ষণ করুন</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-lg text-sm flex items-center space-x-2 transition-all">
+    <span id="toastIcon">✅</span>
+    <span id="toastMsg">ডাটা সফলভাবে সংরক্ষিত হয়েছে!</span>
+  </div>
+
+  <script>
+    const STORAGE_KEY_APP = 'microfinance_reporting_app_v6';
+
+    const defaultData = {
+      branches: ["মিরপুর শাখা", "ধানমন্ডি শাখা", "উত্তরা শাখা", "মতিঝিল শাখা", "গাজীপুর শাখা"],
+      areas: ["ঢাকা উত্তর", "ঢাকা দক্ষিণ", "গাজীপুর জোন", "চট্টগ্রাম এরিয়া"],
+      regions: ["Khulna Region", "Dhaka Region", "Chittagong Region", "Rajshahi Region"],
+      openingData: {
+        "মিরপুর শাখা": { members: 1250, overdue: 350000, portfolio: 4800000, target: 500000 },
+        "ধানমন্ডি শাখা": { members: 980, overdue: 220000, portfolio: 3600000, target: 400000 },
+        "উত্তরা শাখা": { members: 1400, overdue: 410000, portfolio: 5200000, target: 600000 },
+        "মতিঝিল শাখা": { members: 850, overdue: 180000, portfolio: 3100000, target: 350000 },
+        "গাজীপুর শাখা": { members: 1100, overdue: 290000, portfolio: 4200000, target: 450000 }
+      },
+      levels: [
+        { id: 1, name: "সিও (ক্রেডিট অফিসার)", code: "CO" },
+        { id: 2, name: "শাখা ব্যবস্থাপক", code: "BM" },
+        { id: 3, name: "এরিয়া ব্যবস্থাপক", code: "AM" }
+      ],
+      users: [
+        { 
+          id: "user_admin", 
+          username: "indrojit", 
+          password: "admin123", 
+          name: "Indrojit", 
+          level: 0, 
+          role: "admin",
+          designation: "প্রধান এডমিন",
+          region: "Khulna Region",
+          branchName: "কোনো শাখা নেই", 
+          areaName: "Khulna Region", 
+          status: "active" 
+        },
+        { 
+          id: "user_mod", 
+          username: "moderator", 
+          password: "1234", 
+          name: "মোস্তাফিজুর রহমান", 
+          level: "moderator", 
+          role: "moderator",
+          designation: "মনিটরিং অফিসার",
+          region: "Khulna Region",
+          branchName: "কোনো শাখা নেই", 
+          areaName: "Khulna Region", 
+          status: "active" 
+        },
+        { 
+          id: "user_1", 
+          username: "abdur", 
+          password: "1234", 
+          name: "আব্দুর রহমান", 
+          level: 1, 
+          role: "field_staff",
+          designation: "সিও (ক্রেডিট অফিসার)",
+          region: "Dhaka Region",
+          branchName: "মিরপুর শাখা", 
+          areaName: "ঢাকা উত্তর", 
+          status: "active" 
+        },
+        { 
+          id: "user_2", 
+          username: "rafiq", 
+          password: "1234", 
+          name: "মো. রফিকুল ইসলাম", 
+          level: 2, 
+          role: "field_staff",
+          designation: "শাখা ব্যবস্থাপক",
+          region: "Dhaka Region",
+          branchName: "মিরপুর শাখা", 
+          areaName: "ঢাকা উত্তর", 
+          status: "active" 
+        },
+        { 
+          id: "user_3", 
+          username: "tanvir", 
+          password: "1234", 
+          name: "তানভীর আহমেদ", 
+          level: 3, 
+          role: "field_staff",
+          designation: "এরিয়া ব্যবস্থাপক",
+          region: "Dhaka Region",
+          branchName: "মিরপুর শাখা", 
+          areaName: "ঢাকা উত্তর", 
+          status: "active" 
+        }
+      ],
+      questions: [
+        { id: "l1_q1", level: 1, text: "ভর্তি কতজন", type: "number", unit: "জন", isActive: true },
+        { id: "l1_q2", level: 1, text: "খেলাপী আদায় কত টাকা", type: "currency", unit: "টাকা", isActive: true },
+        { id: "l1_q3", level: 1, text: "ঋণ প্রস্তাব কত জন", type: "number", unit: "জন", isActive: true },
+        { id: "l1_q4", level: 1, text: "ওটিআর (%)", type: "percentage", unit: "%", isActive: true },
+        { id: "l1_q5", level: 1, text: "সঞ্চয় করেছে (%)", type: "percentage", unit: "%", isActive: true },
+
+        { id: "l2_q1", level: 2, text: "সমিতি পরিদর্শন", type: "number", unit: "টি", isActive: true },
+        { id: "l2_q2", level: 2, text: "পাশ বই যাচাই (সমিতি সংখ্যা)", type: "number", unit: "টি সমিতি", isActive: true },
+        { id: "l2_q3", level: 2, text: "খেলাপি সদস্যের সাথে যোগাযোগ", type: "number", unit: "জন", isActive: true },
+        { id: "l2_q4", level: 2, text: "খেলাপি আদায় টাকা", type: "currency", unit: "টাকা", isActive: true },
+        { id: "l2_q5", level: 2, text: "ঋণ ফর্ম যাচাই", type: "number", unit: "টি", isActive: true },
+
+        { id: "l3_q1", level: 3, text: "সিও তথ্য প্রদান করেছেন", type: "number", unit: "জন", isActive: true },
+        { id: "l3_q2", level: 3, text: "সিও তথ্য প্রদান করেননি", type: "number", unit: "জন", isActive: true },
+        { id: "l3_q3", level: 3, text: "শাখা ব্যবস্থাপক তথ্য প্রদান করেছেন", type: "number", unit: "জন", isActive: true },
+        { id: "l3_q4", level: 3, text: "শাখা ব্যবস্থাপক তথ্য প্রদান করেননি", type: "number", unit: "জন", isActive: true },
+        { id: "l3_q5", level: 3, text: "পাশ বই যাচাই—সঠিক আছে", type: "number", unit: "টি সংখ্যা", isActive: true },
+        { id: "l3_q6", level: 3, text: "পাশ বই যাচাই—সঠিক নেই", type: "number", unit: "টি সংখ্যা", isActive: true },
+        { id: "l3_q7", level: 3, text: "বিতরণকৃত ঋণ যাচাই", type: "number", unit: "টি সংখ্যা", isActive: true },
+        { id: "l3_q8", level: 3, text: "খেলাপি সদস্যের সাথে যোগাযোগ", type: "number", unit: "জন", isActive: true },
+        { id: "l3_q9", level: 3, text: "খেলাপি আদায়", type: "currency", unit: "টাকা", isActive: true }
+      ],
+      submissions: [
+        {
+          id: "sub_1",
+          userId: "user_1",
+          userName: "আব্দুর রহমান",
+          level: 1,
+          branchName: "মিরপুর শাখা",
+          areaName: "ঢাকা উত্তর",
+          entryDate: new Date().toISOString().split('T')[0],
+          timestamp: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }),
+          answers: {
+            "l1_q1": 6,
+            "l1_q2": 18500,
+            "l1_q3": 4,
+            "l1_q4": 99.2,
+            "l1_q5": 96.0
+          },
+          remarks: "সকাল ৯টায় মাঠ কার্যক্রম শুরু হয়েছিল।"
+        },
+        {
+          id: "sub_2",
+          userId: "user_2",
+          userName: "মো. রফিকুল ইসলাম",
+          level: 2,
+          branchName: "মিরপুর শাখা",
+          areaName: "ঢাকা উত্তর",
+          entryDate: new Date().toISOString().split('T')[0],
+          timestamp: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }),
+          answers: {
+            "l2_q1": 2,
+            "l2_q2": 2,
+            "l2_q3": 8,
+            "l2_q4": 32000,
+            "l2_q5": 6
+          },
+          remarks: "২টি সমিতির সঞ্চয় খতিয়ান সন্তোষজনক।"
+        }
+      ],
+      currentUserId: null
+    };
+
+    let appState = JSON.parse(localStorage.getItem(STORAGE_KEY_APP)) || defaultData;
+
+    // Ensure Admin has Khulna Region and no specific branch
+    let adminUser = appState.users.find(u => u.level === 0 || u.username === 'indrojit');
+    if (!adminUser) {
+      appState.users.unshift(defaultData.users[0]);
+    } else {
+      adminUser.name = "Indrojit";
+      adminUser.username = "indrojit";
+      adminUser.region = adminUser.region || "Khulna Region";
+      adminUser.branchName = "কোনো শাখা নেই";
+      adminUser.role = "admin";
+    }
+
+    // Ensure Moderator exists
+    let modUser = appState.users.find(u => u.role === 'moderator' || u.level === 'moderator');
+    if (!modUser) {
+      appState.users.splice(1, 0, defaultData.users[1]);
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+    }
+
+    function resetToDefaultData() {
+      if (confirm("আপনি কি নিশ্চিত যে সকল ডেমো ডাটা রিসেট করতে চান?")) {
+        appState = JSON.parse(JSON.stringify(defaultData));
+        appState.currentUserId = "user_admin";
+        saveState();
+        initApp();
+        showToast("সিস্টেম সফলভাবে ডিফল্ট ডাটায় রিসেট হয়েছে!");
+      }
+    }
+
+    function fillLoginCredentials(username) {
+      const user = appState.users.find(u => u.username === username);
+      if (user) {
+        document.getElementById('loginUsername').value = user.username;
+        document.getElementById('loginPassword').value = user.password;
+      }
+      document.getElementById('loginAlert').classList.add('hidden');
+    }
+
+    function handleLoginSubmit(e) {
+      e.preventDefault();
+      const uName = document.getElementById('loginUsername').value.trim().toLowerCase();
+      const uPass = document.getElementById('loginPassword').value.trim();
+
+      const matchedUser = appState.users.find(u => 
+        (u.username && u.username.toLowerCase() === uName) && u.password === uPass
+      );
+
+      if (!matchedUser) {
+        const alertBox = document.getElementById('loginAlert');
+        alertBox.textContent = "⚠️ ইউজারনেম বা পাসওয়ার্ড সঠিক নয়! দয়া করে সঠিক তথ্য দিন।";
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      if (matchedUser.status === 'disabled') {
+        const alertBox = document.getElementById('loginAlert');
+        alertBox.textContent = "🚫 আপনার অ্যাকাউন্টটি এডমিন (Indrojit) কর্তৃক বাতিল বা স্থগিত করা হয়েছে!";
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      appState.currentUserId = matchedUser.id;
+      saveState();
+
+      document.getElementById('loginAlert').classList.add('hidden');
+      document.getElementById('loginUsername').value = '';
+      document.getElementById('loginPassword').value = '';
+
+      showToast(`স্বাগতম, ${matchedUser.name}!`);
+      initApp();
+    }
+
+    function handleLogout() {
+      if (confirm("আপনি কি নিশ্চিত যে লগআউট করতে চান?")) {
+        appState.currentUserId = null;
+        saveState();
+        showToast("সফলভাবে লগআউট হয়েছে!");
+        initApp();
+      }
+    }
+
+    function getLoggedInUser() {
+      if (!appState.currentUserId) return null;
+      return appState.users.find(u => u.id === appState.currentUserId) || null;
+    }
+
+    // ==========================================
+    // USER SELF PASSWORD CHANGE
+    // ==========================================
+    function openChangePasswordModal() {
+      document.getElementById('currentPasswordInput').value = '';
+      document.getElementById('newPasswordInput').value = '';
+      document.getElementById('confirmNewPasswordInput').value = '';
+      document.getElementById('pwdAlert').classList.add('hidden');
+      document.getElementById('changePasswordModal').classList.remove('hidden');
+    }
+
+    function closeChangePasswordModal() {
+      document.getElementById('changePasswordModal').classList.add('hidden');
+    }
+
+    function handlePasswordChangeSubmit(e) {
+      e.preventDefault();
+      const user = getLoggedInUser();
+      if (!user) return;
+
+      const currentPass = document.getElementById('currentPasswordInput').value.trim();
+      const newPass = document.getElementById('newPasswordInput').value.trim();
+      const confirmPass = document.getElementById('confirmNewPasswordInput').value.trim();
+      const alertBox = document.getElementById('pwdAlert');
+
+      if (user.password !== currentPass) {
+        alertBox.textContent = "⚠️ আপনার দেওয়া বর্তমান পাসওয়ার্ডটি সঠিক নয়!";
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      if (newPass.length < 4) {
+        alertBox.textContent = "⚠️ নতুন পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে!";
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        alertBox.textContent = "⚠️ নতুন পাসওয়ার্ড এবং নিশ্চিতকরণ পাসওয়ার্ড মেলেনি!";
+        alertBox.classList.remove('hidden');
+        return;
+      }
+
+      user.password = newPass;
+      saveState();
+
+      closeChangePasswordModal();
+      showToast("আপনার পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে! পরবর্তী লগইনে এটি ব্যবহার করুন।", "🔑");
+    }
+
+    // ==========================================
+    // ADMIN FORGOTTEN PASSWORD RESET MODAL (NEW)
+    // ==========================================
+    function openAdminResetModal(userId) {
+      const user = appState.users.find(u => u.id === userId);
+      if (!user) return;
+
+      let levelText = '';
+      if (user.level === 0 || user.username === 'indrojit') {
+        levelText = `প্রধান এডমিন (অঞ্চল: ${user.region || 'Khulna Region'})`;
+      } else if (user.role === 'moderator' || user.level === 'moderator') {
+        levelText = `🛡️ মডারেটর (${user.designation || 'মনিটরিং অফিসার'}) - অঞ্চল: ${user.region || 'Khulna Region'}`;
+      } else {
+        levelText = `লেভেল ${user.level}`;
+        const lvlObj = appState.levels.find(l => l.id === user.level);
+        if (lvlObj) levelText += ` (${lvlObj.name})`;
+      }
+
+      document.getElementById('adminResetTargetUserId').value = user.id;
+      document.getElementById('adminResetTargetName').textContent = user.name;
+      document.getElementById('adminResetTargetUsername').textContent = user.username;
+      document.getElementById('adminResetTargetLevel').textContent = levelText;
+      document.getElementById('adminResetTargetCurrentPass').textContent = user.password;
+      document.getElementById('adminResetNewPassInput').value = '';
+
+      document.getElementById('adminUserResetModal').classList.remove('hidden');
+    }
+
+    function closeAdminResetModal() {
+      document.getElementById('adminUserResetModal').classList.add('hidden');
+    }
+
+    function handleAdminResetSubmit(e) {
+      e.preventDefault();
+      const userId = document.getElementById('adminResetTargetUserId').value;
+      const newPass = document.getElementById('adminResetNewPassInput').value.trim();
+
+      if (newPass.length < 4) {
+        alert("পাসওয়ার্ড কমপক্ষে ৪ অক্ষরের হতে হবে!");
+        return;
+      }
+
+      const user = appState.users.find(u => u.id === userId);
+      if (!user) return;
+
+      user.password = newPass;
+      saveState();
+
+      closeAdminResetModal();
+      renderUsersList();
+      showToast(`"${user.name}"-এর নতুন পাসওয়ার্ড (${newPass}) সফলভাবে সেট করা হয়েছে!`, "🔑");
+    }
+
+    let activeTab = 'entry';
+
+    function switchTab(tab) {
+      const user = getLoggedInUser();
+      if (!user) return;
+
+      if (tab === 'admin' && user.level !== 0 && user.username !== 'indrojit') {
+        alert("অ্যাক্সেস অস্বীকৃত! শুধুমাত্র প্রধান এডমিন (Indrojit) এই প্যানেলে প্রবেশ করতে পারেন।");
+        return;
+      }
+
+      if (tab === 'entry' && (user.role === 'moderator' || user.level === 'moderator')) {
+        alert("মডারেটরগণ শুধুমাত্র রিপোর্ট দেখতে ও ডাউনলোড করতে পারেন। মাঠ পর্যায়ের দৈনিক ডাটা এন্ট্রি প্রযোজ্য নয়।");
+        return;
+      }
+
+      activeTab = tab;
+      document.getElementById('tabContentEntry').classList.toggle('hidden', tab !== 'entry');
+      document.getElementById('tabContentReports').classList.toggle('hidden', tab !== 'reports');
+      document.getElementById('tabContentAdmin').classList.toggle('hidden', tab !== 'admin');
+
+      const tabs = [
+        { id: 'tabBtnEntry', name: 'entry' },
+        { id: 'tabBtnReports', name: 'reports' },
+        { id: 'tabBtnAdmin', name: 'admin' }
+      ];
+
+      tabs.forEach(t => {
+        const btn = document.getElementById(t.id);
+        if (btn) {
+          if (t.name === tab) {
+            btn.className = "tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold bg-white text-emerald-800 shadow-sm transition flex items-center space-x-1.5";
+          } else {
+            btn.className = "tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold text-emerald-100 hover:bg-emerald-700/50 transition flex items-center space-x-1.5";
+          }
+        }
+      });
+
+      if (tab === 'reports') {
+        populateFilterDropdowns();
+        renderReportsTable();
+      }
+      if (tab === 'admin') {
+        renderAdminView();
+      }
+    }
+
+    function updateHeaderAndRoleUI() {
+      const user = getLoggedInUser();
+      const loginScreen = document.getElementById('loginScreen');
+      const mainApp = document.getElementById('mainApp');
+      const adminTabBtn = document.getElementById('tabBtnAdmin');
+      const entryTabBtn = document.getElementById('tabBtnEntry');
+
+      if (!user) {
+        loginScreen.classList.remove('hidden');
+        mainApp.classList.add('hidden');
+        return;
+      }
+
+      loginScreen.classList.add('hidden');
+      mainApp.classList.remove('hidden');
+
+      document.getElementById('headerUserName').textContent = user.name;
+
+      const isAdmin = (user.level === 0 || user.username === 'indrojit' || user.role === 'admin');
+      const isModerator = (user.role === 'moderator' || user.level === 'moderator');
+      const locationDiv = document.getElementById('headerLocationInfo');
+
+      // Profile Photo Display in Header
+      const headerAvatar = document.getElementById('headerUserAvatar');
+      const headerAvatarFallback = document.getElementById('headerUserAvatarFallback');
+      if (headerAvatar && headerAvatarFallback) {
+        if (user.photo) {
+          headerAvatar.src = user.photo;
+          headerAvatar.classList.remove('hidden');
+          headerAvatarFallback.classList.add('hidden');
+        } else {
+          headerAvatar.src = '';
+          headerAvatar.classList.add('hidden');
+          headerAvatarFallback.classList.remove('hidden');
+          headerAvatarFallback.textContent = isAdmin ? '👑' : (isModerator ? '🛡️' : '👤');
+        }
+      }
+
+      if (isAdmin) {
+        document.getElementById('headerUserLevel').textContent = "প্রধান এডমিন (Indrojit)";
+        document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-red-600 text-white font-bold shadow-sm";
+        adminTabBtn.classList.remove('hidden');
+        if (entryTabBtn) entryTabBtn.classList.remove('hidden');
+        if (locationDiv) {
+          locationDiv.innerHTML = `
+            <span class="bg-red-900/60 px-2 py-0.5 rounded border border-red-400/40 text-red-100 font-semibold">🏛️ অঞ্চল: <b class="text-white">${user.region || 'Khulna Region'}</b></span>
+            <span class="text-[10px] text-emerald-300">(কোনো নির্দিষ্ট শাখা নয়)</span>
+          `;
+        }
+      } else if (isModerator) {
+        document.getElementById('headerUserLevel').textContent = `🛡️ মডারেটর (${user.designation || 'রিপোর্ট পর্যবেক্ষক'})`;
+        document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-600 text-white font-bold shadow-sm";
+        adminTabBtn.classList.add('hidden');
+        if (entryTabBtn) entryTabBtn.classList.add('hidden');
+        if (locationDiv) {
+          locationDiv.innerHTML = `
+            <span>পদবী: <b class="text-white">${user.designation || 'মনিটরিং অফিসার'}</b></span>
+            <span>•</span>
+            <span class="bg-amber-900/60 px-2 py-0.5 rounded border border-amber-400/40 text-amber-100 font-semibold">📍 অঞ্চল: <b class="text-white">${user.region || 'Khulna Region'}</b></span>
+          `;
+        }
+        if (activeTab === 'entry' || activeTab === 'admin') {
+          switchTab('reports');
+        }
+      } else {
+        let levelTitle = `লেভেল ${user.level}`;
+        const lvlObj = appState.levels.find(l => l.id === user.level);
+        if (lvlObj) levelTitle += ` (${lvlObj.name})`;
+        document.getElementById('headerUserLevel').textContent = levelTitle;
+        document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-900 text-emerald-100 font-bold";
+        adminTabBtn.classList.add('hidden');
+        if (entryTabBtn) entryTabBtn.classList.remove('hidden');
+        if (locationDiv) {
+          locationDiv.innerHTML = `
+            <span>শাখা: <b class="text-white">${user.branchName}</b></span>
+            <span>•</span>
+            <span>এরিয়া: <b class="text-white">${user.areaName}</b></span>
+          `;
+        }
+        if (activeTab === 'admin') {
+          switchTab('entry');
+        }
+      }
+
+      const isDisabled = user.status === 'disabled';
+      document.getElementById('disabledBanner').classList.toggle('hidden', !isDisabled);
+      const submitBtn = document.getElementById('submitBtn');
+      if (submitBtn) {
+        submitBtn.disabled = isDisabled;
+        submitBtn.classList.toggle('opacity-50', isDisabled);
+        submitBtn.classList.toggle('cursor-not-allowed', isDisabled);
+      }
+    }
+
+    function setAutoDate() {
+      const now = new Date();
+      const options = { year: 'numeric', month: 'long', day: 'numeric' };
+      const banglaDate = now.toLocaleDateString('bn-BD', options);
+      document.getElementById('displayAutoDate').textContent = banglaDate;
+      const isoDate = now.toISOString().split('T')[0];
+      const filterDate = document.getElementById('filterDate');
+      if (filterDate && !filterDate.value) {
+        filterDate.value = isoDate;
+      }
+    }
+
+    function renderQuestionsForm() {
+      const user = getLoggedInUser();
+      if (!user) return;
+
+      const container = document.getElementById('questionsContainer');
+      const levelBadge = document.getElementById('currentLevelBadge');
+      const formTitle = document.getElementById('formTitle');
+      const formSubtitle = document.getElementById('formSubtitle');
+
+      if (user.level === 0) {
+        levelBadge.textContent = "প্রধান এডমিন (Indrojit)";
+        formTitle.textContent = "এডমিন প্রিভিউ মোড (সিও লেভেল)";
+        formSubtitle.textContent = "এডমিন সরাসরি ডাটা এন্ট্রি না দিয়ে অন্যান্য লেভেলের তথ্য মনিটর ও নিয়ন্ত্রণ করতে পারেন। নিচে সিও লেভেলের নমুনা দেওয়া হলো:";
+      } else {
+        const lvlObj = appState.levels.find(l => l.id === user.level);
+        levelBadge.textContent = `লেভেল ${user.level} (${lvlObj ? lvlObj.name : ''})`;
+        formTitle.textContent = `${lvlObj ? lvlObj.name : 'কর্মকর্তা'}-এর দৈনিক তথ্য ইনপুট`;
+        formSubtitle.textContent = `শাখা: ${user.branchName} | এরিয়া: ${user.areaName} - আজকের দিনের সঠিক তথ্য দিন।`;
+      }
+
+      const targetLevel = user.level === 0 ? 1 : user.level;
+      const activeQuestions = appState.questions.filter(q => q.level === targetLevel && q.isActive);
+
+      if (activeQuestions.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-8 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+            <p class="text-sm">এই লেভেলের জন্য বর্তমানে কোনো সক্রিয় প্রশ্ন নেই।</p>
+            <p class="text-xs text-slate-400 mt-1">এডমিন (Indrojit) প্যানেলে গিয়ে নতুন প্রশ্ন সংযুক্ত করতে পারেন।</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = activeQuestions.map((q, idx) => {
+        let inputField = '';
+        if (q.type === 'currency') {
+          inputField = `
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">৳</span>
+              <input type="number" step="any" min="0" required name="q_${q.id}" placeholder="0.00" class="w-full pl-8 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+              <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">${q.unit || 'টাকা'}</span>
+            </div>
+          `;
+        } else if (q.type === 'percentage') {
+          inputField = `
+            <div class="relative">
+              <input type="number" step="0.1" min="0" max="100" required name="q_${q.id}" placeholder="0 - 100" class="w-full px-4 pr-10 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+              <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-bold">%</span>
+            </div>
+          `;
+        } else {
+          inputField = `
+            <div class="relative">
+              <input type="number" min="0" required name="q_${q.id}" placeholder="সংখ্যা লিখুন" class="w-full px-4 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+              <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">${q.unit || 'সংখ্যা'}</span>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 hover:border-emerald-300 transition">
+            <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+              <span>প্রশ্ন ${idx + 1}: ${q.text}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200/70 text-slate-600 font-medium">${q.unit || 'তথ্য'}</span>
+            </label>
+            ${inputField}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function handleDataSubmit(e) {
+      e.preventDefault();
+      const user = getLoggedInUser();
+      if (!user) return;
+
+      if (user.status === 'disabled') {
+        alert("আপনার একাউন্টটি সাময়িকভাবে বাতিল রয়েছে। আপনি ডাটা সাবমিট করতে পারবেন না।");
+        return;
+      }
+
+      const form = e.target;
+      const formData = new FormData(form);
+      const answers = {};
+
+      const targetLevel = user.level === 0 ? 1 : user.level;
+      const activeQuestions = appState.questions.filter(q => q.level === targetLevel && q.isActive);
+
+      activeQuestions.forEach(q => {
+        const val = formData.get(`q_${q.id}`);
+        answers[q.id] = parseFloat(val) || 0;
+      });
+
+      const today = new Date().toISOString().split('T')[0];
+      const newSubmission = {
+        id: "sub_" + Date.now(),
+        userId: user.id,
+        userName: user.name,
+        level: targetLevel,
+        branchName: user.branchName,
+        areaName: user.areaName,
+        entryDate: today,
+        timestamp: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }),
+        answers: answers,
+        remarks: document.getElementById('entryRemarks').value.trim()
+      };
+
+      appState.submissions.unshift(newSubmission);
+      saveState();
+      form.reset();
+      showToast("আজকের তথ্য সফলভাবে ডাটাবেসে সংরক্ষিত হয়েছে!");
+    }
+
+    function populateFilterDropdowns() {
+      const branchSelect = document.getElementById('filterBranchSelect');
+      const currentBranchVal = branchSelect.value;
+      branchSelect.innerHTML = '<option value="all">সকল শাখা</option>' + 
+        appState.branches.map(b => `<option value="${b}">${b}</option>`).join('');
+      if (appState.branches.includes(currentBranchVal)) branchSelect.value = currentBranchVal;
+
+      const areaSelect = document.getElementById('filterAreaSelect');
+      const currentAreaVal = areaSelect.value;
+      areaSelect.innerHTML = '<option value="all">সকল এরিয়া</option>' + 
+        appState.areas.map(a => `<option value="${a}">${a}</option>`).join('');
+      if (appState.areas.includes(currentAreaVal)) areaSelect.value = currentAreaVal;
+    }
+
+    function renderReportsTable() {
+      const filterDate = document.getElementById('filterDate').value;
+      const filterLevel = document.getElementById('filterLevel').value;
+      const filterBranch = document.getElementById('filterBranchSelect').value;
+      const filterArea = document.getElementById('filterAreaSelect').value;
+
+      const filtered = appState.submissions.filter(sub => {
+        if (filterDate && sub.entryDate !== filterDate) return false;
+        if (filterLevel !== 'all' && sub.level.toString() !== filterLevel) return false;
+        if (filterBranch !== 'all' && sub.branchName !== filterBranch) return false;
+        if (filterArea !== 'all' && sub.areaName !== filterArea) return false;
+        return true;
+      });
+
+      document.getElementById('reportCount').textContent = filtered.length;
+
+      renderOpeningDataCard(filterBranch);
+
+      let totalOverdue = 0;
+      let totalSamityVisited = 0;
+      let totalAdmitted = 0;
+
+      filtered.forEach(s => {
+        if (s.answers['l1_q2']) totalOverdue += s.answers['l1_q2'];
+        if (s.answers['l2_q4']) totalOverdue += s.answers['l2_q4'];
+        if (s.answers['l3_q9']) totalOverdue += s.answers['l3_q9'];
+        if (s.answers['l1_q1']) totalAdmitted += s.answers['l1_q1'];
+        if (s.answers['l2_q1']) totalSamityVisited += s.answers['l2_q1'];
+      });
+
+      document.getElementById('reportSummaryCards').innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-400">ফিল্টারকৃত মোট এন্ট্রি</div>
+          <div class="text-2xl font-bold text-slate-800 mt-1">${filtered.length} টি</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-400">আজকের নতুন ভর্তি</div>
+          <div class="text-2xl font-bold text-emerald-600 mt-1">${totalAdmitted} জন</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-400">আজকের খেলাপি আদায়</div>
+          <div class="text-2xl font-bold text-blue-600 mt-1">৳ ${totalOverdue.toLocaleString('bn-BD')}</div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div class="text-[11px] font-semibold text-slate-400">সমিতি পরিদর্শন</div>
+          <div class="text-2xl font-bold text-indigo-600 mt-1">${totalSamityVisited} টি</div>
+        </div>
+      `;
+
+      const tbody = document.getElementById('reportsTableBody');
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-4 py-8 text-center text-slate-400">কোনো ডাটা পাওয়া যায়নি। ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(item => {
+        let levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">লেভেল ${item.level}</span>`;
+        if (item.level === 2) levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">লেভেল ২ (শাখা ব্যবস্থাপক)</span>`;
+        if (item.level === 3) levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">লেভেল ৩ (এরিয়া ব্যবস্থাপক)</span>`;
+
+        const answersList = Object.entries(item.answers).map(([qId, val]) => {
+          const qObj = appState.questions.find(q => q.id === qId);
+          const qText = qObj ? qObj.text : qId;
+          const unit = qObj ? qObj.unit : '';
+          return `
+            <div class="inline-flex items-center space-x-1 bg-slate-100 px-2 py-1 rounded text-[11px] mr-1.5 mb-1.5">
+              <span class="text-slate-600">${qText}:</span>
+              <span class="font-bold text-slate-800">${val} ${unit}</span>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <tr class="hover:bg-slate-50/70 transition">
+            <td class="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">${item.entryDate}</td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="font-bold text-slate-800">${item.userName}</div>
+              <div class="mt-0.5">${levelBadge}</div>
+            </td>
+            <td class="px-4 py-3 whitespace-nowrap">
+              <div class="text-slate-800 font-medium">${item.branchName}</div>
+              <div class="text-slate-400 text-[11px]">${item.areaName}</div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex flex-wrap items-center">
+                ${answersList}
+              </div>
+              ${item.remarks ? `<div class="text-[11px] text-slate-500 italic mt-1">মন্তব্য: ${item.remarks}</div>` : ''}
+            </td>
+            <td class="px-4 py-3 text-right text-slate-400 whitespace-nowrap font-mono text-[11px]">${item.timestamp}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderOpeningDataCard(selectedBranch) {
+      const label = document.getElementById('openingBranchLabel');
+      const grid = document.getElementById('openingMetricsGrid');
+
+      let branchKey = selectedBranch !== 'all' ? selectedBranch : appState.branches[0];
+      label.textContent = selectedBranch !== 'all' ? `নির্বাচিত শাখা: ${branchKey}` : `সামগ্রিক / প্রধান শাখা: ${branchKey}`;
+
+      const op = appState.openingData[branchKey] || { members: 0, overdue: 0, portfolio: 0, target: 0 };
+
+      grid.innerHTML = `
+        <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+          <span class="text-emerald-200 text-[11px]">প্রারম্ভিক সদস্য সংখ্যা</span>
+          <div class="text-lg font-bold mt-0.5">${(op.members || 0).toLocaleString('bn-BD')} জন</div>
+        </div>
+        <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+          <span class="text-emerald-200 text-[11px]">প্রারম্ভিক খেলাপি ঋণ</span>
+          <div class="text-lg font-bold mt-0.5">৳ ${(op.overdue || 0).toLocaleString('bn-BD')}</div>
+        </div>
+        <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+          <span class="text-emerald-200 text-[11px]">মোট ঋণ স্থিতি (Portfolio)</span>
+          <div class="text-lg font-bold mt-0.5">৳ ${(op.portfolio || 0).toLocaleString('bn-BD')}</div>
+        </div>
+        <div class="bg-white/10 rounded-xl p-3 border border-white/10">
+          <span class="text-emerald-200 text-[11px]">মাসিক আদায় টার্গেট</span>
+          <div class="text-lg font-bold mt-0.5">৳ ${(op.target || 0).toLocaleString('bn-BD')}</div>
+        </div>
+      `;
+    }
+
+    function exportToCSV() {
+      if (appState.submissions.length === 0) {
+        alert("ডাউনলোড করার মতো কোনো ডাটা নেই।");
+        return;
+      }
+      let csv = "তারিখ,কর্মকর্তা,লেভেল,শাখা,এরিয়া,প্রশ্নের বিবরণ,টাইমস্ট্যাম্প\n";
+      appState.submissions.forEach(s => {
+        const answersStr = Object.entries(s.answers).map(([qId, val]) => {
+          const q = appState.questions.find(x => x.id === qId);
+          return `${q ? q.text : qId}: ${val}`;
+        }).join(' | ');
+
+        csv += `"${s.entryDate}","${s.userName}","লেভেল ${s.level}","${s.branchName}","${s.areaName}","${answersStr}","${s.timestamp}"\n`;
+      });
+
+      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", `Field_Report_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // ==========================================
+    // ADMIN MANAGEMENT PANEL (LOCKED)
+    // ==========================================
+    let activeQuestionTabLevel = 1;
+
+    function renderAdminView() {
+      const user = getLoggedInUser();
+      if (!user || user.level !== 0) return;
+
+      renderBranchAndAreaChips();
+      renderOpeningDataAdmin();
+      renderUsersList();
+      renderQuestionsManagement();
+    }
+
+    function renderBranchAndAreaChips() {
+      const branchContainer = document.getElementById('branchChipsContainer');
+      branchContainer.innerHTML = appState.branches.map(b => `
+        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-800 border border-emerald-200">
+          ${b}
+          <button onclick="removeBranch('${b}')" class="ml-1 text-emerald-600 hover:text-rose-600 font-bold">✕</button>
+        </span>
+      `).join('');
+
+      const areaContainer = document.getElementById('areaChipsContainer');
+      areaContainer.innerHTML = appState.areas.map(a => `
+        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-800 border border-blue-200">
+          ${a}
+          <button onclick="removeArea('${a}')" class="ml-1 text-blue-600 hover:text-rose-600 font-bold">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addNewBranch() {
+      const input = document.getElementById('newBranchInput');
+      const val = input.value.trim();
+      if (!val) {
+        alert("অনুগ্রহ করে শাখার সঠিক নাম লিখুন।");
+        return;
+      }
+      if (appState.branches.includes(val)) {
+        alert("এই শাখাটি ইতিমধ্যে তালিকায় আছে!");
+        return;
+      }
+      appState.branches.push(val);
+      if (!appState.openingData[val]) {
+        appState.openingData[val] = { members: 0, overdue: 0, portfolio: 0, target: 0 };
+      }
+      saveState();
+      input.value = '';
+      renderBranchAndAreaChips();
+      renderOpeningDataAdmin();
+      populateFilterDropdowns();
+      showToast(`নতুন শাখা "${val}" সফলভাবে যুক্ত হয়েছে!`);
+    }
+
+    function removeBranch(branchName) {
+      if (confirm(`আপনি কি "${branchName}" শাখাটি তালিকা থেকে সরাতে চান?`)) {
+        appState.branches = appState.branches.filter(b => b !== branchName);
+        saveState();
+        renderBranchAndAreaChips();
+        renderOpeningDataAdmin();
+        populateFilterDropdowns();
+        showToast("শাখা সফলভাবে মুছে ফেলা হয়েছে!");
+      }
+    }
+
+    function addNewArea() {
+      const input = document.getElementById('newAreaInput');
+      const val = input.value.trim();
+      if (!val) {
+        alert("অনুগ্রহ করে এরিয়ার সঠিক নাম লিখুন।");
+        return;
+      }
+      if (appState.areas.includes(val)) {
+        alert("এই এরিয়াটি ইতিমধ্যে তালিকায় আছে!");
+        return;
+      }
+      appState.areas.push(val);
+      saveState();
+      input.value = '';
+      renderBranchAndAreaChips();
+      populateFilterDropdowns();
+      showToast(`নতুন এরিয়া "${val}" সফলভাবে যুক্ত হয়েছে!`);
+    }
+
+    function removeArea(areaName) {
+      if (confirm(`আপনি কি "${areaName}" এরিয়াটি তালিকা থেকে সরাতে চান?`)) {
+        appState.areas = appState.areas.filter(a => a !== areaName);
+        saveState();
+        renderBranchAndAreaChips();
+        populateFilterDropdowns();
+        showToast("এরিয়া সফলভাবে মুছে ফেলা হয়েছে!");
+      }
+    }
+
+    function renderOpeningDataAdmin() {
+      const select = document.getElementById('openingBranchSelect');
+      const currentSelected = select.value || appState.branches[0];
+      select.innerHTML = appState.branches.map(b => `<option value="${b}">${b}</option>`).join('');
+      if (appState.branches.includes(currentSelected)) {
+        select.value = currentSelected;
+      }
+      loadOpeningDataForBranch(select.value);
+    }
+
+    function loadOpeningDataForBranch(branchName) {
+      const data = appState.openingData[branchName] || { members: '', overdue: '', portfolio: '', target: '' };
+      document.getElementById('opMembers').value = data.members || '';
+      document.getElementById('opOverdue').value = data.overdue || '';
+      document.getElementById('opPortfolio').value = data.portfolio || '';
+      document.getElementById('opTarget').value = data.target || '';
+    }
+
+    function saveOpeningData() {
+      const branchName = document.getElementById('openingBranchSelect').value;
+      if (!branchName) return;
+
+      const members = parseFloat(document.getElementById('opMembers').value) || 0;
+      const overdue = parseFloat(document.getElementById('opOverdue').value) || 0;
+      const portfolio = parseFloat(document.getElementById('opPortfolio').value) || 0;
+      const target = parseFloat(document.getElementById('opTarget').value) || 0;
+
+      appState.openingData[branchName] = { members, overdue, portfolio, target };
+      saveState();
+      showToast(`"${branchName}"-এর ওপেনিং ডাটা সংরক্ষিত হয়েছে!`);
+    }
+
+    function renderUsersList() {
+      const container = document.getElementById('usersListContainer');
+      container.innerHTML = appState.users.map(u => {
+        const isActive = u.status === 'active';
+        const isAdmin = (u.level === 0 || u.username === 'indrojit' || u.role === 'admin');
+        const isMod = (u.role === 'moderator' || u.level === 'moderator');
+
+        let levelBadge = '';
+        let locationText = '';
+
+        if (isAdmin) {
+          levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-red-100 text-red-800 border border-red-200">👑 প্রধান এডমিন</span>';
+          locationText = `
+            <div class="text-xs text-red-800 font-semibold mt-1">
+              🏛️ অঞ্চল: <b>${u.region || 'Khulna Region'}</b> <span class="text-[11px] text-slate-400 font-normal">(শাখা প্রযোজ্য নয়)</span>
+            </div>
+          `;
+        } else if (isMod) {
+          levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-amber-100 text-amber-900 border border-amber-300">🛡️ মডারেটর</span>';
+          locationText = `
+            <div class="text-xs text-slate-700 font-medium mt-1">
+              পদবী: <b class="text-amber-900">${u.designation || 'মনিটরিং অফিসার'}</b> • অঞ্চল: <b class="text-slate-800">${u.region || 'Khulna Region'}</b>
+            </div>
+            <div class="text-[10px] text-slate-400">অনুমতি: শুধুমাত্র রিপোর্ট পরিদর্শন ও এক্সেল ডাউনলোড</div>
+          `;
+        } else {
+          let levelTitle = `লেভেল ${u.level}`;
+          const lvlObj = appState.levels.find(l => l.id === u.level);
+          if (lvlObj) levelTitle += ` (${lvlObj.name})`;
+          levelBadge = `<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">${levelTitle}</span>`;
+          locationText = `
+            <div class="text-xs text-slate-600 mt-1">
+              শাখা: <b class="text-slate-800">${u.branchName}</b> • এরিয়া: <b class="text-slate-800">${u.areaName}</b>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="border border-slate-200 rounded-2xl p-4 bg-white hover:border-emerald-300 shadow-sm transition space-y-3">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center space-x-2">
+                  <span class="font-bold text-slate-800 text-sm">${u.name}</span>
+                  ${levelBadge}
+                  <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
+                    ${isActive ? 'সক্রিয়' : 'বাতিল'}
+                  </span>
+                </div>
+                ${locationText}
+              </div>
+
+              <!-- Password Display Box for Admin -->
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 block font-semibold">পাসওয়ার্ড:</span>
+                <span class="text-xs font-mono font-bold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded inline-block mt-0.5">
+                  ${u.password}
+                </span>
+              </div>
+            </div>
+
+            <!-- Action Controls for Indrojit -->
+            <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+              <span class="text-[11px] text-slate-500 font-mono">আইডি: @${u.username}</span>
+              <div class="flex items-center space-x-1.5">
+                <!-- Open Admin Reset Password Modal -->
+                <button onclick="openAdminResetModal('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition flex items-center space-x-1" title="ইউজারের পাসওয়ার্ড পরিবর্তন/রিসেট">
+                  <span>🔑 পাসওয়ার্ড পরিবর্তন</span>
+                </button>
+
+                ${!isAdmin ? `
+                  <button onclick="toggleUserStatus('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${isActive ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'}">
+                    ${isActive ? '🚫 বাতিল' : '✅ সক্রিয়'}
+                  </button>
+                ` : '<span class="text-[10px] text-red-600 font-bold px-2 py-1 rounded bg-red-50 border border-red-200">প্রধান এডমিন</span>'}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleUserStatus(userId) {
+      const user = appState.users.find(u => u.id === userId);
+      if (!user) return;
+      user.status = user.status === 'active' ? 'disabled' : 'active';
+      saveState();
+      renderUsersList();
+      showToast(`${user.name}-এর স্ট্যাটাস পরিবর্তন করা হয়েছে!`);
+    }
+
+    function renderQuestionsManagement() {
+      const tabBtns = document.getElementById('questionLevelTabButtons');
+      tabBtns.innerHTML = appState.levels.map(lvl => {
+        const isCurrent = activeQuestionTabLevel === lvl.id;
+        return `
+          <button onclick="switchQuestionLevelTab(${lvl.id})" class="px-3 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${isCurrent ? 'bg-emerald-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">
+            লেভেল ${lvl.id}: ${lvl.name}
+          </button>
+        `;
+      }).join('');
+
+      const questionsContainer = document.getElementById('questionsManageContainer');
+      const questions = appState.questions.filter(q => q.level === activeQuestionTabLevel);
+
+      if (questions.length === 0) {
+        questionsContainer.innerHTML = `
+          <div class="py-6 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs">
+            এই লেভেলে কোনো প্রশ্ন নেই। ওপরের "+ নতুন প্রশ্ন" বাটন দিয়ে যোগ করুন।
+          </div>
+        `;
+        return;
+      }
+
+      questionsContainer.innerHTML = questions.map((q, i) => {
+        return `
+          <div class="border border-slate-200 rounded-xl p-3 flex items-center justify-between ${q.isActive ? 'bg-white' : 'bg-slate-50/80 opacity-70'}">
+            <div class="flex items-center space-x-3">
+              <span class="w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center">${i + 1}</span>
+              <div>
+                <span class="text-xs font-bold text-slate-800 ${!q.isActive ? 'line-through text-slate-400' : ''}">${q.text}</span>
+                <span class="text-[10px] text-slate-500 ml-2">(${q.type} | একক: ${q.unit || 'নেই'})</span>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <button onclick="toggleQuestionStatus('${q.id}')" class="text-xs px-2.5 py-1 rounded-md font-semibold transition ${q.isActive ? 'text-amber-700 bg-amber-50 hover:bg-amber-100' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}">
+                ${q.isActive ? 'নিষ্ক্রিয়/বাতিল' : 'পুনরায় চালু'}
+              </button>
+              <button onclick="deleteQuestion('${q.id}')" class="text-xs text-rose-500 hover:text-rose-700 px-2 py-1">
+                🗑️
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function switchQuestionLevelTab(lvlId) {
+      activeQuestionTabLevel = lvlId;
+      renderQuestionsManagement();
+    }
+
+    function toggleQuestionStatus(qId) {
+      const q = appState.questions.find(x => x.id === qId);
+      if (q) {
+        q.isActive = !q.isActive;
+        saveState();
+        renderQuestionsManagement();
+        renderQuestionsForm();
+        showToast("প্রশ্নের স্ট্যাটাস আপডেট করা হয়েছে!");
+      }
+    }
+
+    function deleteQuestion(qId) {
+      if (confirm("আপনি কি নিশ্চিত এই প্রশ্নটি মুছে ফেলতে চান?")) {
+        appState.questions = appState.questions.filter(x => x.id !== qId);
+        saveState();
+        renderQuestionsManagement();
+        renderQuestionsForm();
+        showToast("প্রশ্ন মুছে ফেলা হয়েছে!");
+      }
+    }
+
+    let selectedPhotoBase64 = null;
+
+    function openProfileModal() {
+      const user = getLoggedInUser();
+      if (!user) return;
+      document.getElementById('editUserName').value = user.name;
+
+      const isAdmin = (user.level === 0 || user.username === 'indrojit' || user.role === 'admin');
+      const isMod = (user.role === 'moderator' || user.level === 'moderator');
+
+      const fsSection = document.getElementById('profileFieldStaffSection');
+      const maSection = document.getElementById('profileModAdminSection');
+      const desField = document.getElementById('profileDesignationField');
+      const adminHint = document.getElementById('profileAdminBranchHint');
+
+      if (isAdmin || isMod) {
+        fsSection.classList.add('hidden');
+        maSection.classList.remove('hidden');
+        document.getElementById('editUserRegion').value = user.region || 'Khulna Region';
+
+        if (isAdmin) {
+          desField.classList.add('hidden');
+          adminHint.classList.remove('hidden');
+          document.getElementById('profileModalTitle').textContent = "এডমিন প্রোফাইল ও অঞ্চল";
+        } else {
+          desField.classList.remove('hidden');
+          adminHint.classList.add('hidden');
+          document.getElementById('editUserDesignation').value = user.designation || 'মনিটরিং অফিসার';
+          document.getElementById('profileModalTitle').textContent = "মডারেটর প্রোফাইল ও অঞ্চল";
+        }
+      } else {
+        fsSection.classList.remove('hidden');
+        maSection.classList.add('hidden');
+        document.getElementById('profileModalTitle').textContent = "শাখা ও এরিয়া পোস্টিং পরিবর্তন";
+
+        const branchSelect = document.getElementById('editBranchSelect');
+        branchSelect.innerHTML = appState.branches.map(b => `<option value="${b}" ${b === user.branchName ? 'selected' : ''}>${b}</option>`).join('');
+
+        const areaSelect = document.getElementById('editAreaSelect');
+        areaSelect.innerHTML = appState.areas.map(a => `<option value="${a}" ${a === user.areaName ? 'selected' : ''}>${a}</option>`).join('');
+      }
+
+      // Load Profile Photo Preview
+      selectedPhotoBase64 = user.photo || null;
+      displayPhotoPreview(selectedPhotoBase64);
+      const photoInput = document.getElementById('editUserPhotoInput');
+      if (photoInput) photoInput.value = '';
+
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    function handlePhotoSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      if (file.size > 2 * 1024 * 1024) {
+        alert("ছবির সাইজ অনেক বড়! অনুগ্রহ করে ২ মেগাবাইট (2MB)-এর ছোট ছবি নির্বাচন করুন।");
+        event.target.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        selectedPhotoBase64 = e.target.result;
+        displayPhotoPreview(selectedPhotoBase64);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function displayPhotoPreview(dataUrl) {
+      const preview = document.getElementById('editUserPhotoPreview');
+      const fallback = document.getElementById('editUserPhotoFallback');
+      const removeBtn = document.getElementById('removePhotoBtn');
+
+      if (dataUrl) {
+        preview.src = dataUrl;
+        preview.classList.remove('hidden');
+        fallback.classList.add('hidden');
+        if (removeBtn) removeBtn.classList.remove('hidden');
+      } else {
+        preview.src = '';
+        preview.classList.add('hidden');
+        fallback.classList.remove('hidden');
+        if (removeBtn) removeBtn.classList.add('hidden');
+      }
+    }
+
+    function removeSelectedPhoto() {
+      selectedPhotoBase64 = null;
+      document.getElementById('editUserPhotoInput').value = '';
+      displayPhotoPreview(null);
+    }
+
+    function openMobileGuideModal() {
+      document.getElementById('mobileGuideModal').classList.remove('hidden');
+    }
+
+    function closeMobileGuideModal() {
+      document.getElementById('mobileGuideModal').classList.add('hidden');
+    }
+
+    function saveProfileChanges(e) {
+      e.preventDefault();
+      const user = getLoggedInUser();
+      if (!user) return;
+
+      user.name = document.getElementById('editUserName').value.trim();
+      user.photo = selectedPhotoBase64;
+
+      const isAdmin = (user.level === 0 || user.username === 'indrojit' || user.role === 'admin');
+      const isMod = (user.role === 'moderator' || user.level === 'moderator');
+
+      if (isAdmin || isMod) {
+        user.region = document.getElementById('editUserRegion').value.trim() || 'Khulna Region';
+        if (isMod) {
+          user.designation = document.getElementById('editUserDesignation').value.trim() || 'মনিটরিং অফিসার';
+        }
+      } else {
+        user.branchName = document.getElementById('editBranchSelect').value;
+        user.areaName = document.getElementById('editAreaSelect').value;
+      }
+
+      saveState();
+      updateHeaderAndRoleUI();
+      if (!isMod) renderQuestionsForm();
+      closeProfileModal();
+      showToast("প্রোফাইল তথ্য ও ছবি সফলভাবে সংরক্ষিত হয়েছে!");
+    }
+
+    function openAddQuestionModal() {
+      const select = document.getElementById('newQuestionLevel');
+      select.innerHTML = appState.levels.map(l => `<option value="${l.id}">লেভেল ${l.id} (${l.name})</option>`).join('');
+      select.value = activeQuestionTabLevel;
+      document.getElementById('newQuestionText').value = '';
+      document.getElementById('newQuestionUnit').value = '';
+      document.getElementById('addQuestionModal').classList.remove('hidden');
+    }
+    function closeAddQuestionModal() {
+      document.getElementById('addQuestionModal').classList.add('hidden');
+    }
+    function saveNewQuestion(e) {
+      e.preventDefault();
+      const lvl = parseInt(document.getElementById('newQuestionLevel').value);
+      const text = document.getElementById('newQuestionText').value.trim();
+      const type = document.getElementById('newQuestionType').value;
+      const unit = document.getElementById('newQuestionUnit').value.trim();
+
+      const newQ = {
+        id: `custom_q_${Date.now()}`,
+        level: lvl,
+        text: text,
+        type: type,
+        unit: unit,
+        isActive: true
+      };
+
+      appState.questions.push(newQ);
+      saveState();
+      closeAddQuestionModal();
+      activeQuestionTabLevel = lvl;
+      renderQuestionsManagement();
+      renderQuestionsForm();
+      showToast("নতুন প্রশ্ন সফলভাবে যুক্ত হয়েছে!");
+    }
+
+    function openAddLevelModal() {
+      const nextLevel = appState.levels.length + 1;
+      document.getElementById('newLevelNumber').value = nextLevel;
+      document.getElementById('newLevelName').value = '';
+      document.getElementById('addLevelModal').classList.remove('hidden');
+    }
+    function closeAddLevelModal() {
+      document.getElementById('addLevelModal').classList.add('hidden');
+    }
+    function saveNewLevel(e) {
+      e.preventDefault();
+      const nextNum = parseInt(document.getElementById('newLevelNumber').value);
+      const name = document.getElementById('newLevelName').value.trim();
+
+      appState.levels.push({
+        id: nextNum,
+        name: name,
+        code: `LVL_${nextNum}`
+      });
+
+      saveState();
+      closeAddLevelModal();
+      activeQuestionTabLevel = nextNum;
+      renderQuestionsManagement();
+      showToast(`অভিনন্দন! নতুন লেভেল ${nextNum} (${name}) যুক্ত হয়েছে!`);
+    }
+
+    function handleNewUserLevelChange() {
+      const val = document.getElementById('newUserLevel').value;
+      const isMod = val === 'moderator';
+      document.getElementById('newUserModFields').classList.toggle('hidden', !isMod);
+      document.getElementById('newUserFieldStaffFields').classList.toggle('hidden', isMod);
+    }
+
+    function openNewUserModal() {
+      const select = document.getElementById('newUserLevel');
+      let optionsHtml = `<option value="moderator">🛡️ মডারেটর (শুধুমাত্র রিপোর্ট ভিউয়ার)</option>`;
+      optionsHtml += appState.levels.map(l => `<option value="${l.id}">লেভেল ${l.id} (${l.name})</option>`).join('');
+      select.innerHTML = optionsHtml;
+      select.value = 'moderator';
+      handleNewUserLevelChange();
+
+      document.getElementById('newUserName').value = '';
+      document.getElementById('newUserUsername').value = '';
+      document.getElementById('newUserPassword').value = '';
+      document.getElementById('newUserDesignation').value = 'মনিটরিং অফিসার';
+      document.getElementById('newUserRegion').value = 'Khulna Region';
+
+      const branchSelect = document.getElementById('newUserBranchSelect');
+      branchSelect.innerHTML = appState.branches.map(b => `<option value="${b}">${b}</option>`).join('');
+
+      const areaSelect = document.getElementById('newUserAreaSelect');
+      areaSelect.innerHTML = appState.areas.map(a => `<option value="${a}">${a}</option>`).join('');
+
+      document.getElementById('addUserModal').classList.remove('hidden');
+    }
+
+    function closeAddUserModal() {
+      document.getElementById('addUserModal').classList.add('hidden');
+    }
+
+    function saveNewUser(e) {
+      e.preventDefault();
+      const name = document.getElementById('newUserName').value.trim();
+      const username = document.getElementById('newUserUsername').value.trim().toLowerCase();
+      const password = document.getElementById('newUserPassword').value.trim();
+      const levelVal = document.getElementById('newUserLevel').value;
+
+      if (appState.users.some(u => u.username && u.username.toLowerCase() === username)) {
+        alert("এই ইউজারনেমটি ইতিমধ্যে ব্যবহৃত হয়েছে! অন্য একটি ইউজারনেম দিন।");
+        return;
+      }
+
+      const newId = `user_${Date.now()}`;
+      if (levelVal === 'moderator') {
+        const designation = document.getElementById('newUserDesignation').value.trim() || 'মনিটরিং অফিসার';
+        const region = document.getElementById('newUserRegion').value.trim() || 'Khulna Region';
+        appState.users.push({
+          id: newId,
+          username: username,
+          password: password,
+          name: name,
+          level: 'moderator',
+          role: 'moderator',
+          designation: designation,
+          region: region,
+          branchName: 'কোনো শাখা নেই',
+          areaName: region,
+          status: "active"
+        });
+        saveState();
+        closeAddUserModal();
+        renderUsersList();
+        showToast(`নতুন মডারেটর "${name}" সফলভাবে যুক্ত হয়েছেন!`);
+      } else {
+        const level = parseInt(levelVal);
+        const branch = document.getElementById('newUserBranchSelect').value;
+        const area = document.getElementById('newUserAreaSelect').value;
+        const lvlObj = appState.levels.find(l => l.id === level);
+        appState.users.push({
+          id: newId,
+          username: username,
+          password: password,
+          name: name,
+          level: level,
+          role: 'field_staff',
+          designation: lvlObj ? lvlObj.name : `লেভেল ${level}`,
+          region: 'Khulna Region',
+          branchName: branch,
+          areaName: area,
+          status: "active"
+        });
+        saveState();
+        closeAddUserModal();
+        renderUsersList();
+        showToast(`নতুন কর্মী "${name}"-এর একাউন্ট সফলভাবে তৈরি হয়েছে!`);
+      }
+    }
+
+    function showToast(msg, icon = '✅') {
+      const toast = document.getElementById('toast');
+      document.getElementById('toastMsg').textContent = msg;
+      document.getElementById('toastIcon').textContent = icon;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 3500);
+    }
+
+    function initApp() {
+      setAutoDate();
+      updateHeaderAndRoleUI();
+      if (getLoggedInUser()) {
+        renderQuestionsForm();
+        populateFilterDropdowns();
+      }
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
