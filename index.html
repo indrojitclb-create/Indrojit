@@ -1133,7 +1133,15 @@
     // CENTRAL CLOUD DATABASE ENGINE (GOOGLE FIREBASE FIRESTORE)
     // ==========================================
     const STORAGE_KEY_FIREBASE = 'microfinance_firebase_config_v1';
-    let EMBEDDED_FIREBASE_CONFIG = null; // Can be pre-embedded for zero-setup on client devices
+    const EMBEDDED_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyD-66AvPjq2nuRZjJHVMAzWlYapXE1C9g8",
+      authDomain: "indrojit-4b8cc.firebaseapp.com",
+      projectId: "indrojit-4b8cc",
+      storageBucket: "indrojit-4b8cc.firebasestorage.app",
+      messagingSenderId: "569578060149",
+      appId: "1:569578060149:web:e4a8070cfc4c73595c7b3c",
+      measurementId: "G-N0CZMN0BXJ"
+    };
 
     let firebaseDb = null;
     let isFirebaseConnected = false;
@@ -1630,6 +1638,7 @@
 
       user.password = newPass;
       saveState();
+      syncUserPasswordToCloud(user.id, newPass);
 
       closeAdminResetModal();
       renderUsersList();
@@ -2653,6 +2662,7 @@
           status: "active"
         });
         saveState();
+        syncUserToCloud(appState.users[appState.users.length - 1]);
         closeAddUserModal();
         renderUsersList();
         showToast(`নতুন কর্মী "${name}"-এর একাউন্ট সফলভাবে তৈরি হয়েছে!`);
@@ -2670,6 +2680,7 @@
     }
 
     function initApp() {
+      initFirebaseDatabase();
       setAutoDate();
       updateHeaderAndRoleUI();
       if (getLoggedInUser()) {
