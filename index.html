@@ -311,17 +311,10 @@
             <h3 class="text-sm font-bold text-slate-700">বিস্তারিত এন্ট্রি তালিকা (<span id="reportCount">০</span> টি পাওয়া গেছে)</h3>
           </div>
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
-              <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200/80">
-                <tr>
-                  <th class="px-4 py-3">তারিখ</th>
-                  <th class="px-4 py-3">কর্মকর্তার নাম ও লেভেল</th>
-                  <th class="px-4 py-3">শাখা ও এরিয়া</th>
-                  <th class="px-4 py-3">ইনপুটকৃত তথ্যাবলী (প্রশ্নের উত্তর)</th>
-                  <th class="px-4 py-3 text-right">টাইমস্ট্যাম্প</th>
-                </tr>
+            <table class="w-full text-left text-xs border-collapse">
+              <thead id="reportsTableHead" class="bg-slate-100 text-slate-700 font-semibold border-b-2 border-slate-200">
               </thead>
-              <tbody id="reportsTableBody" class="divide-y divide-slate-100">
+              <tbody id="reportsTableBody" class="divide-y divide-slate-100 bg-white">
               </tbody>
             </table>
           </div>
@@ -338,7 +331,7 @@
               <p class="text-xs text-red-700">নতুন শাখা/এরিয়া তৈরি, ওপেনিং ডাটা ইনপুট, ইউজারদের পাসওয়ার্ড রিসেট/পরিবর্তন এবং প্রশ্ন পরিচালনা করুন।</p>
             </div>
           </div>
-          <button onclick="resetToDefaultData()" class="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition border border-red-300 w-fit">
+          <button id="resetToDefaultDataBtn" onclick="resetToDefaultData()" class="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition border border-red-300 w-fit">
             🔄 ডিফল্ট ডাটায় রিসেট
           </button>
         </div>
@@ -359,7 +352,7 @@
               </div>
             </div>
             <div class="flex items-center space-x-2 flex-wrap gap-2">
-              <button onclick="openCloudConfigModal()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl transition shadow flex items-center space-x-1.5">
+              <button id="adminCloudSettingsBtn" onclick="openCloudConfigModal()" class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl transition shadow flex items-center space-x-1.5">
                 <span>⚙️ ক্লাউড সেটিংস</span>
               </button>
               <button onclick="syncAllLocalDataToCloud()" class="text-xs bg-teal-50 hover:bg-teal-100 text-teal-800 font-bold px-3 py-2 rounded-xl border border-teal-300 transition flex items-center space-x-1" title="সব লোকাল ডাটা ক্লাউডে আপলোড করুন">
@@ -860,6 +853,85 @@
     </div>
   </div>
 
+  <!-- Modal: Edit User Level & Details -->
+  <div id="editUserLevelModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 my-auto border border-slate-200 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-2xl">✏️</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-800">ইউজার লেভেল ও তথ্য পরিবর্তন</h3>
+            <p class="text-[11px] text-slate-400">পদবী, শাখা, এরিয়া ও দায়িত্ব পুনর্নির্ধারণ</p>
+          </div>
+        </div>
+        <button onclick="closeEditUserModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <form onsubmit="handleSaveUserLevelEdit(event)" class="space-y-3.5">
+        <input type="hidden" id="editTargetUserId">
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">কর্মকর্তার নাম:</label>
+          <input type="text" id="editTargetName" required class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">ইউজারনেম (আইডি - পরিবর্তনযোগ্য নয়):</label>
+          <input type="text" id="editTargetUsername" readonly class="w-full px-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl font-mono text-slate-600">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">পদবী ও লেভেল নির্বাচন:</label>
+          <select id="editTargetLevel" onchange="handleEditTargetLevelChange()" class="w-full px-3 py-2 text-xs border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-slate-800">
+          </select>
+        </div>
+
+        <!-- Section for Field Staff (Branch & Area) -->
+        <div id="editTargetFieldStaffFields" class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">শাখার নাম:</label>
+            <select id="editTargetBranchSelect" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">এরিয়ার নাম:</label>
+            <select id="editTargetAreaSelect" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </select>
+          </div>
+        </div>
+
+        <!-- Section for Moderator / Co-Admin (Designation & Region) -->
+        <div id="editTargetModAdminFields" class="hidden space-y-2 bg-amber-50/70 p-3 rounded-xl border border-amber-200">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-xs font-bold text-amber-900 mb-1">পদবী / ডেজিগনেশন:</label>
+              <input type="text" id="editTargetDesignation" class="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-amber-900 mb-1">অঞ্চল (Region):</label>
+              <input type="text" id="editTargetRegion" class="w-full px-3 py-2 text-xs border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500 outline-none font-semibold">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-600 mb-1">অ্যাকাউন্ট স্ট্যাটাস:</label>
+          <select id="editTargetStatus" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+            <option value="active">✅ সক্রিয় (Active - স্বাভাবিক কাজ করতে পারবেন)</option>
+            <option value="disabled">🚫 বাতিল / স্থগিত (Disabled - ভিউতে থাকবে না)</option>
+          </select>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button type="button" onclick="closeEditUserModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl">বাতিল</button>
+          <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow">
+            💾 পরিবর্তন সংরক্ষণ করুন
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Modal: Central Cloud Database (Firebase) Setup -->
   <div id="cloudConfigModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl space-y-4 my-auto border-2 border-emerald-500/20 max-h-[90vh] overflow-y-auto">
@@ -956,7 +1028,20 @@
       ],
       users: [
         { 
-          id: "user_admin", 
+          id: "user_admin",
+        { 
+          id: "user_coadmin", 
+          username: "coadmin", 
+          password: "1234", 
+          name: "সহকারী এডমিন", 
+          level: "co_admin", 
+          role: "co_admin",
+          designation: "সহকারী এডমিন",
+          region: "Khulna Region",
+          branchName: "কোনো শাখা নেই", 
+          areaName: "Khulna Region", 
+          status: "active" 
+        }, 
           username: "indrojit", 
           password: "admin123", 
           name: "Indrojit", 
@@ -1535,6 +1620,24 @@
       }
     }
 
+
+    // ==========================================
+    // ROLE & PERMISSION HELPERS
+    // ==========================================
+    function isHeadAdmin(user) {
+      if (!user) return false;
+      return user.username === 'indrojit' || user.role === 'admin' || (user.level === 0 && user.role !== 'co_admin');
+    }
+
+    function isCoAdmin(user) {
+      if (!user) return false;
+      return user.role === 'co_admin' || user.level === 'co_admin';
+    }
+
+    function canAccessAdmin(user) {
+      return isHeadAdmin(user) || isCoAdmin(user);
+    }
+
     function getLoggedInUser() {
       if (!appState.currentUserId) return null;
       return appState.users.find(u => u.id === appState.currentUserId) || null;
@@ -1651,8 +1754,8 @@
       const user = getLoggedInUser();
       if (!user) return;
 
-      if (tab === 'admin' && user.level !== 0 && user.username !== 'indrojit') {
-        alert("অ্যাক্সেস অস্বীকৃত! শুধুমাত্র প্রধান এডমিন (Indrojit) এই প্যানেলে প্রবেশ করতে পারেন।");
+      if (tab === 'admin' && !canAccessAdmin(user)) {
+        alert("অ্যাক্সেস অস্বীকৃত! শুধুমাত্র প্রধান এডমিন ও সহ-এডমিন এই প্যানেলে প্রবেশ করতে পারেন।");
         return;
       }
 
@@ -1710,7 +1813,9 @@
 
       document.getElementById('headerUserName').textContent = user.name;
 
-      const isAdmin = (user.level === 0 || user.username === 'indrojit' || user.role === 'admin');
+      const isHead = isHeadAdmin(user);
+      const isCo = isCoAdmin(user);
+      const isAdminOrCo = isHead || isCo;
       const isModerator = (user.role === 'moderator' || user.level === 'moderator');
       const locationDiv = document.getElementById('headerLocationInfo');
 
@@ -1730,7 +1835,7 @@
         }
       }
 
-      if (isAdmin) {
+      if (isHead) {
         document.getElementById('headerUserLevel').textContent = "প্রধান এডমিন (Indrojit)";
         document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-red-600 text-white font-bold shadow-sm";
         adminTabBtn.classList.remove('hidden');
@@ -1739,6 +1844,16 @@
           locationDiv.innerHTML = `
             <span class="bg-red-900/60 px-2 py-0.5 rounded border border-red-400/40 text-red-100 font-semibold">🏛️ অঞ্চল: <b class="text-white">${user.region || 'Khulna Region'}</b></span>
             <span class="text-[10px] text-emerald-300">(কোনো নির্দিষ্ট শাখা নয়)</span>
+          `;
+        }
+      } else if (isCo) {
+        document.getElementById('headerUserLevel').textContent = "🛡️ সহ-এডমিন (" + (user.designation || 'সহকারী এডমিন') + ")";
+        document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-teal-600 text-white font-bold shadow-sm";
+        adminTabBtn.classList.remove('hidden');
+        if (entryTabBtn) entryTabBtn.classList.remove('hidden');
+        if (locationDiv) {
+          locationDiv.innerHTML = `
+            <span class="bg-teal-900/60 px-2 py-0.5 rounded border border-teal-400/40 text-teal-100 font-semibold">🛡️ অঞ্চল: <b class="text-white">${user.region || 'Khulna Region'}</b></span>
           `;
         }
       } else if (isModerator) {
@@ -1941,7 +2056,6 @@
       });
 
       document.getElementById('reportCount').textContent = filtered.length;
-
       renderOpeningDataCard(filterBranch);
 
       let totalOverdue = 0;
@@ -1975,51 +2089,79 @@
         </div>
       `;
 
+      // Determine questions to display as individual columns
+      let questionsToShow = [];
+      if (filterLevel !== 'all') {
+        const lvl = parseInt(filterLevel);
+        questionsToShow = appState.questions.filter(q => q.level === lvl && q.isActive);
+      } else {
+        // When all levels, show all active questions sorted by level
+        questionsToShow = appState.questions.filter(q => q.isActive).sort((a, b) => a.level - b.level);
+      }
+
+      // Build Dynamic Table Header (Separate column for each question)
+      const thead = document.getElementById('reportsTableHead');
+      if (thead) {
+        thead.innerHTML = `
+          <tr class="bg-slate-100 text-slate-700 font-bold border-b-2 border-slate-200 text-xs">
+            <th class="px-3 py-3 text-center border-r border-slate-200 whitespace-nowrap">#</th>
+            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">তারিখ</th>
+            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">কর্মকর্তার নাম</th>
+            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">পদবী ও লেভেল</th>
+            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">শাখা</th>
+            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">এরিয়া</th>
+            ${questionsToShow.map(q => `
+              <th class="px-3 py-3 text-center whitespace-nowrap bg-emerald-50 text-emerald-900 border-r border-emerald-200 min-w-[110px]" title="${q.text}">
+                <div class="text-[11px] font-bold text-slate-800">${q.text}</div>
+                <div class="text-[9px] font-normal text-emerald-700">(${q.unit || (q.type === 'currency' ? 'টাকা' : q.type === 'percentage' ? '%' : 'সংখ্যা')})</div>
+              </th>
+            `).join('')}
+            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">মন্তব্য</th>
+            <th class="px-3 py-3 whitespace-nowrap text-right">টাইমস্ট্যাম্প</th>
+          </tr>
+        `;
+      }
+
       const tbody = document.getElementById('reportsTableBody');
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="px-4 py-8 text-center text-slate-400">কোনো ডাটা পাওয়া যায়নি। ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।</td>
+            <td colspan="${questionsToShow.length + 8}" class="px-4 py-8 text-center text-slate-400">কোনো ডাটা পাওয়া যায়নি। ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।</td>
           </tr>
         `;
         return;
       }
 
-      tbody.innerHTML = filtered.map(item => {
+      tbody.innerHTML = filtered.map((item, idx) => {
         let levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">লেভেল ${item.level}</span>`;
-        if (item.level === 2) levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">লেভেল ২ (শাখা ব্যবস্থাপক)</span>`;
-        if (item.level === 3) levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">লেভেল ৩ (এরিয়া ব্যবস্থাপক)</span>`;
+        if (item.level === 2) levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">লেভেল ২ (শাখা ব্য.)</span>`;
+        if (item.level === 3) levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800">লেভেল ৩ (এরিয়া ব্য.)</span>`;
 
-        const answersList = Object.entries(item.answers).map(([qId, val]) => {
-          const qObj = appState.questions.find(q => q.id === qId);
-          const qText = qObj ? qObj.text : qId;
-          const unit = qObj ? qObj.unit : '';
-          return `
-            <div class="inline-flex items-center space-x-1 bg-slate-100 px-2 py-1 rounded text-[11px] mr-1.5 mb-1.5">
-              <span class="text-slate-600">${qText}:</span>
-              <span class="font-bold text-slate-800">${val} ${unit}</span>
-            </div>
-          `;
+        // Render each question in its own distinct column cell
+        const questionCells = questionsToShow.map(q => {
+          const val = item.answers[q.id];
+          if (val !== undefined && val !== null && val !== '') {
+            let displayVal = '';
+            if (q.type === 'currency') displayVal = '৳ ' + Number(val).toLocaleString('bn-BD');
+            else if (q.type === 'percentage') displayVal = val + '%';
+            else displayVal = Number(val).toLocaleString('bn-BD') + (q.unit ? ' ' + q.unit : '');
+            return `<td class="px-3 py-2.5 text-center font-bold text-slate-800 whitespace-nowrap border-r border-slate-100 bg-emerald-50/20">${displayVal}</td>`;
+          } else {
+            return `<td class="px-3 py-2.5 text-center text-slate-300 border-r border-slate-100">-</td>`;
+          }
         }).join('');
 
         return `
-          <tr class="hover:bg-slate-50/70 transition">
-            <td class="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">${item.entryDate}</td>
-            <td class="px-4 py-3 whitespace-nowrap">
-              <div class="font-bold text-slate-800">${item.userName}</div>
-              <div class="mt-0.5">${levelBadge}</div>
-            </td>
-            <td class="px-4 py-3 whitespace-nowrap">
-              <div class="text-slate-800 font-medium">${item.branchName}</div>
-              <div class="text-slate-400 text-[11px]">${item.areaName}</div>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex flex-wrap items-center">
-                ${answersList}
-              </div>
-              ${item.remarks ? `<div class="text-[11px] text-slate-500 italic mt-1">মন্তব্য: ${item.remarks}</div>` : ''}
-            </td>
-            <td class="px-4 py-3 text-right text-slate-400 whitespace-nowrap font-mono text-[11px]">${item.timestamp}</td>
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100">
+            <td class="px-3 py-2.5 text-center text-slate-400 font-mono text-xs border-r border-slate-100">${idx + 1}</td>
+            <td class="px-3 py-2.5 font-semibold text-slate-700 whitespace-nowrap border-r border-slate-100">${item.entryDate}</td>
+            <td class="px-3 py-2.5 font-bold text-slate-800 whitespace-nowrap border-r border-slate-100">${item.userName}</td>
+            <td class="px-3 py-2.5 whitespace-nowrap border-r border-slate-100">${levelBadge}</td>
+            <td class="px-3 py-2.5 font-medium text-slate-800 whitespace-nowrap border-r border-slate-100">${item.branchName}</td>
+            <td class="px-3 py-2.5 text-slate-500 whitespace-nowrap text-[11px] border-r border-slate-100">${item.areaName}</td>
+            ${questionCells}
+            <td class="px-3 py-2.5 text-[11px] text-slate-500 max-w-xs truncate border-r border-slate-100" title="${item.remarks || ''}">${item.remarks || '-'}</td>
+            <td class="px-3 py-2.5 text-right text-slate-400 whitespace-nowrap font-mono text-[11px]">${item.timestamp}</td>
           </tr>
         `;
       }).join('');
@@ -2059,17 +2201,59 @@
         alert("ডাউনলোড করার মতো কোনো ডাটা নেই।");
         return;
       }
-      let csv = "তারিখ,কর্মকর্তা,লেভেল,শাখা,এরিয়া,প্রশ্নের বিবরণ,টাইমস্ট্যাম্প\n";
-      appState.submissions.forEach(s => {
-        const answersStr = Object.entries(s.answers).map(([qId, val]) => {
-          const q = appState.questions.find(x => x.id === qId);
-          return `${q ? q.text : qId}: ${val}`;
-        }).join(' | ');
 
-        csv += `"${s.entryDate}","${s.userName}","লেভেল ${s.level}","${s.branchName}","${s.areaName}","${answersStr}","${s.timestamp}"\n`;
+      const filterDate = document.getElementById('filterDate').value;
+      const filterLevel = document.getElementById('filterLevel').value;
+      const filterBranch = document.getElementById('filterBranchSelect').value;
+      const filterArea = document.getElementById('filterAreaSelect').value;
+
+      const filtered = appState.submissions.filter(sub => {
+        if (filterDate && sub.entryDate !== filterDate) return false;
+        if (filterLevel !== 'all' && sub.level.toString() !== filterLevel) return false;
+        if (filterBranch !== 'all' && sub.branchName !== filterBranch) return false;
+        if (filterArea !== 'all' && sub.areaName !== filterArea) return false;
+        return true;
       });
 
-      const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+      if (filtered.length === 0) {
+        alert("নির্বাচিত ফিল্টারে কোনো ডাটা পাওয়া যায়নি।");
+        return;
+      }
+
+      let questionsForExport = [];
+      if (filterLevel !== 'all') {
+        const lvl = parseInt(filterLevel);
+        questionsForExport = appState.questions.filter(q => q.level === lvl && q.isActive);
+      } else {
+        questionsForExport = appState.questions.filter(q => q.isActive).sort((a, b) => a.level - b.level);
+      }
+
+      let headers = ["ক্রমিক", "তারিখ", "কর্মকর্তার নাম", "লেভেল", "শাখা", "এরিয়া"];
+      questionsForExport.forEach(q => {
+        headers.push(`${q.text} (${q.unit || q.type})`);
+      });
+      headers.push("মন্তব্য", "টাইমস্ট্যাম্প");
+
+      let csv = "\uFEFF" + headers.map(h => `"${h}"`).join(',') + "\n";
+
+      filtered.forEach((s, idx) => {
+        let row = [
+          idx + 1,
+          s.entryDate,
+          s.userName,
+          `লেভেল ${s.level}`,
+          s.branchName,
+          s.areaName
+        ];
+        questionsForExport.forEach(q => {
+          const val = s.answers[q.id];
+          row.push(val !== undefined && val !== null ? val : '');
+        });
+        row.push(s.remarks || '', s.timestamp);
+        csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + "\n";
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
@@ -2086,7 +2270,13 @@
 
     function renderAdminView() {
       const user = getLoggedInUser();
-      if (!user || user.level !== 0) return;
+      if (!user || !canAccessAdmin(user)) return;
+
+      const isHead = isHeadAdmin(user);
+      const resetBtn = document.getElementById('resetToDefaultDataBtn');
+      if (resetBtn) resetBtn.classList.toggle('hidden', !isHead);
+      const cloudSettingsBtn = document.getElementById('adminCloudSettingsBtn');
+      if (cloudSettingsBtn) cloudSettingsBtn.classList.toggle('hidden', !isHead);
 
       renderBranchAndAreaChips();
       renderOpeningDataAdmin();
@@ -2212,22 +2402,190 @@
       showToast(`"${branchName}"-এর ওপেনিং ডাটা সংরক্ষিত হয়েছে!`);
     }
 
+
+    // ==========================================
+    // USER LEVEL & INFO EDIT MODAL HANDLERS
+    // ==========================================
+    function openEditUserModal(userId) {
+      const loggedUser = getLoggedInUser();
+      const user = appState.users.find(u => u.id === userId);
+      if (!user) return;
+
+      const isTargetHead = isHeadAdmin(user);
+      const isTargetCo = isCoAdmin(user);
+
+      // Co-Admin cannot edit Head Admin or other Co-Admins
+      if (isCoAdmin(loggedUser) && (isTargetHead || isTargetCo)) {
+        alert("অ্যাক্সেস অস্বীকৃত! সহ-এডমিন হিসেবে আপনি প্রধান এডমিন বা অন্য সহ-এডমিনের তথ্য পরিবর্তন করতে পারবেন না।");
+        return;
+      }
+
+      document.getElementById('editTargetUserId').value = user.id;
+      document.getElementById('editTargetName').value = user.name;
+      document.getElementById('editTargetUsername').value = '@' + user.username;
+
+      const levelSelect = document.getElementById('editTargetLevel');
+      let optionsHtml = '';
+      if (isHeadAdmin(loggedUser)) {
+        optionsHtml += '<option value="co_admin">🛡️ সহ-এডমিন (সহকারী এডমিন)</option>';
+      }
+      optionsHtml += '<option value="moderator">🛡️ মডারেটর (মনিটরিং অফিসার)</option>';
+      optionsHtml += appState.levels.map(l => `<option value="${l.id}">লেভেল ${l.id} (${l.name})</option>`).join('');
+      levelSelect.innerHTML = optionsHtml;
+
+      if (user.role === 'co_admin' || user.level === 'co_admin') {
+        levelSelect.value = 'co_admin';
+      } else if (user.role === 'moderator' || user.level === 'moderator') {
+        levelSelect.value = 'moderator';
+      } else {
+        levelSelect.value = user.level;
+      }
+
+      // Populate branches and areas
+      const branchSelect = document.getElementById('editTargetBranchSelect');
+      branchSelect.innerHTML = appState.branches.map(b => `<option value="${b}">${b}</option>`).join('');
+      branchSelect.value = user.branchName || appState.branches[0];
+
+      const areaSelect = document.getElementById('editTargetAreaSelect');
+      areaSelect.innerHTML = appState.areas.map(a => `<option value="${a}">${a}</option>`).join('');
+      areaSelect.value = user.areaName || appState.areas[0];
+
+      document.getElementById('editTargetDesignation').value = user.designation || '';
+      document.getElementById('editTargetRegion').value = user.region || 'Khulna Region';
+      document.getElementById('editTargetStatus').value = user.status || 'active';
+
+      handleEditTargetLevelChange();
+      document.getElementById('editUserLevelModal').classList.remove('hidden');
+    }
+
+    function closeEditUserModal() {
+      document.getElementById('editUserLevelModal').classList.add('hidden');
+    }
+
+    function handleEditTargetLevelChange() {
+      const val = document.getElementById('editTargetLevel').value;
+      const isModOrCo = (val === 'moderator' || val === 'co_admin');
+      document.getElementById('editTargetModAdminFields').classList.toggle('hidden', !isModOrCo);
+      document.getElementById('editTargetFieldStaffFields').classList.toggle('hidden', isModOrCo);
+      if (val === 'co_admin' && !document.getElementById('editTargetDesignation').value) {
+        document.getElementById('editTargetDesignation').value = 'সহকারী এডমিন';
+      }
+      if (val === 'moderator' && !document.getElementById('editTargetDesignation').value) {
+        document.getElementById('editTargetDesignation').value = 'মনিটরিং অফিসার';
+      }
+    }
+
+    function handleSaveUserLevelEdit(e) {
+      e.preventDefault();
+      const userId = document.getElementById('editTargetUserId').value;
+      const user = appState.users.find(u => u.id === userId);
+      if (!user) return;
+
+      const newName = document.getElementById('editTargetName').value.trim();
+      const newLvlVal = document.getElementById('editTargetLevel').value;
+      const newStatus = document.getElementById('editTargetStatus').value;
+
+      user.name = newName;
+      user.status = newStatus;
+
+      if (newLvlVal === 'co_admin') {
+        user.level = 'co_admin';
+        user.role = 'co_admin';
+        user.designation = document.getElementById('editTargetDesignation').value.trim() || 'সহকারী এডমিন';
+        user.region = document.getElementById('editTargetRegion').value.trim() || 'Khulna Region';
+        user.branchName = 'কোনো শাখা নেই';
+        user.areaName = user.region;
+      } else if (newLvlVal === 'moderator') {
+        user.level = 'moderator';
+        user.role = 'moderator';
+        user.designation = document.getElementById('editTargetDesignation').value.trim() || 'মনিটরিং অফিসার';
+        user.region = document.getElementById('editTargetRegion').value.trim() || 'Khulna Region';
+        user.branchName = 'কোনো শাখা নেই';
+        user.areaName = user.region;
+      } else {
+        const lvlNum = parseInt(newLvlVal);
+        const lvlObj = appState.levels.find(l => l.id === lvlNum);
+        user.level = lvlNum;
+        user.role = 'field_staff';
+        user.designation = lvlObj ? lvlObj.name : `লেভেল ${lvlNum}`;
+        user.branchName = document.getElementById('editTargetBranchSelect').value;
+        user.areaName = document.getElementById('editTargetAreaSelect').value;
+        user.region = 'Khulna Region';
+      }
+
+      saveState();
+      syncUserToCloud(user);
+      closeEditUserModal();
+      renderUsersList();
+      updateHeaderAndRoleUI();
+      showToast(`"${user.name}"-এর লেভেল ও তথ্য সফলভাবে আপডেট হয়েছে!`, "✏️");
+    }
+
+    let showDisabledUsersView = false;
+
+    function toggleShowDisabledUsers() {
+      showDisabledUsersView = !showDisabledUsersView;
+      renderUsersList();
+    }
+
     function renderUsersList() {
       const container = document.getElementById('usersListContainer');
-      container.innerHTML = appState.users.map(u => {
-        const isActive = u.status === 'active';
-        const isAdmin = (u.level === 0 || u.username === 'indrojit' || u.role === 'admin');
+      const loggedUser = getLoggedInUser();
+      const isLoggedHead = isHeadAdmin(loggedUser);
+      const isLoggedCo = isCoAdmin(loggedUser);
+
+      const activeUsers = appState.users.filter(u => u.status !== 'disabled');
+      const disabledUsers = appState.users.filter(u => u.status === 'disabled');
+
+      // Users to display: active only by default, or all if showDisabledUsersView is true
+      const usersToDisplay = showDisabledUsersView ? appState.users : activeUsers;
+
+      let topBarHtml = `
+        <div class="col-span-full flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl mb-1 text-xs">
+          <div class="flex items-center space-x-2">
+            <span class="font-bold text-slate-700">👥 মোট সক্রিয় কর্মী:</span>
+            <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">${activeUsers.length} জন</span>
+          </div>
+          ${disabledUsers.length > 0 ? `
+            <button onclick="toggleShowDisabledUsers()" class="px-3 py-1.5 rounded-lg border font-bold transition flex items-center space-x-1.5 ${showDisabledUsersView ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-300'}">
+              <span>${showDisabledUsersView ? '👁️ বাতিলকৃতদের লুকান' : `🚫 বাতিলকৃত অ্যাকাউন্ট (${disabledUsers.length} জন দেখুন)`}</span>
+            </button>
+          ` : '<span class="text-[11px] text-slate-400">কোনো বাতিলকৃত আইডি নেই</span>'}
+        </div>
+      `;
+
+      if (usersToDisplay.length === 0) {
+        container.innerHTML = topBarHtml + `
+          <div class="col-span-full py-8 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs">
+            কোনো সক্রিয় ইউজার নেই।
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = topBarHtml + usersToDisplay.map(u => {
+        const isActive = u.status !== 'disabled';
+        const isTargetHead = isHeadAdmin(u);
+        const isTargetCo = isCoAdmin(u);
         const isMod = (u.role === 'moderator' || u.level === 'moderator');
 
         let levelBadge = '';
         let locationText = '';
 
-        if (isAdmin) {
+        if (isTargetHead) {
           levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-red-100 text-red-800 border border-red-200">👑 প্রধান এডমিন</span>';
           locationText = `
             <div class="text-xs text-red-800 font-semibold mt-1">
               🏛️ অঞ্চল: <b>${u.region || 'Khulna Region'}</b> <span class="text-[11px] text-slate-400 font-normal">(শাখা প্রযোজ্য নয়)</span>
             </div>
+          `;
+        } else if (isTargetCo) {
+          levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-teal-100 text-teal-800 border border-teal-300">🛡️ সহ-এডমিন</span>';
+          locationText = `
+            <div class="text-xs text-teal-900 font-semibold mt-1">
+              পদবী: <b>${u.designation || 'সহকারী এডমিন'}</b> • অঞ্চল: <b>${u.region || 'Khulna Region'}</b>
+            </div>
+            <div class="text-[10px] text-slate-400">অনুমতি: ইউজার তৈরি ও প্রশ্ন পরিচালনা</div>
           `;
         } else if (isMod) {
           levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-amber-100 text-amber-900 border border-amber-300">🛡️ মডারেটর</span>';
@@ -2235,7 +2593,7 @@
             <div class="text-xs text-slate-700 font-medium mt-1">
               পদবী: <b class="text-amber-900">${u.designation || 'মনিটরিং অফিসার'}</b> • অঞ্চল: <b class="text-slate-800">${u.region || 'Khulna Region'}</b>
             </div>
-            <div class="text-[10px] text-slate-400">অনুমতি: শুধুমাত্র রিপোর্ট পরিদর্শন ও এক্সেল ডাউনলোড</div>
+            <div class="text-[10px] text-slate-400">অনুমতি: শুধুমাত্র সার্বিক রিপোর্ট পরিদর্শন</div>
           `;
         } else {
           let levelTitle = `লেভেল ${u.level}`;
@@ -2249,8 +2607,12 @@
           `;
         }
 
+        // Action permissions:
+        // Co-Admin cannot edit or reset password of Head Admin or other Co-Admins
+        const canManageThisUser = isLoggedHead || (isLoggedCo && !isTargetHead && !isTargetCo);
+
         return `
-          <div class="border border-slate-200 rounded-2xl p-4 bg-white hover:border-emerald-300 shadow-sm transition space-y-3">
+          <div class="border ${isActive ? 'border-slate-200 bg-white' : 'border-rose-200 bg-rose-50/40 opacity-75'} rounded-2xl p-4 hover:border-emerald-300 shadow-sm transition space-y-3">
             <div class="flex items-start justify-between">
               <div>
                 <div class="flex items-center space-x-2">
@@ -2263,29 +2625,36 @@
                 ${locationText}
               </div>
 
-              <!-- Password Display Box for Admin -->
+              <!-- Password Display Box -->
               <div class="text-right">
                 <span class="text-[10px] text-slate-400 block font-semibold">পাসওয়ার্ড:</span>
                 <span class="text-xs font-mono font-bold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded inline-block mt-0.5">
-                  ${u.password}
+                  ${canManageThisUser ? u.password : '••••'}
                 </span>
               </div>
             </div>
 
-            <!-- Action Controls for Indrojit -->
-            <div class="pt-2.5 border-t border-slate-100 flex items-center justify-between">
+            <!-- Action Controls -->
+            <div class="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1.5">
               <span class="text-[11px] text-slate-500 font-mono">আইডি: @${u.username}</span>
-              <div class="flex items-center space-x-1.5">
-                <!-- Open Admin Reset Password Modal -->
-                <button onclick="openAdminResetModal('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition flex items-center space-x-1" title="ইউজারের পাসওয়ার্ড পরিবর্তন/রিসেট">
-                  <span>🔑 পাসওয়ার্ড পরিবর্তন</span>
-                </button>
-
-                ${!isAdmin ? `
-                  <button onclick="toggleUserStatus('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${isActive ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'}">
-                    ${isActive ? '🚫 বাতিল' : '✅ সক্রিয়'}
+              <div class="flex items-center space-x-1.5 flex-wrap gap-1">
+                ${canManageThisUser ? `
+                  <!-- Edit Level & Posting Button -->
+                  <button onclick="openEditUserModal('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 transition flex items-center space-x-1" title="লেভেল ও পোস্টিং পরিবর্তন">
+                    <span>✏️ লেভেল পরিবর্তন</span>
                   </button>
-                ` : '<span class="text-[10px] text-red-600 font-bold px-2 py-1 rounded bg-red-50 border border-red-200">প্রধান এডমিন</span>'}
+
+                  <!-- Password Reset Button -->
+                  <button onclick="openAdminResetModal('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition flex items-center space-x-1" title="পাসওয়ার্ড পরিবর্তন/রিসেট">
+                    <span>🔑 পাসওয়ার্ড</span>
+                  </button>
+
+                  ${!isTargetHead ? `
+                    <button onclick="toggleUserStatus('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${isActive ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'}" title="${isActive ? 'আইডি বাতিল করুন' : 'আইডি পুনরায় সক্রিয় করুন'}">
+                      ${isActive ? '🚫 বাতিল' : '✅ সক্রিয়'}
+                    </button>
+                  ` : ''}
+                ` : '<span class="text-[10px] text-slate-400 font-bold px-2 py-1">সুরক্ষিত একাউন্ট</span>'}
               </div>
             </div>
           </div>
@@ -2577,17 +2946,27 @@
 
     function handleNewUserLevelChange() {
       const val = document.getElementById('newUserLevel').value;
-      const isMod = val === 'moderator';
-      document.getElementById('newUserModFields').classList.toggle('hidden', !isMod);
-      document.getElementById('newUserFieldStaffFields').classList.toggle('hidden', isMod);
+      const isModOrCo = (val === 'moderator' || val === 'co_admin');
+      document.getElementById('newUserModFields').classList.toggle('hidden', !isModOrCo);
+      document.getElementById('newUserFieldStaffFields').classList.toggle('hidden', isModOrCo);
+      if (val === 'co_admin') {
+        document.getElementById('newUserDesignation').value = 'সহকারী এডমিন';
+      } else if (val === 'moderator') {
+        document.getElementById('newUserDesignation').value = 'মনিটরিং অফিসার';
+      }
     }
 
     function openNewUserModal() {
+      const loggedUser = getLoggedInUser();
       const select = document.getElementById('newUserLevel');
-      let optionsHtml = `<option value="moderator">🛡️ মডারেটর (শুধুমাত্র রিপোর্ট ভিউয়ার)</option>`;
+      let optionsHtml = '';
+      if (isHeadAdmin(loggedUser)) {
+        optionsHtml += `<option value="co_admin">🛡️ সহ-এডমিন (সহকারী এডমিন - প্রশ্ন ও ফিল্ড ইউজার তৈরিকারী)</option>`;
+      }
+      optionsHtml += `<option value="moderator">🛡️ মডারেটর (শুধুমাত্র রিপোর্ট ভিউয়ার)</option>`;
       optionsHtml += appState.levels.map(l => `<option value="${l.id}">লেভেল ${l.id} (${l.name})</option>`).join('');
       select.innerHTML = optionsHtml;
-      select.value = 'moderator';
+      select.value = isHeadAdmin(loggedUser) ? 'co_admin' : 'moderator';
       handleNewUserLevelChange();
 
       document.getElementById('newUserName').value = '';
@@ -2622,7 +3001,28 @@
       }
 
       const newId = `user_${Date.now()}`;
-      if (levelVal === 'moderator') {
+      if (levelVal === 'co_admin') {
+        const designation = document.getElementById('newUserDesignation').value.trim() || 'সহকারী এডমিন';
+        const region = document.getElementById('newUserRegion').value.trim() || 'Khulna Region';
+        appState.users.push({
+          id: newId,
+          username: username,
+          password: password,
+          name: name,
+          level: 'co_admin',
+          role: 'co_admin',
+          designation: designation,
+          region: region,
+          branchName: 'কোনো শাখা নেই',
+          areaName: region,
+          status: "active"
+        });
+        saveState();
+        syncUserToCloud(appState.users[appState.users.length - 1]);
+        closeAddUserModal();
+        renderUsersList();
+        showToast(`নতুন সহ-এডমিন "${name}" সফলভাবে যুক্ত হয়েছেন!`);
+      } else if (levelVal === 'moderator') {
         const designation = document.getElementById('newUserDesignation').value.trim() || 'মনিটরিং অফিসার';
         const region = document.getElementById('newUserRegion').value.trim() || 'Khulna Region';
         appState.users.push({
