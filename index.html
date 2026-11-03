@@ -210,13 +210,16 @@
             <p class="text-xs text-slate-500" id="formSubtitle">আপনার নির্দিষ্ট প্রশ্নের সঠিক তথ্য প্রদান করে নিচে সাবমিট করুন।</p>
           </div>
 
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center space-x-3 min-w-[240px]">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center space-x-3 min-w-[260px]">
             <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
               📅
             </div>
-            <div>
-              <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">ইনপুট তারিখ (স্বয়ংক্রিয়)</span>
-              <div class="text-sm font-bold text-slate-800" id="displayAutoDate">১৫ অক্টোবর, ২০২৬</div>
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">পোস্টিং / এন্ট্রি তারিখ:</span>
+                <span class="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">পরিবর্তনযোগ্য</span>
+              </div>
+              <input type="date" id="entryPostingDate" class="w-full mt-1 px-2.5 py-1 text-xs font-bold text-slate-800 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none" title="আজকের বা পূর্ববর্তী যে দিনের তথ্য পোস্ট করছেন তা নির্বাচন করুন">
             </div>
           </div>
         </div>
@@ -257,9 +260,19 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
-            <div>
-              <label class="block text-[11px] font-semibold text-slate-500 mb-1">তারিখ নির্বাচন:</label>
-              <input type="date" id="filterDate" onchange="renderReportsTable()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-[11px] font-semibold text-slate-600">তারিখ নির্বাচন:</label>
+                <button type="button" onclick="setQuickDateFilter('all')" class="text-[10px] text-emerald-700 hover:text-emerald-900 font-bold bg-emerald-50 hover:bg-emerald-100 px-2 py-0.5 rounded border border-emerald-200 transition">
+                  📚 সব তারিখ
+                </button>
+              </div>
+              <input type="date" id="filterDate" onchange="renderReportsTable()" class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+              <div class="flex items-center space-x-1 pt-0.5">
+                <button type="button" onclick="setQuickDateFilter('today')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-medium transition">আজকে</button>
+                <button type="button" onclick="setQuickDateFilter('yesterday')" class="px-2 py-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-medium transition">গতকাল</button>
+                <button type="button" onclick="setQuickDateFilter('all')" class="px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-[10px] font-bold transition">পূর্বের সকল দিন</button>
+              </div>
             </div>
             <div>
               <label class="block text-[11px] font-semibold text-slate-500 mb-1">লেভেল ফিল্টার:</label>
@@ -1274,10 +1287,19 @@
       if (adminProjectId) adminProjectId.textContent = projectId || (connected ? (getActiveFirebaseConfig()?.projectId || 'সক্রিয়') : 'কানেক্ট করা হয়নি');
     }
 
+    let isPersistenceAttempted = false;
+    let isListenersAttached = false;
+
     function initFirebaseDatabase() {
       const cfg = getActiveFirebaseConfig();
       if (!cfg || !cfg.apiKey || typeof firebase === 'undefined') {
         updateCloudStatusUI(false, "ক্লাউড ডাটাবেস সেটআপ প্রয়োজন (লোকাল মোড)");
+        return;
+      }
+
+      // If already initialized and connected, simply update UI status and return
+      if (firebaseDb && isFirebaseConnected) {
+        updateCloudStatusUI(true, "সরাসরি ক্লাউড ডাটাবেসের সাথে সংযুক্ত", cfg.projectId);
         return;
       }
 
@@ -1287,17 +1309,28 @@
         }
         firebaseDb = firebase.firestore();
 
-        // Enable offline persistence
-        firebaseDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
-          console.warn("Firestore offline persistence notice:", err.message);
-        });
+        // Enable offline persistence safely (only once, never throw)
+        if (!isPersistenceAttempted) {
+          isPersistenceAttempted = true;
+          try {
+            firebaseDb.enablePersistence({ synchronizeTabs: true }).catch(err => {
+              console.warn("Firestore offline persistence notice:", err.message);
+            });
+          } catch(pErr) {
+            console.warn("Firestore persistence notice:", pErr.message);
+          }
+        }
 
         updateCloudStatusUI(true, "সরাসরি ক্লাউড ডাটাবেসের সাথে সংযুক্ত", cfg.projectId);
         setupCloudListeners();
 
       } catch(err) {
-        console.error("Firebase initialization failed:", err);
-        updateCloudStatusUI(false, "কানেকশন ত্রুটি: " + err.message);
+        console.error("Firebase initialization:", err);
+        if (firebaseDb) {
+          updateCloudStatusUI(true, "সরাসরি ক্লাউড ডাটাবেসের সাথে সংযুক্ত", cfg.projectId);
+        } else {
+          updateCloudStatusUI(false, "কানেকশন ত্রুটি: " + err.message);
+        }
       }
     }
 
@@ -1306,7 +1339,8 @@
     let unsubscribeConfig = null;
 
     function setupCloudListeners() {
-      if (!firebaseDb) return;
+      if (!firebaseDb || isListenersAttached) return;
+      isListenersAttached = true;
 
       // 1. Listen to Master Config (branches, areas, regions, levels, questions, openingData)
       unsubscribeConfig = firebaseDb.collection("app_config").doc("master").onSnapshot(doc => {
@@ -1902,15 +1936,48 @@
       }
     }
 
+
+    // ==========================================
+    // QUICK DATE FILTER & POSTING DATE HELPERS
+    // ==========================================
+    function setQuickDateFilter(type) {
+      const filterInput = document.getElementById('filterDate');
+      if (!filterInput) return;
+
+      const now = new Date();
+      if (type === 'today') {
+        filterInput.value = now.toISOString().split('T')[0];
+      } else if (type === 'yesterday') {
+        const yesterday = new Date(now);
+        yesterday.setDate(now.getDate() - 1);
+        filterInput.value = yesterday.toISOString().split('T')[0];
+      } else if (type === 'all') {
+        filterInput.value = ''; // Empty string means ALL dates
+      }
+      renderReportsTable();
+    }
+
     function setAutoDate() {
       const now = new Date();
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      const banglaDate = now.toLocaleDateString('bn-BD', options);
-      document.getElementById('displayAutoDate').textContent = banglaDate;
       const isoDate = now.toISOString().split('T')[0];
+
+      // Set Entry Posting Date input (defaults to today, but user can pick previous dates)
+      const entryPosting = document.getElementById('entryPostingDate');
+      if (entryPosting && !entryPosting.value) {
+        entryPosting.value = isoDate;
+      }
+
+      // Display Bangla date banner if element exists
+      const displayElem = document.getElementById('displayAutoDate');
+      if (displayElem) {
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        displayElem.textContent = now.toLocaleDateString('bn-BD', options);
+      }
+
+      // Keep filterDate empty by default so ALL previous days' records are visible!
       const filterDate = document.getElementById('filterDate');
       if (filterDate && !filterDate.value) {
-        filterDate.value = isoDate;
+        filterDate.value = ''; // Shows all dates!
       }
     }
 
@@ -2007,7 +2074,9 @@
         answers[q.id] = parseFloat(val) || 0;
       });
 
-      const today = new Date().toISOString().split('T')[0];
+      const postingDateElem = document.getElementById('entryPostingDate');
+      const selectedDate = (postingDateElem && postingDateElem.value) ? postingDateElem.value : new Date().toISOString().split('T')[0];
+
       const newSubmission = {
         id: "sub_" + Date.now(),
         userId: user.id,
@@ -2015,7 +2084,7 @@
         level: targetLevel,
         branchName: user.branchName,
         areaName: user.areaName,
-        entryDate: today,
+        entryDate: selectedDate,
         timestamp: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }),
         answers: answers,
         remarks: document.getElementById('entryRemarks').value.trim()
@@ -2057,6 +2126,11 @@
       });
 
       document.getElementById('reportCount').textContent = filtered.length;
+      const countLabel = document.getElementById('reportCount');
+      if (countLabel && countLabel.parentElement) {
+        const dateNote = filterDate ? ` (তারিখ: ${filterDate})` : ' (সকল পূর্বের ও বর্তমান দিন)';
+        countLabel.title = `ফিল্টারকৃত তারিখ: ${dateNote}`;
+      }
       renderOpeningDataCard(filterBranch);
 
       let totalOverdue = 0;
@@ -2304,7 +2378,6 @@
     }
 
     function addNewBranch() {
-      setTimeout(syncMasterConfigToCloud, 200);
       const input = document.getElementById('newBranchInput');
       const val = input.value.trim();
       if (!val) {
@@ -2320,6 +2393,7 @@
         appState.openingData[val] = { members: 0, overdue: 0, portfolio: 0, target: 0 };
       }
       saveState();
+      syncMasterConfigToCloud();
       input.value = '';
       renderBranchAndAreaChips();
       renderOpeningDataAdmin();
@@ -2328,10 +2402,10 @@
     }
 
     function removeBranch(branchName) {
-      setTimeout(syncMasterConfigToCloud, 200);
       if (confirm(`আপনি কি "${branchName}" শাখাটি তালিকা থেকে সরাতে চান?`)) {
         appState.branches = appState.branches.filter(b => b !== branchName);
         saveState();
+        syncMasterConfigToCloud();
         renderBranchAndAreaChips();
         renderOpeningDataAdmin();
         populateFilterDropdowns();
@@ -2340,7 +2414,6 @@
     }
 
     function addNewArea() {
-      setTimeout(syncMasterConfigToCloud, 200);
       const input = document.getElementById('newAreaInput');
       const val = input.value.trim();
       if (!val) {
@@ -2353,6 +2426,7 @@
       }
       appState.areas.push(val);
       saveState();
+      syncMasterConfigToCloud();
       input.value = '';
       renderBranchAndAreaChips();
       populateFilterDropdowns();
@@ -2360,10 +2434,10 @@
     }
 
     function removeArea(areaName) {
-      setTimeout(syncMasterConfigToCloud, 200);
       if (confirm(`আপনি কি "${areaName}" এরিয়াটি তালিকা থেকে সরাতে চান?`)) {
         appState.areas = appState.areas.filter(a => a !== areaName);
         saveState();
+        syncMasterConfigToCloud();
         renderBranchAndAreaChips();
         populateFilterDropdowns();
         showToast("এরিয়া সফলভাবে মুছে ফেলা হয়েছে!");
@@ -2389,7 +2463,6 @@
     }
 
     function saveOpeningData() {
-      setTimeout(syncMasterConfigToCloud, 200);
       const branchName = document.getElementById('openingBranchSelect').value;
       if (!branchName) return;
 
@@ -2400,6 +2473,7 @@
 
       appState.openingData[branchName] = { members, overdue, portfolio, target };
       saveState();
+      syncMasterConfigToCloud();
       showToast(`"${branchName}"-এর ওপেনিং ডাটা সংরক্ষিত হয়েছে!`);
     }
 
@@ -2725,11 +2799,11 @@
     }
 
     function toggleQuestionStatus(qId) {
-      setTimeout(syncMasterConfigToCloud, 200);
       const q = appState.questions.find(x => x.id === qId);
       if (q) {
         q.isActive = !q.isActive;
         saveState();
+        syncMasterConfigToCloud();
         renderQuestionsManagement();
         renderQuestionsForm();
         showToast("প্রশ্নের স্ট্যাটাস আপডেট করা হয়েছে!");
@@ -2737,10 +2811,10 @@
     }
 
     function deleteQuestion(qId) {
-      setTimeout(syncMasterConfigToCloud, 200);
       if (confirm("আপনি কি নিশ্চিত এই প্রশ্নটি মুছে ফেলতে চান?")) {
         appState.questions = appState.questions.filter(x => x.id !== qId);
         saveState();
+        syncMasterConfigToCloud();
         renderQuestionsManagement();
         renderQuestionsForm();
         showToast("প্রশ্ন মুছে ফেলা হয়েছে!");
@@ -2892,7 +2966,6 @@
       document.getElementById('addQuestionModal').classList.add('hidden');
     }
     function saveNewQuestion(e) {
-      setTimeout(syncMasterConfigToCloud, 200);
       e.preventDefault();
       const lvl = parseInt(document.getElementById('newQuestionLevel').value);
       const text = document.getElementById('newQuestionText').value.trim();
@@ -2910,6 +2983,7 @@
 
       appState.questions.push(newQ);
       saveState();
+      syncMasterConfigToCloud();
       closeAddQuestionModal();
       activeQuestionTabLevel = lvl;
       renderQuestionsManagement();
@@ -2927,7 +3001,6 @@
       document.getElementById('addLevelModal').classList.add('hidden');
     }
     function saveNewLevel(e) {
-      setTimeout(syncMasterConfigToCloud, 200);
       e.preventDefault();
       const nextNum = parseInt(document.getElementById('newLevelNumber').value);
       const name = document.getElementById('newLevelName').value.trim();
@@ -2939,6 +3012,7 @@
       });
 
       saveState();
+      syncMasterConfigToCloud();
       closeAddLevelModal();
       activeQuestionTabLevel = nextNum;
       renderQuestionsManagement();
