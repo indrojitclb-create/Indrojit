@@ -154,6 +154,13 @@
               <span id="headerCloudText" class="text-emerald-100 text-[11px]">ক্লাউড ডাটাবেস</span>
             </button>
 
+            <!-- Notification Bell Button -->
+            <button onclick="toggleNotificationsModal()" class="relative px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 text-white" title="বিজ্ঞপ্তি ও মন্তব্য">
+              <span class="text-sm">🔔</span>
+              <span class="hidden sm:inline">বিজ্ঞপ্তি</span>
+              <span id="unreadNotifBadge" class="hidden px-1.5 py-0.2 min-w-[16px] text-[10px] font-bold bg-red-500 text-white rounded-full text-center shadow animate-pulse">0</span>
+            </button>
+
             <button onclick="openProfileModal()" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-semibold transition flex items-center space-x-1" title="পোস্টিং ও প্রোফাইল পরিবর্তন">
               <span>✏️ পোস্টিং</span>
             </button>
@@ -525,6 +532,71 @@
   <!-- MODALS                                     -->
   <!-- ========================================== -->
 
+  <!-- Modal: Supervisor Remark Modal (Level 3 & Admin/Co-Admin) -->
+  <div id="remarkModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">✍️</span>
+          <div>
+            <h3 class="text-base font-bold text-slate-800" id="remarkModalTitle">সুপারভাইজারি মন্তব্য</h3>
+            <span id="remarkModalTypeBadge" class="text-[10px] px-2 py-0.5 rounded font-bold bg-slate-100 text-slate-700">মন্তব্য</span>
+          </div>
+        </div>
+        <button onclick="closeRemarkModal()" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+      </div>
+
+      <div id="remarkModalTargetInfo" class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
+      </div>
+
+      <div class="space-y-1.5">
+        <label class="block text-xs font-semibold text-slate-700">মন্তব্য / দিক-নির্দেশনা লিখুন:</label>
+        <textarea id="remarkModalText" rows="3" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition" placeholder="কর্মকর্তার রিপোর্ট সম্পর্কে মন্তব্য বা নির্দেশনা লিখুন..."></textarea>
+        <p class="text-[11px] text-slate-400">এই মন্তব্যটি সংরক্ষণ করার সাথে সাথে সংশ্লিষ্ট কর্মকর্তার নিকট নোটিফিকেশন পৌঁছে যাবে।</p>
+      </div>
+
+      <div class="flex items-center justify-end space-x-3 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closeRemarkModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition">বাতিল</button>
+        <button type="button" onclick="saveRemark()" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow hover:shadow-md transition flex items-center space-x-1.5">
+          <span>💾 সেভ ও নোটিফাই করুন</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Notifications / Remarks Modal -->
+  <div id="notificationsModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 bg-gradient-to-r from-emerald-800 to-teal-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-2xl">🔔</span>
+          <div>
+            <h3 class="text-base font-bold">নোটিফিকেশন ও সুপারভাইজার মন্তব্য</h3>
+            <p class="text-[11px] text-emerald-200">আপনার রিপোর্টের প্রেক্ষিতে প্রদত্ত সকল মন্তব্য ও নোটিশ</p>
+          </div>
+        </div>
+        <button onclick="closeNotificationsModal()" class="text-white/70 hover:text-white text-xl">✕</button>
+      </div>
+
+      <div class="p-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-600">সকল প্রাপ্ত বার্তা ও পর্যবেক্ষণ</span>
+        <button onclick="markAllNotificationsAsRead()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
+          ✓ সবগুলো পঠিত চিহ্নিত করুন
+        </button>
+      </div>
+
+      <div id="notificationsList" class="p-4 space-y-3 overflow-y-auto flex-1 max-h-[50vh]">
+        <!-- Notifications injected dynamically -->
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
+        <button onclick="closeNotificationsModal()" class="px-5 py-2 text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-100 rounded-xl transition shadow-sm">
+          বন্ধ করুন
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal 1: Edit Profile (Branch & Area / Region & Designation) -->
   <div id="profileModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl space-y-4">
@@ -543,13 +615,17 @@
         <div id="profileFieldStaffSection" class="space-y-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">শাখার নাম (অনুমোদিত তালিকা):</label>
-            <select id="editBranchSelect" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            <select id="editBranchSelect" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
             </select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">এরিয়ার নাম (অনুমোদিত তালিকা):</label>
-            <select id="editAreaSelect" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            <select id="editAreaSelect" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
             </select>
+          </div>
+          <div id="profileBranchLockNotice" class="hidden p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-800 flex items-center space-x-2">
+            <span class="text-base">🔒</span>
+            <span>শাখা ও এরিয়া পরিবর্তনের এখতিয়ার শুধুমাত্র <strong>এডমিন ও সহ-এডমিন</strong> এর হাতে সংরক্ষিত।</span>
           </div>
         </div>
 
@@ -1181,6 +1257,7 @@
     };
 
     let appState = JSON.parse(localStorage.getItem(STORAGE_KEY_APP)) || defaultData;
+    if (!appState.notifications) appState.notifications = [];
 
     // Ensure Admin has Khulna Region and no specific branch
     let adminUser = appState.users.find(u => u.level === 0 || u.username === 'indrojit');
@@ -1337,6 +1414,7 @@
     let unsubscribeUsers = null;
     let unsubscribeSubs = null;
     let unsubscribeConfig = null;
+    let unsubscribeNotifs = null;
 
     function setupCloudListeners() {
       if (!firebaseDb || isListenersAttached) return;
@@ -1399,6 +1477,23 @@
           updateLastSyncTime();
         }
       }, err => console.error("Submissions sync error:", err));
+
+      // 4. Listen to Notifications in Real-time
+      unsubscribeNotifs = firebaseDb.collection("notifications").orderBy("createdAt", "desc").limit(100).onSnapshot(snapshot => {
+        if (!snapshot.empty) {
+          const cloudNotifs = [];
+          snapshot.forEach(doc => {
+            cloudNotifs.push(doc.data());
+          });
+          appState.notifications = cloudNotifs;
+          localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+          updateNotificationBadge();
+          const notifModal = document.getElementById('notificationsModal');
+          if (notifModal && !notifModal.classList.contains('hidden')) {
+            renderNotificationsList();
+          }
+        }
+      }, err => console.warn("Notifications listener note:", err));
     }
 
     function updateLastSyncTime() {
@@ -1832,6 +1927,7 @@
 
     function updateHeaderAndRoleUI() {
       const user = getLoggedInUser();
+      updateNotificationBadge();
       const loginScreen = document.getElementById('loginScreen');
       const mainApp = document.getElementById('mainApp');
       const adminTabBtn = document.getElementById('tabBtnAdmin');
@@ -2076,23 +2172,44 @@
 
       const postingDateElem = document.getElementById('entryPostingDate');
       const selectedDate = (postingDateElem && postingDateElem.value) ? postingDateElem.value : new Date().toISOString().split('T')[0];
+      const entryRemarksVal = document.getElementById('entryRemarks').value.trim();
 
-      const newSubmission = {
-        id: "sub_" + Date.now(),
-        userId: user.id,
-        userName: user.name,
-        level: targetLevel,
-        branchName: user.branchName,
-        areaName: user.areaName,
-        entryDate: selectedDate,
-        timestamp: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }),
-        answers: answers,
-        remarks: document.getElementById('entryRemarks').value.trim()
-      };
+      // Check if user already submitted for this date: if so, overwrite/update so only latest remains
+      const existingIdx = appState.submissions.findIndex(s => s.userId === user.id && s.entryDate === selectedDate);
+      let subToSave;
 
-      appState.submissions.unshift(newSubmission);
+      if (existingIdx !== -1) {
+        const existing = appState.submissions[existingIdx];
+        existing.answers = answers;
+        existing.remarks = entryRemarksVal;
+        existing.timestamp = new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
+        existing.updatedAt = new Date().toISOString();
+        existing.branchName = user.branchName;
+        existing.areaName = user.areaName;
+        existing.level = targetLevel;
+        existing.userName = user.name;
+        subToSave = existing;
+        showToast("আজকের আগের ডাটা সর্বশেষ তথ্য দিয়ে সফলভাবে আপডেট করা হয়েছে!", "success");
+      } else {
+        subToSave = {
+          id: "sub_" + Date.now(),
+          userId: user.id,
+          userName: user.name,
+          level: targetLevel,
+          branchName: user.branchName,
+          areaName: user.areaName,
+          entryDate: selectedDate,
+          timestamp: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }),
+          answers: answers,
+          remarks: entryRemarksVal,
+          createdAt: new Date().toISOString()
+        };
+        appState.submissions.unshift(subToSave);
+        showToast("নতুন ফিল্ড ডাটা সফলভাবে জমা হয়েছে!", "success");
+      }
+
       saveState();
-      syncSubmissionToCloud(newSubmission);
+      syncSubmissionToCloud(subToSave);
       form.reset();
       showToast("আজকের তথ্য সফলভাবে ডাটাবেসে সংরক্ষিত হয়েছে!");
     }
@@ -2191,8 +2308,17 @@
                 <div class="text-[9px] font-normal text-emerald-700">(${q.unit || (q.type === 'currency' ? 'টাকা' : q.type === 'percentage' ? '%' : 'সংখ্যা')})</div>
               </th>
             `).join('')}
-            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">মন্তব্য</th>
-            <th class="px-3 py-3 whitespace-nowrap text-right">টাইমস্ট্যাম্প</th>
+            <th class="px-3 py-3 whitespace-nowrap border-r border-slate-200">মন্তব্য (মাঠ)</th>
+            <th class="px-3 py-3 whitespace-nowrap bg-purple-50 text-purple-900 border-r border-purple-200 text-center min-w-[130px]" title="লেভেল-৩ এরিয়া ম্যানেজার মন্তব্য">
+              <div class="text-[11px] font-bold">লেভেল-৩ মন্তব্য</div>
+              <div class="text-[9px] font-normal text-purple-600">(এরিয়া ব্য./এডমিন)</div>
+            </th>
+            <th class="px-3 py-3 whitespace-nowrap bg-red-50 text-red-900 border-r border-red-200 text-center min-w-[130px]" title="এডমিন / সহ-এডমিন মন্তব্য">
+              <div class="text-[11px] font-bold">এডমিন মন্তব্য</div>
+              <div class="text-[9px] font-normal text-red-600">(প্রধান/সহ-এডমিন)</div>
+            </th>
+            <th class="px-3 py-3 whitespace-nowrap text-right border-r border-slate-200">টাইমস্ট্যাম্প</th>
+            ${(isHeadAdmin(getLoggedInUser()) || isCoAdmin(getLoggedInUser())) ? '<th class="px-3 py-3 whitespace-nowrap text-center">অ্যাকশন</th>' : ''}
           </tr>
         `;
       }
@@ -2207,6 +2333,7 @@
         return;
       }
 
+      const loggedUser = getLoggedInUser();
       tbody.innerHTML = filtered.map((item, idx) => {
         let levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">লেভেল ${item.level}</span>`;
         if (item.level === 2) levelBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800">লেভেল ২ (শাখা ব্য.)</span>`;
@@ -2236,7 +2363,62 @@
             <td class="px-3 py-2.5 text-slate-500 whitespace-nowrap text-[11px] border-r border-slate-100">${item.areaName}</td>
             ${questionCells}
             <td class="px-3 py-2.5 text-[11px] text-slate-500 max-w-xs truncate border-r border-slate-100" title="${item.remarks || ''}">${item.remarks || '-'}</td>
-            <td class="px-3 py-2.5 text-right text-slate-400 whitespace-nowrap font-mono text-[11px]">${item.timestamp}</td>
+            
+            <!-- Column 1: Level-3 Area Manager Remark -->
+            <td class="px-3 py-2.5 text-center border-r border-slate-100 min-w-[130px]">
+              ${(() => {
+                const canEditAM = (loggedUser && (loggedUser.level === 3 || isHeadAdmin(loggedUser) || isCoAdmin(loggedUser)));
+                if (item.amRemark) {
+                  return `
+                    <div class="space-y-1 text-left">
+                      <div class="text-[11px] font-semibold text-purple-900 bg-purple-50/80 p-1.5 rounded border border-purple-100" title="${item.amRemark}">${item.amRemark}</div>
+                      <div class="flex items-center justify-between text-[9px] text-purple-600">
+                        <span>✍️ ${item.amRemarkBy || 'লেভেল-৩'}</span>
+                        ${canEditAM ? `<button onclick="openRemarkModal('${item.id}', 'am')" class="hover:underline font-bold text-purple-700 ml-1">[সম্পাদনা]</button>` : ''}
+                      </div>
+                    </div>
+                  `;
+                } else {
+                  return canEditAM 
+                    ? `<button onclick="openRemarkModal('${item.id}', 'am')" class="px-2 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg text-[10px] font-semibold transition">+ মন্তব্য</button>`
+                    : `<span class="text-slate-300">-</span>`;
+                }
+              })()}
+            </td>
+
+            <!-- Column 2: Admin / Co-Admin Remark -->
+            <td class="px-3 py-2.5 text-center border-r border-slate-100 min-w-[130px]">
+              ${(() => {
+                const canEditAdmin = (loggedUser && (isHeadAdmin(loggedUser) || isCoAdmin(loggedUser)));
+                if (item.adminRemark) {
+                  return `
+                    <div class="space-y-1 text-left">
+                      <div class="text-[11px] font-semibold text-red-900 bg-red-50/80 p-1.5 rounded border border-red-100" title="${item.adminRemark}">${item.adminRemark}</div>
+                      <div class="flex items-center justify-between text-[9px] text-red-600">
+                        <span>🛡️ ${item.adminRemarkBy || 'এডমিন'}</span>
+                        ${canEditAdmin ? `<button onclick="openRemarkModal('${item.id}', 'admin')" class="hover:underline font-bold text-red-700 ml-1">[সম্পাদনা]</button>` : ''}
+                      </div>
+                    </div>
+                  `;
+                } else {
+                  return canEditAdmin 
+                    ? `<button onclick="openRemarkModal('${item.id}', 'admin')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-[10px] font-semibold transition">+ মন্তব্য</button>`
+                    : `<span class="text-slate-300">-</span>`;
+                }
+              })()}
+            </td>
+
+            <td class="px-3 py-2.5 text-right text-slate-400 whitespace-nowrap font-mono text-[11px] border-r border-slate-100">${item.timestamp}</td>
+
+            <!-- Action Column (Delete for Admin/Co-Admin) -->
+            ${(isHeadAdmin(getLoggedInUser()) || isCoAdmin(getLoggedInUser())) ? `
+              <td class="px-3 py-2.5 text-center whitespace-nowrap">
+                <button onclick="deleteSubmission('${item.id}')" class="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-[11px] font-bold transition inline-flex items-center space-x-1" title="এই রিপোর্টটি স্থায়ীভাবে মুছে ফেলুন">
+                  <span>🗑️</span>
+                  <span>মুছুন</span>
+                </button>
+              </td>
+            ` : ''}
           </tr>
         `;
       }).join('');
@@ -2307,7 +2489,7 @@
       questionsForExport.forEach(q => {
         headers.push(`${q.text} (${q.unit || q.type})`);
       });
-      headers.push("মন্তব্য", "টাইমস্ট্যাম্প");
+      headers.push("জমাকারীর মন্তব্য", "লেভেল-৩ (এরিয়া) মন্তব্য", "এডমিন/সহ-এডমিন মন্তব্য", "টাইমস্ট্যাম্প");
 
       let csv = "\uFEFF" + headers.map(h => `"${h}"`).join(',') + "\n";
 
@@ -2324,7 +2506,7 @@
           const val = s.answers[q.id];
           row.push(val !== undefined && val !== null ? val : '');
         });
-        row.push(s.remarks || '', s.timestamp);
+        row.push(s.remarks || '', s.amRemark || '', s.adminRemark || '', s.timestamp);
         csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + "\n";
       });
 
@@ -2856,11 +3038,27 @@
         maSection.classList.add('hidden');
         document.getElementById('profileModalTitle').textContent = "শাখা ও এরিয়া পোস্টিং পরিবর্তন";
 
+        const canEditBranchArea = isHeadAdmin(user) || isCoAdmin(user);
         const branchSelect = document.getElementById('editBranchSelect');
         branchSelect.innerHTML = appState.branches.map(b => `<option value="${b}" ${b === user.branchName ? 'selected' : ''}>${b}</option>`).join('');
 
         const areaSelect = document.getElementById('editAreaSelect');
         areaSelect.innerHTML = appState.areas.map(a => `<option value="${a}" ${a === user.areaName ? 'selected' : ''}>${a}</option>`).join('');
+
+        const lockNotice = document.getElementById('profileBranchLockNotice');
+        if (canEditBranchArea) {
+          branchSelect.disabled = false;
+          areaSelect.disabled = false;
+          branchSelect.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-70');
+          areaSelect.classList.remove('bg-slate-100', 'cursor-not-allowed', 'opacity-70');
+          if (lockNotice) lockNotice.classList.add('hidden');
+        } else {
+          branchSelect.disabled = true;
+          areaSelect.disabled = true;
+          branchSelect.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-70');
+          areaSelect.classList.add('bg-slate-100', 'cursor-not-allowed', 'opacity-70');
+          if (lockNotice) lockNotice.classList.remove('hidden');
+        }
       }
 
       // Load Profile Photo Preview
@@ -2937,14 +3135,18 @@
       const isAdmin = (user.level === 0 || user.username === 'indrojit' || user.role === 'admin');
       const isMod = (user.role === 'moderator' || user.level === 'moderator');
 
+      const canEditBranchArea = isHeadAdmin(user) || isCoAdmin(user);
       if (isAdmin || isMod) {
         user.region = document.getElementById('editUserRegion').value.trim() || 'Khulna Region';
         if (isMod) {
           user.designation = document.getElementById('editUserDesignation').value.trim() || 'মনিটরিং অফিসার';
         }
       } else {
-        user.branchName = document.getElementById('editBranchSelect').value;
-        user.areaName = document.getElementById('editAreaSelect').value;
+        // Only Admin or Co-Admin can change branch and area
+        if (canEditBranchArea) {
+          user.branchName = document.getElementById('editBranchSelect').value;
+          user.areaName = document.getElementById('editAreaSelect').value;
+        }
       }
 
       saveState();
@@ -3153,6 +3355,278 @@
         toast.classList.add('hidden');
       }, 3500);
     }
+
+    
+    // ==========================================
+    // SUBMISSION DELETION (ADMIN & CO-ADMIN)
+    // ==========================================
+    function deleteSubmission(subId) {
+      const user = getLoggedInUser();
+      if (!user || (!isHeadAdmin(user) && !isCoAdmin(user))) {
+        alert("ডাটা মুছে ফেলার এখতিয়ার শুধুমাত্র এডমিন ও সহ-এডমিন এর রয়েছে।");
+        return;
+      }
+
+      const sub = appState.submissions.find(s => s.id === subId);
+      if (!sub) return;
+
+      const confirmMsg = `আপনি কি নিশ্চিতভাবে ${sub.userName}-এর (${sub.entryDate} তারিখের) ডাটাটি মুছে ফেলতে চান?\n\nসতর্কতা: এটি ক্লাউড ডাটাবেস থেকেও মুছে ফেলা হবে।`;
+      if (!confirm(confirmMsg)) return;
+
+      // Remove locally
+      appState.submissions = appState.submissions.filter(s => s.id !== subId);
+      saveState();
+
+      // Delete from Firestore
+      if (firebaseDb) {
+        firebaseDb.collection("submissions").doc(subId).delete().then(() => {
+          console.log("Submission permanently deleted from cloud:", subId);
+        }).catch(err => {
+          console.error("Firestore deletion error:", err);
+        });
+      }
+
+      renderReportsTable();
+      showToast("রিপোর্টটি সফলভাবে মুছে ফেলা হয়েছে!", "info");
+    }
+
+    // ==========================================
+    // SUPERVISOR REMARKS (LEVEL 3 & ADMIN)
+    // ==========================================
+    let currentRemarkSubId = null;
+    let currentRemarkType = null;
+
+    function openRemarkModal(subId, type) {
+      const user = getLoggedInUser();
+      if (!user) return;
+      const sub = appState.submissions.find(s => s.id === subId);
+      if (!sub) return;
+
+      currentRemarkSubId = subId;
+      currentRemarkType = type;
+
+      const titleElem = document.getElementById('remarkModalTitle');
+      const badgeElem = document.getElementById('remarkModalTypeBadge');
+      const textElem = document.getElementById('remarkModalText');
+      const targetInfoElem = document.getElementById('remarkModalTargetInfo');
+
+      if (type === 'am') {
+        titleElem.textContent = "লেভেল-৩ (এরিয়া ম্যানেজার) মন্তব্য";
+        badgeElem.textContent = "লেভেল-৩ সুপারভিশন";
+        badgeElem.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800";
+        textElem.value = sub.amRemark || '';
+      } else {
+        titleElem.textContent = "এডমিন / সহ-এডমিন মন্তব্য";
+        badgeElem.textContent = "এডমিন সুপারভিশন";
+        badgeElem.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800";
+        textElem.value = sub.adminRemark || '';
+      }
+
+      targetInfoElem.innerHTML = `
+        <div class="font-bold text-slate-800">${sub.userName} (লেভেল ${sub.level})</div>
+        <div class="text-slate-500">তারিখ: <span class="font-semibold text-slate-700">${sub.entryDate}</span> | শাখা: <span class="font-semibold text-slate-700">${sub.branchName}</span> | এরিয়া: <span class="font-semibold text-slate-700">${sub.areaName}</span></div>
+      `;
+
+      document.getElementById('remarkModal').classList.remove('hidden');
+      setTimeout(() => textElem.focus(), 100);
+    }
+
+    function closeRemarkModal() {
+      document.getElementById('remarkModal').classList.add('hidden');
+      currentRemarkSubId = null;
+      currentRemarkType = null;
+    }
+
+    function saveRemark() {
+      const user = getLoggedInUser();
+      if (!user || !currentRemarkSubId || !currentRemarkType) return;
+
+      const sub = appState.submissions.find(s => s.id === currentRemarkSubId);
+      if (!sub) return;
+
+      const remarkText = document.getElementById('remarkModalText').value.trim();
+      if (!remarkText) {
+        alert("অনুগ্রহ করে মন্তব্য লিখুন।");
+        return;
+      }
+
+      const senderRole = isHeadAdmin(user) ? "প্রধান এডমিন" : isCoAdmin(user) ? "সহ-এডমিন" : "লেভেল-৩ (এরিয়া ব্য.)";
+
+      if (currentRemarkType === 'am') {
+        sub.amRemark = remarkText;
+        sub.amRemarkBy = `${user.name} (${senderRole})`;
+        sub.amRemarkAt = new Date().toISOString();
+      } else {
+        sub.adminRemark = remarkText;
+        sub.adminRemarkBy = `${user.name} (${senderRole})`;
+        sub.adminRemarkAt = new Date().toISOString();
+      }
+
+      // Generate notification for the submitting user
+      const notif = {
+        id: "notif_" + Date.now(),
+        toUserId: sub.userId,
+        toUserName: sub.userName,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        senderRole: senderRole,
+        submissionId: sub.id,
+        entryDate: sub.entryDate,
+        branchName: sub.branchName,
+        areaName: sub.areaName,
+        remarkType: currentRemarkType,
+        remarkText: remarkText,
+        createdAt: new Date().toISOString(),
+        timeDisplay: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toLocaleDateString('bn-BD'),
+        isRead: false
+      };
+
+      if (!appState.notifications) appState.notifications = [];
+      appState.notifications.unshift(notif);
+
+      saveState();
+
+      // Sync submission to Firebase
+      syncSubmissionToCloud(sub);
+
+      // Sync notification to Firebase
+      if (firebaseDb) {
+        firebaseDb.collection("notifications").doc(notif.id).set(notif).catch(err => {
+          console.error("Cloud notification error:", err);
+        });
+      }
+
+      closeRemarkModal();
+      renderReportsTable();
+      updateNotificationBadge();
+      showToast("মন্তব্য সফলভাবে সংরক্ষিত হয়েছে এবং সংশ্লিষ্ট ইউজারের কাছে নোটিফিকেশন পাঠানো হয়েছে!", "success");
+    }
+
+    // ==========================================
+    // NOTIFICATIONS SYSTEM
+    // ==========================================
+    function toggleNotificationsModal() {
+      const modal = document.getElementById('notificationsModal');
+      if (modal.classList.contains('hidden')) {
+        renderNotificationsList();
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    function closeNotificationsModal() {
+      document.getElementById('notificationsModal').classList.add('hidden');
+    }
+
+    function renderNotificationsList() {
+      const user = getLoggedInUser();
+      if (!user) return;
+      if (!appState.notifications) appState.notifications = [];
+
+      const isAdmin = isHeadAdmin(user) || isCoAdmin(user);
+      const userNotifs = isAdmin 
+        ? appState.notifications.slice(0, 50)
+        : appState.notifications.filter(n => n.toUserId === user.id);
+
+      const listContainer = document.getElementById('notificationsList');
+      if (userNotifs.length === 0) {
+        listContainer.innerHTML = `
+          <div class="py-8 text-center text-slate-400">
+            <span class="text-3xl block mb-2">🔔</span>
+            <p class="text-xs">বর্তমানে কোনো নতুন নোটিফিকেশন নেই।</p>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = userNotifs.map(n => {
+        const isUnread = !n.isRead;
+        const typeBadge = n.remarkType === 'am' 
+          ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">লেভেল-৩ মন্তব্য</span>`
+          : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">এডমিন মন্তব্য</span>`;
+
+        return `
+          <div class="p-3 rounded-xl border ${isUnread ? 'bg-amber-50/70 border-amber-200 shadow-sm' : 'bg-slate-50 border-slate-200/80'} transition space-y-1.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-1.5">
+                ${typeBadge}
+                <span class="text-xs font-bold text-slate-800">${n.fromUserName}</span>
+                <span class="text-[10px] text-slate-500">(${n.senderRole || ''})</span>
+              </div>
+              <span class="text-[10px] text-slate-400 font-mono">${n.timeDisplay || ''}</span>
+            </div>
+            <p class="text-xs text-slate-700 bg-white/90 p-2 rounded-lg border border-slate-200/60 italic font-medium">
+              "${n.remarkText}"
+            </p>
+            <div class="flex items-center justify-between pt-1 text-[11px] text-slate-500">
+              <span>রিপোর্ট তারিখ: <strong class="text-slate-700">${n.entryDate}</strong> | শাখা: ${n.branchName || ''}</span>
+              ${isUnread ? `
+                <button onclick="markNotificationAsRead('${n.id}')" class="px-2.5 py-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 hover:bg-emerald-200 rounded-lg transition">
+                  ✓ পঠিত চিহ্নিত করুন
+                </button>
+              ` : `
+                <span class="text-[10px] text-slate-400">✓ পঠিত</span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function markNotificationAsRead(notifId) {
+      if (!appState.notifications) return;
+      const notif = appState.notifications.find(n => n.id === notifId);
+      if (notif) {
+        notif.isRead = true;
+        saveState();
+        if (firebaseDb) {
+          firebaseDb.collection("notifications").doc(notifId).set({ isRead: true }, { merge: true }).catch(console.error);
+        }
+        renderNotificationsList();
+        updateNotificationBadge();
+      }
+    }
+
+    function markAllNotificationsAsRead() {
+      const user = getLoggedInUser();
+      if (!user || !appState.notifications) return;
+
+      const isAdmin = isHeadAdmin(user) || isCoAdmin(user);
+      appState.notifications.forEach(n => {
+        if (isAdmin || n.toUserId === user.id) {
+          n.isRead = true;
+          if (firebaseDb) {
+            firebaseDb.collection("notifications").doc(n.id).set({ isRead: true }, { merge: true }).catch(console.error);
+          }
+        }
+      });
+
+      saveState();
+      renderNotificationsList();
+      updateNotificationBadge();
+      showToast("সকল নোটিফিকেশন পঠিত হিসেবে চিহ্নিত করা হয়েছে!");
+    }
+
+    function updateNotificationBadge() {
+      const user = getLoggedInUser();
+      if (!user) return;
+      if (!appState.notifications) appState.notifications = [];
+
+      const userNotifs = appState.notifications.filter(n => n.toUserId === user.id);
+      const unreadCount = userNotifs.filter(n => !n.isRead).length;
+
+      const badge = document.getElementById('unreadNotifBadge');
+      if (badge) {
+        if (unreadCount > 0) {
+          badge.textContent = unreadCount.toString();
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    }
+
 
     function initApp() {
       initFirebaseDatabase();
