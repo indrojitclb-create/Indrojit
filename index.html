@@ -1487,7 +1487,11 @@
     }
 
     function saveState() {
-      localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+      try {
+        localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+      } catch (err) {
+        console.warn("LocalStorage quota notice (Cloud Database is holding unlimited records):", err);
+      }
     }
 
     function resetToDefaultData() {
@@ -1705,22 +1709,28 @@
         }
       }, err => console.error("Users sync error:", err));
 
-      // 3. Listen to Submissions (Field Reports)
-      unsubscribeSubs = firebaseDb.collection("submissions").orderBy("id", "desc").limit(500).onSnapshot(snapshot => {
+      // 3. Listen to Submissions (Field Reports) - সম্পূর্ণ আনলিমিটেড (সকল ডাটা আজীবন সংরক্ষিত)
+      unsubscribeSubs = firebaseDb.collection("submissions").onSnapshot(snapshot => {
         if (!snapshot.empty) {
           const cloudSubs = [];
           snapshot.forEach(doc => {
             cloudSubs.push(doc.data());
           });
+          // Sort: Latest date and timestamp first
+          cloudSubs.sort((a, b) => {
+            const dateComp = (b.entryDate || '').localeCompare(a.entryDate || '');
+            if (dateComp !== 0) return dateComp;
+            return (b.id || '').localeCompare(a.id || '');
+          });
           appState.submissions = cloudSubs;
-          localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+          saveState();
           refreshActiveViews();
           updateLastSyncTime();
         }
       }, err => console.error("Submissions sync error:", err));
 
-      // 4. Listen to Notifications in Real-time with Audio Alert
-      unsubscribeNotifs = firebaseDb.collection("notifications").orderBy("createdAt", "desc").limit(100).onSnapshot(snapshot => {
+      // 4. Listen to Notifications in Real-time with Audio Alert (আনলিমিটেড)
+      unsubscribeNotifs = firebaseDb.collection("notifications").onSnapshot(snapshot => {
         if (!snapshot.empty) {
           const cloudNotifs = [];
           snapshot.forEach(doc => {
