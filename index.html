@@ -136,8 +136,8 @@
 
             <div class="flex flex-col text-right">
               <div class="flex items-center justify-end space-x-1.5">
-                <span id="headerUserName" class="text-sm font-bold text-white">Indrojit</span>
-                <span id="headerUserLevel" class="text-[10px] px-2 py-0.5 rounded-full bg-red-600 text-white font-bold">প্রধান এডমিন</span>
+                <span id="headerUserName" class="text-sm font-bold text-white">ব্যবহারকারী</span>
+                <span id="headerUserLevel" class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold shadow-sm">পদবী</span>
               </div>
               <div id="headerLocationInfo" class="text-[11px] text-emerald-200 flex items-center justify-end space-x-2">
                 <!-- Dynamically filled by updateHeaderAndRoleUI() -->
@@ -149,7 +149,7 @@
               <span>📱 মোবাইল এ্যাপ</span>
             </button>
             <!-- Central Cloud Database Status Pill -->
-            <button onclick="openCloudConfigModal()" id="headerCloudBtn" class="px-2.5 py-1.5 bg-emerald-900/80 hover:bg-emerald-900 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 border border-emerald-400/40" title="কেন্দ্রিয় ক্লাউড ডাটাবেস স্ট্যাটাস">
+            <button onclick="openCloudConfigModal()" id="headerCloudBtn" class="hidden px-2.5 py-1.5 bg-emerald-900/80 hover:bg-emerald-900 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 border border-emerald-400/40" title="কেন্দ্রিয় ক্লাউড ডাটাবেস স্ট্যাটাস">
               <span id="headerCloudDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
               <span id="headerCloudText" class="text-emerald-100 text-[11px]">ক্লাউড ডাটাবেস</span>
             </button>
@@ -266,7 +266,7 @@
             </button>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 pt-4 border-t border-slate-100">
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
                 <label class="block text-[11px] font-semibold text-slate-600">তারিখ নির্বাচন:</label>
@@ -302,6 +302,12 @@
                 <option value="all">সকল এরিয়া</option>
               </select>
             </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-500 mb-1">কর্মকর্তা / ইউজার ফিল্টার:</label>
+              <select id="filterUserSelect" onchange="renderReportsTable()" class="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+                <option value="all">👥 সকল কর্মকর্তা / ইউজার</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -320,7 +326,18 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="reportSummaryCards">
+        <div>
+          <div class="flex items-center justify-between mb-2.5">
+            <h3 class="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
+              <span>📊</span>
+              <span>ড্যাশবোর্ড সারসংক্ষেপ কার্ড</span>
+            </h3>
+            <button onclick="openDashboardCardsFilterModal()" class="px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-sm">
+              <span>⚙️ ড্যাশবোর্ড কার্ড ফিল্টার</span>
+            </button>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" id="reportSummaryCards">
+          </div>
         </div>
 
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
@@ -351,6 +368,38 @@
           <button id="resetToDefaultDataBtn" onclick="resetToDefaultData()" class="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition border border-red-300 w-fit">
             🔄 ডিফল্ট ডাটায় রিসেট
           </button>
+        </div>
+
+        <!-- Admin Broadcast Notification Box (All Users) -->
+        <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-5 space-y-3.5 shadow-sm">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2.5">
+              <span class="text-2xl">📢</span>
+              <div>
+                <h3 class="text-sm font-bold text-amber-950">কেন্দ্রীয় নোটিফিকেশন ও ঘোষণা বক্স (এডমিন প্যানেল)</h3>
+                <p class="text-xs text-amber-700">এখান থেকে বার্তা দিলে সকল কর্মকর্তা ও স্টাফদের স্ক্রিনে তাৎক্ষণিক নোটিফিকেশন পৌঁছাবে।</p>
+              </div>
+            </div>
+            <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-200 text-amber-900 border border-amber-300">সকলের জন্য উন্মুক্ত বার্তা</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="md:col-span-1">
+              <label class="block text-xs font-semibold text-amber-900 mb-1">ঘোষণার শিরোনাম / বিষয়:</label>
+              <input type="text" id="adminBroadcastTitle" placeholder="উদাঃ জরুরি নির্দেশনা / মাসিক সভা" class="w-full px-3 py-2 text-xs border border-amber-300 bg-white rounded-xl focus:ring-2 focus:ring-amber-500 outline-none font-semibold">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-amber-900 mb-1">বার্তার বিস্তারিত বিবরণ:</label>
+              <textarea id="adminBroadcastMessage" rows="2" placeholder="সকল কর্মকর্তা ও কর্মীদের উদ্দেশ্যে বার্তাটি লিখুন..." class="w-full px-3 py-2 text-xs border border-amber-300 bg-white rounded-xl focus:ring-2 focus:ring-amber-500 outline-none"></textarea>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pt-1 border-t border-amber-200/60">
+            <span class="text-[11px] text-amber-800">প্রেরক পরিচয়: <strong>প্রধান এডমিন (Indrojit)</strong></span>
+            <button type="button" onclick="sendAdminBroadcast()" class="px-5 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-xl shadow hover:shadow-md transition flex items-center space-x-1.5">
+              <span>📢 সকল ইউজারের কাছে নোটিফিকেশন পাঠান</span>
+            </button>
+          </div>
         </div>
 
         <!-- SECTION 0: CENTRAL CLOUD DATABASE MANAGEMENT (GOOGLE FIREBASE) -->
@@ -495,6 +544,37 @@
               </button>
             </div>
 
+            <!-- Staff Search Bar & Active/Cancelled Tabs -->
+            <div class="space-y-3">
+              <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                <!-- Search Input & Buttons -->
+                <div class="flex items-center space-x-1.5 flex-1 max-w-md">
+                  <div class="relative flex-1">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">🔍</span>
+                    <input type="text" id="staffSearchKeyword" oninput="handleStaffSearchInput()" onkeyup="if(event.key==='Enter') executeStaffSearch()" placeholder="নাম, ইউজারনেম, পদবী, শাখা বা এরিয়া দিয়ে খুঁজুন..." class="w-full pl-8 pr-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none font-medium">
+                  </div>
+                  <button type="button" onclick="executeStaffSearch()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-sm transition">
+                    খুঁজুন
+                  </button>
+                  <button type="button" onclick="clearStaffSearch()" class="px-2.5 py-1.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg transition" title="সার্চ রিসেট">
+                    ✕
+                  </button>
+                </div>
+
+                <!-- Tabs: Active vs Cancelled -->
+                <div class="flex items-center space-x-2">
+                  <button type="button" onclick="setStaffFilterTab('active')" id="staffTabActiveBtn" class="px-3 py-1.5 rounded-lg border font-bold text-xs transition flex items-center space-x-1.5 bg-emerald-600 text-white border-emerald-600 shadow-sm">
+                    <span>👥 সক্রিয় কর্মী</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-white/20 text-white text-[10px]" id="staffActiveCountBadge">0</span>
+                  </button>
+                  <button type="button" onclick="setStaffFilterTab('cancelled')" id="staffTabCancelledBtn" class="px-3 py-1.5 rounded-lg border font-bold text-xs transition flex items-center space-x-1.5 bg-white text-slate-600 hover:bg-slate-100 border-slate-300">
+                    <span>🚫 বাতিলকৃত সদস্য</span>
+                    <span class="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700 text-[10px]" id="staffCancelledCountBadge">0</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <div id="usersListContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
             </div>
           </div>
@@ -531,6 +611,123 @@
   <!-- ========================================== -->
   <!-- MODALS                                     -->
   <!-- ========================================== -->
+
+    <!-- Modal: Data Confirm Slide Modal (2-Step Submission Review) -->
+  <div id="dataConfirmSlideModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+      <div class="p-5 bg-gradient-to-r from-emerald-700 to-teal-800 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-2xl">📋</span>
+          <div>
+            <h3 class="text-base font-bold">ইনপুটকৃত তথ্যের খসড়া পর্যালোচনা</h3>
+            <p class="text-[11px] text-emerald-100">সাবমিট করার পূর্বে আপনার প্রদত্ত তথ্যগুলো যাচাই করুন</p>
+          </div>
+        </div>
+        <button onclick="closeDataConfirmSlideModal()" class="text-white/80 hover:text-white text-xl">✕</button>
+      </div>
+
+      <!-- Slide Step 1: Review Table -->
+      <div id="dataConfirmStep1" class="flex-1 overflow-y-auto p-5 space-y-4">
+        <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
+          <div>তারিখ: <strong id="confirmModalDate" class="text-emerald-950 font-bold">-</strong></div>
+          <div>শাখা: <strong id="confirmModalBranch" class="text-emerald-950 font-bold">-</strong></div>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl overflow-hidden text-xs">
+          <table class="w-full text-left">
+            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-2.5">#</th>
+                <th class="p-2.5">প্রশ্নের শিরোনাম</th>
+                <th class="p-2.5 text-right">আপনার প্রদত্ত মান</th>
+              </tr>
+            </thead>
+            <tbody id="confirmModalAnswersTable" class="divide-y divide-slate-100">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <div id="confirmModalRemarksRow" class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600">
+          <span class="font-bold text-slate-700">মন্তব্য:</span>
+          <span id="confirmModalRemarksText" class="italic ml-1">-</span>
+        </div>
+
+        <div class="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-center font-bold text-amber-900 text-sm">
+          আপনার দেওয়া সকল তথ্য কি সঠিক আছে?
+        </div>
+
+        <div class="flex items-center justify-between pt-2">
+          <button type="button" onclick="closeDataConfirmSlideModal()" class="px-5 py-2.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition flex items-center space-x-1.5">
+            <span>❌ না, সংশোধন করুন</span>
+          </button>
+          <button type="button" onclick="advanceToFinalSubmitStep()" class="px-6 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow hover:shadow-md transition flex items-center space-x-1.5">
+            <span>✓ হ্যাঁ, তথ্য সঠিক আছে</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Slide Step 2: Final Confirmation -->
+      <div id="dataConfirmStep2" class="hidden flex-1 p-6 space-y-5 text-center">
+        <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner">
+          💾
+        </div>
+
+        <div class="space-y-1.5">
+          <h4 class="text-base font-bold text-slate-800">আপনি কি নিশ্চিতভাবে এই ডাটা সাবমিট করতে চান?</h4>
+          <p class="text-xs text-slate-500">ডাটা সাবমিট বাটনে চাপলে তথ্যটি কেন্দ্রীয় ক্লাউড সার্ভারে চূড়ান্তভাবে সংরক্ষিত হবে।</p>
+        </div>
+
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 text-left">
+          <p>• একই তারিখে পূর্বের কোনো রিপোর্ট থাকলে তা স্বয়ংক্রিয়ভাবে সর্বশেষ তথ্য দিয়ে আপডেট হবে।</p>
+          <p>• সফলভাবে সাবমিট হলে আপনার স্ক্রিনে নিশ্চিতকরণ বার্তা দেখাবে।</p>
+        </div>
+
+        <div class="flex items-center justify-center space-x-4 pt-3">
+          <button type="button" onclick="closeDataConfirmSlideModal()" class="px-6 py-2.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition">
+            না, ফিরে যান
+          </button>
+          <button type="button" onclick="executeFinalDataSubmit()" class="px-7 py-2.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-lg hover:shadow-xl transition flex items-center space-x-1.5">
+            <span>✓ হ্যাঁ, ডাটা সাবমিট করুন</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Dashboard Cards Filter Modal -->
+  <div id="dashboardCardsFilterModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+      <div class="p-4 bg-gradient-to-r from-emerald-800 to-teal-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">📊</span>
+          <div>
+            <h3 class="text-sm font-bold">ড্যাশবোর্ড কার্ড ফিল্টার ও নির্বাচন</h3>
+            <p class="text-[11px] text-emerald-200">কোন কোন তথ্য আপনি ড্যাশবোর্ডে দেখতে চান তা টিক দিন</p>
+          </div>
+        </div>
+        <button onclick="closeDashboardCardsFilterModal()" class="text-white/80 hover:text-white text-lg">✕</button>
+      </div>
+
+      <div class="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50 text-xs">
+        <span class="text-slate-600 font-medium">নিচের তালিকা থেকে কার্ড নির্বাচন করুন:</span>
+        <div class="space-x-2 font-bold">
+          <button type="button" onclick="toggleAllDashboardCards(true)" class="text-emerald-700 hover:underline">সব নির্বাচন</button>
+          <span>•</span>
+          <button type="button" onclick="toggleAllDashboardCards(false)" class="text-rose-600 hover:underline">সব বাতিল</button>
+        </div>
+      </div>
+
+      <div id="dashboardCardsChecklist" class="p-4 space-y-2 overflow-y-auto flex-1 max-h-[50vh]">
+        <!-- Dynamically rendered -->
+      </div>
+
+      <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2">
+        <button type="button" onclick="closeDashboardCardsFilterModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">বাতিল</button>
+        <button type="button" onclick="saveDashboardCardsSelection()" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow transition">কার্ড সেভ করুন</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal: Supervisor Remark Modal (Level 3 & Admin/Co-Admin) -->
   <div id="remarkModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
@@ -834,13 +1031,20 @@
               <option value="number">সংখ্যা (Number)</option>
               <option value="currency">টাকা (Amount)</option>
               <option value="percentage">শতাংশ (%)</option>
-              <option value="text">টেক্সট (Text)</option>
+              <option value="code">কোড / কাস্টম নম্বর / একাউন্ট নং (যেমন: 103-052-0003)</option>
+              <option value="text">টেক্সট / বিবরণ (Text)</option>
             </select>
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">একক / ইউনিট:</label>
             <input type="text" id="newQuestionUnit" placeholder="যেমন: জন, টাকা, টি" class="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
           </div>
+        </div>
+        <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl flex items-center space-x-2">
+          <input type="checkbox" id="newQuestionOptional" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500">
+          <label for="newQuestionOptional" class="text-xs font-semibold text-slate-700 cursor-pointer">
+            প্রশ্নটির উত্তর ঐচ্ছিক (খালি রাখা যাবে, বাধ্যতামূলক নয়)
+          </label>
         </div>
         <div class="flex justify-end space-x-2 pt-3 border-t border-slate-100">
           <button type="button" onclick="closeAddQuestionModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">বাতিল</button>
@@ -1424,18 +1628,50 @@
       unsubscribeConfig = firebaseDb.collection("app_config").doc("master").onSnapshot(doc => {
         if (doc.exists) {
           const data = doc.data();
-          if (data.branches && data.branches.length > 0) appState.branches = data.branches;
-          if (data.areas && data.areas.length > 0) appState.areas = data.areas;
-          if (data.regions && data.regions.length > 0) appState.regions = data.regions;
-          if (data.levels && data.levels.length > 0) appState.levels = data.levels;
-          if (data.questions && data.questions.length > 0) appState.questions = data.questions;
-          if (data.openingData) appState.openingData = data.openingData;
+          
+          // Smart union merge: Never lose branches or areas
+          if (data.branches && data.branches.length > 0) {
+            const mergedB = Array.from(new Set([...(appState.branches || []), ...data.branches]));
+            appState.branches = mergedB;
+          }
+          if (data.areas && data.areas.length > 0) {
+            const mergedA = Array.from(new Set([...(appState.areas || []), ...data.areas]));
+            appState.areas = mergedA;
+          }
+          if (data.regions && data.regions.length > 0) {
+            const mergedR = Array.from(new Set([...(appState.regions || []), ...data.regions]));
+            appState.regions = mergedR;
+          }
+          if (data.levels && data.levels.length > 0) {
+            const lvlMap = new Map();
+            (data.levels || []).forEach(l => lvlMap.set(l.id, l));
+            (appState.levels || []).forEach(l => { if (!lvlMap.has(l.id)) lvlMap.set(l.id, l); });
+            appState.levels = Array.from(lvlMap.values()).sort((a,b) => a.id - b.id);
+          }
+          // Smart question merge by q.id: Custom questions are preserved across all devices!
+          if (data.questions && data.questions.length > 0) {
+            const qMap = new Map();
+            (data.questions || []).forEach(q => qMap.set(q.id, q));
+            (appState.questions || []).forEach(q => {
+              if (!qMap.has(q.id)) {
+                qMap.set(q.id, q);
+              }
+            });
+            appState.questions = Array.from(qMap.values());
+          }
+          if (data.openingData) {
+            appState.openingData = Object.assign({}, appState.openingData || {}, data.openingData);
+          }
+
           localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
           refreshActiveViews();
           updateLastSyncTime();
         } else {
-          // Auto seed config
-          syncMasterConfigToCloud();
+          // Auto seed config ONLY if Admin
+          const u = getLoggedInUser();
+          if (isHeadAdmin(u) || isCoAdmin(u)) {
+            syncMasterConfigToCloud();
+          }
         }
       }, err => console.error("Config sync error:", err));
 
@@ -1542,6 +1778,13 @@
     }
 
     function syncMasterConfigToCloud() {
+      const user = getLoggedInUser();
+      // CRITICAL DATA PRESERVATION: Only Head Admin and Co-Admin are allowed to update master config!
+      // Field officers must never overwrite master branches, areas, or questions with older local defaults!
+      if (!user || (!isHeadAdmin(user) && !isCoAdmin(user))) {
+        return;
+      }
+
       if (firebaseDb) {
         const masterDoc = {
           branches: appState.branches,
@@ -1552,7 +1795,7 @@
           openingData: appState.openingData,
           lastUpdated: new Date().toISOString()
         };
-        firebaseDb.collection("app_config").doc("master").set(masterDoc).catch(err => {
+        firebaseDb.collection("app_config").doc("master").set(masterDoc, { merge: true }).catch(err => {
           console.error("Cloud config sync error:", err);
         });
       }
@@ -1589,6 +1832,11 @@
     }
 
     function openCloudConfigModal() {
+      const user = getLoggedInUser();
+      if (!user || !isHeadAdmin(user)) {
+        alert("ক্লাউড ডাটাবেস সেটিংস কনফিগার করার এখতিয়ার শুধুমাত্র প্রধান এডমিন (Indrojit)-এর রয়েছে।");
+        return;
+      }
       const modal = document.getElementById('cloudConfigModal');
       if (!modal) return;
       const cfg = getActiveFirebaseConfig();
@@ -1962,12 +2210,21 @@
           headerAvatar.src = '';
           headerAvatar.classList.add('hidden');
           headerAvatarFallback.classList.remove('hidden');
-          headerAvatarFallback.textContent = isAdmin ? '👑' : (isModerator ? '🛡️' : '👤');
+          headerAvatarFallback.textContent = isHead ? '👑' : (isCo ? '🛡️' : (isModerator ? '📊' : '👤'));
         }
       }
 
+      // Cloud Database Button Visibility (Strictly Head Admin Indrojit only)
+      const cloudBtn = document.getElementById('headerCloudBtn');
+      if (cloudBtn) {
+        if (isHead) cloudBtn.classList.remove('hidden');
+        else cloudBtn.classList.add('hidden');
+      }
+
+      // Display the logged-in user's role / designation instead of hardcoded 'প্রধান এডমিন'
       if (isHead) {
-        document.getElementById('headerUserLevel').textContent = "প্রধান এডমিন (Indrojit)";
+        const adminRole = user.designation ? `${user.designation} (প্রধান এডমিন)` : "প্রধান এডমিন (ইন্দ্রজিৎ)";
+        document.getElementById('headerUserLevel').textContent = adminRole;
         document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-red-600 text-white font-bold shadow-sm";
         adminTabBtn.classList.remove('hidden');
         if (entryTabBtn) entryTabBtn.classList.remove('hidden');
@@ -1978,7 +2235,7 @@
           `;
         }
       } else if (isCo) {
-        document.getElementById('headerUserLevel').textContent = "🛡️ সহ-এডমিন (" + (user.designation || 'সহকারী এডমিন') + ")";
+        document.getElementById('headerUserLevel').textContent = "সহ-এডমিন (" + (user.designation || 'সহকারী এডমিন') + ")";
         document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-teal-600 text-white font-bold shadow-sm";
         adminTabBtn.classList.remove('hidden');
         if (entryTabBtn) entryTabBtn.classList.remove('hidden');
@@ -1988,7 +2245,7 @@
           `;
         }
       } else if (isModerator) {
-        document.getElementById('headerUserLevel').textContent = `🛡️ মডারেটর (${user.designation || 'রিপোর্ট পর্যবেক্ষক'})`;
+        document.getElementById('headerUserLevel').textContent = "মডারেটর (" + (user.designation || 'মনিটরিং অফিসার') + ")";
         document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-amber-600 text-white font-bold shadow-sm";
         adminTabBtn.classList.add('hidden');
         if (entryTabBtn) entryTabBtn.classList.add('hidden');
@@ -2003,18 +2260,19 @@
           switchTab('reports');
         }
       } else {
-        let levelTitle = `লেভেল ${user.level}`;
         const lvlObj = appState.levels.find(l => l.id === user.level);
-        if (lvlObj) levelTitle += ` (${lvlObj.name})`;
-        document.getElementById('headerUserLevel').textContent = levelTitle;
-        document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-900 text-emerald-100 font-bold";
+        const userDesig = user.designation || (lvlObj ? lvlObj.name : `লেভেল ${user.level}`);
+        document.getElementById('headerUserLevel').textContent = `${userDesig} (লেভেল ${user.level})`;
+        document.getElementById('headerUserLevel').className = "text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold shadow-sm";
         adminTabBtn.classList.add('hidden');
         if (entryTabBtn) entryTabBtn.classList.remove('hidden');
         if (locationDiv) {
           locationDiv.innerHTML = `
-            <span>শাখা: <b class="text-white">${user.branchName}</b></span>
+            <span>পদবী: <b class="text-white">${userDesig}</b></span>
             <span>•</span>
-            <span>এরিয়া: <b class="text-white">${user.areaName}</b></span>
+            <span>শাখা: <b class="text-white">${user.branchName || 'কোনো শাখা নেই'}</b></span>
+            <span>•</span>
+            <span class="text-emerald-300">এরিয়া: <b>${user.areaName || 'কোনো এরিয়া নেই'}</b></span>
           `;
         }
         if (activeTab === 'admin') {
@@ -2022,20 +2280,16 @@
         }
       }
 
-      const isDisabled = user.status === 'disabled';
-      document.getElementById('disabledBanner').classList.toggle('hidden', !isDisabled);
-      const submitBtn = document.getElementById('submitBtn');
-      if (submitBtn) {
-        submitBtn.disabled = isDisabled;
-        submitBtn.classList.toggle('opacity-50', isDisabled);
-        submitBtn.classList.toggle('cursor-not-allowed', isDisabled);
+      // Check account disabled status
+      if (user.status === 'disabled') {
+        const statusAlert = document.getElementById('accountDisabledAlert');
+        if (statusAlert) statusAlert.classList.remove('hidden');
+      } else {
+        const statusAlert = document.getElementById('accountDisabledAlert');
+        if (statusAlert) statusAlert.classList.add('hidden');
       }
     }
 
-
-    // ==========================================
-    // QUICK DATE FILTER & POSTING DATE HELPERS
-    // ==========================================
     function setQuickDateFilter(type) {
       const filterInput = document.getElementById('filterDate');
       if (!filterInput) return;
@@ -2086,14 +2340,16 @@
       const formTitle = document.getElementById('formTitle');
       const formSubtitle = document.getElementById('formSubtitle');
 
+      const lvlObj = appState.levels.find(l => l.id === user.level);
+      const userDesig = user.designation || (lvlObj ? lvlObj.name : (user.level === 0 ? 'প্রধান এডমিন' : `লেভেল ${user.level}`));
+
       if (user.level === 0) {
-        levelBadge.textContent = "প্রধান এডমিন (Indrojit)";
+        levelBadge.textContent = "প্রধান এডমিন (ইন্দ্রজিৎ)";
         formTitle.textContent = "এডমিন প্রিভিউ মোড (সিও লেভেল)";
         formSubtitle.textContent = "এডমিন সরাসরি ডাটা এন্ট্রি না দিয়ে অন্যান্য লেভেলের তথ্য মনিটর ও নিয়ন্ত্রণ করতে পারেন। নিচে সিও লেভেলের নমুনা দেওয়া হলো:";
       } else {
-        const lvlObj = appState.levels.find(l => l.id === user.level);
-        levelBadge.textContent = `লেভেল ${user.level} (${lvlObj ? lvlObj.name : ''})`;
-        formTitle.textContent = `${lvlObj ? lvlObj.name : 'কর্মকর্তা'}-এর দৈনিক তথ্য ইনপুট`;
+        levelBadge.textContent = `${userDesig} (লেভেল ${user.level})`;
+        formTitle.textContent = `${user.name} (${userDesig})-এর দৈনিক তথ্য ইনপুট`;
         formSubtitle.textContent = `শাখা: ${user.branchName} | এরিয়া: ${user.areaName} - আজকের দিনের সঠিক তথ্য দিন।`;
       }
 
@@ -2104,7 +2360,7 @@
         container.innerHTML = `
           <div class="col-span-full py-8 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
             <p class="text-sm">এই লেভেলের জন্য বর্তমানে কোনো সক্রিয় প্রশ্ন নেই।</p>
-            <p class="text-xs text-slate-400 mt-1">এডমিন (Indrojit) প্যানেলে গিয়ে নতুন প্রশ্ন সংযুক্ত করতে পারেন।</p>
+            <p class="text-xs text-slate-400 mt-1">এডমিন প্যানেলে গিয়ে নতুন প্রশ্ন সংযুক্ত করতে পারেন।</p>
           </div>
         `;
         return;
@@ -2112,40 +2368,74 @@
 
       container.innerHTML = activeQuestions.map((q, idx) => {
         let inputField = '';
+        const isOpt = q.isOptional === true;
+        const optBadge = isOpt ? '<span class="text-[10px] text-slate-400 font-normal ml-1">(ঐচ্ছিক)</span>' : '<span class="text-rose-500 font-bold ml-1">*</span>';
+
         if (q.type === 'currency') {
           inputField = `
             <div class="relative">
               <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm">৳</span>
-              <input type="number" step="any" min="0" required name="q_${q.id}" placeholder="0.00" class="w-full pl-8 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+              <input type="number" step="any" min="0" id="input_q_${q.id}" name="q_${q.id}" placeholder="0.00" oninput="clearInputError('${q.id}')" class="w-full pl-8 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
               <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">${q.unit || 'টাকা'}</span>
             </div>
           `;
         } else if (q.type === 'percentage') {
           inputField = `
             <div class="relative">
-              <input type="number" step="0.1" min="0" max="100" required name="q_${q.id}" placeholder="0 - 100" class="w-full px-4 pr-10 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+              <input type="number" step="0.1" min="0" max="100" id="input_q_${q.id}" name="q_${q.id}" placeholder="0 - 100" oninput="clearInputError('${q.id}')" class="w-full px-4 pr-10 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
               <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-bold">%</span>
+            </div>
+          `;
+        } else if (q.type === 'code') {
+          inputField = `
+            <div class="relative">
+              <input type="text" id="input_q_${q.id}" name="q_${q.id}" placeholder="উদাঃ 103-052-0003, 103-0051-0025" oninput="clearInputError('${q.id}')" class="w-full px-4 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition font-mono">
+              <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">${q.unit || 'কোড'}</span>
+            </div>
+          `;
+        } else if (q.type === 'text') {
+          inputField = `
+            <div class="relative">
+              <input type="text" id="input_q_${q.id}" name="q_${q.id}" placeholder="বিবরণ বা তথ্য লিখুন" oninput="clearInputError('${q.id}')" class="w-full px-4 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+              <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">${q.unit || 'টেক্সট'}</span>
             </div>
           `;
         } else {
           inputField = `
             <div class="relative">
-              <input type="number" min="0" required name="q_${q.id}" placeholder="সংখ্যা লিখুন" class="w-full px-4 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
+              <input type="number" min="0" id="input_q_${q.id}" name="q_${q.id}" placeholder="সংখ্যা লিখুন (না থাকলে 0)" oninput="clearInputError('${q.id}')" class="w-full px-4 pr-12 py-2.5 text-sm font-semibold border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none transition">
               <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 text-xs font-medium">${q.unit || 'সংখ্যা'}</span>
             </div>
           `;
         }
 
         return `
-          <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 hover:border-emerald-300 transition">
+          <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-4 hover:border-emerald-300 transition" id="card_q_${q.id}">
             <label class="block text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
-              <span>প্রশ্ন ${idx + 1}: ${q.text}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200/70 text-slate-600 font-medium">${q.unit || 'তথ্য'}</span>
+              <span>প্রশ্ন ${idx + 1}: ${q.text} ${optBadge}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-slate-200/70 text-slate-600 font-medium">${q.unit || (q.type === 'currency' ? 'টাকা' : q.type === 'percentage' ? '%' : q.type === 'code' ? 'কোড/নম্বর' : 'সংখ্যা')}</span>
             </label>
             ${inputField}
+            <div id="error_q_${q.id}" class="hidden text-[11px] font-bold text-rose-600 mt-1.5 flex items-center space-x-1">
+              <span>⚠️</span>
+              <span>এই ঘরটি পূরণ করা আবশ্যক (কোনো তথ্য না থাকলে '০' লিখুন)।</span>
+            </div>
           </div>
         `;
       }).join('');
+    }
+
+    let pendingSubmission = null;
+
+    function clearInputError(qId) {
+      const inputElem = document.getElementById(`input_q_${qId}`);
+      const errorElem = document.getElementById(`error_q_${qId}`);
+      if (inputElem) {
+        inputElem.classList.remove('border-rose-500', 'bg-rose-50/50', 'ring-2', 'ring-rose-200');
+      }
+      if (errorElem) {
+        errorElem.classList.add('hidden');
+      }
     }
 
     function handleDataSubmit(e) {
@@ -2165,23 +2455,124 @@
       const targetLevel = user.level === 0 ? 1 : user.level;
       const activeQuestions = appState.questions.filter(q => q.level === targetLevel && q.isActive);
 
+      let hasBlank = false;
+      let firstBlankElem = null;
+
+      // 1. Validate: Highlight any empty required fields and prevent submit
       activeQuestions.forEach(q => {
         const val = formData.get(`q_${q.id}`);
-        answers[q.id] = parseFloat(val) || 0;
+        const isOpt = q.isOptional === true;
+        const inputElem = document.getElementById(`input_q_${q.id}`);
+        const errorElem = document.getElementById(`error_q_${q.id}`);
+
+        if (!isOpt && (val === null || val === undefined || String(val).trim() === '')) {
+          hasBlank = true;
+          if (inputElem) {
+            inputElem.classList.add('border-rose-500', 'bg-rose-50/50', 'ring-2', 'ring-rose-200');
+            if (!firstBlankElem) firstBlankElem = inputElem;
+          }
+          if (errorElem) {
+            errorElem.classList.remove('hidden');
+          }
+        } else {
+          if (inputElem) {
+            inputElem.classList.remove('border-rose-500', 'bg-rose-50/50', 'ring-2', 'ring-rose-200');
+          }
+          if (errorElem) {
+            errorElem.classList.add('hidden');
+          }
+          if (q.type === 'code' || q.type === 'text') {
+            answers[q.id] = val ? String(val).trim() : '';
+          } else {
+            answers[q.id] = (val !== null && val !== undefined && String(val).trim() !== '') ? parseFloat(val) : 0;
+          }
+        }
       });
+
+      if (hasBlank) {
+        if (firstBlankElem) {
+          firstBlankElem.focus();
+          firstBlankElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        alert("⚠️ সতর্কবার্তা: কোনো ঘর ফাঁকা রাখা যাবে না!\n\nসবগুলো ঘরে কোনো না কোনো সংখ্যা দিতে হবে। কোনো তথ্য না থাকলে শূন্য (০) লিখুন।");
+        return;
+      }
 
       const postingDateElem = document.getElementById('entryPostingDate');
       const selectedDate = (postingDateElem && postingDateElem.value) ? postingDateElem.value : new Date().toISOString().split('T')[0];
       const entryRemarksVal = document.getElementById('entryRemarks').value.trim();
 
-      // Check if user already submitted for this date: if so, overwrite/update so only latest remains
+      // Store pending submission data and open 2-Step Confirmation Slide Review Modal
+      pendingSubmission = {
+        answers: answers,
+        selectedDate: selectedDate,
+        remarks: entryRemarksVal,
+        targetLevel: targetLevel,
+        form: form,
+        questions: activeQuestions,
+        user: user
+      };
+
+      openDataConfirmSlideModal();
+    }
+
+    // ==========================================
+    // 2-STEP CONFIRMATION SLIDE REVIEW MODAL
+    // ==========================================
+    function openDataConfirmSlideModal() {
+      if (!pendingSubmission) return;
+      const sub = pendingSubmission;
+
+      document.getElementById('confirmModalDate').textContent = sub.selectedDate;
+      document.getElementById('confirmModalBranch').textContent = sub.user.branchName || 'কোনো শাখা নেই';
+      document.getElementById('confirmModalRemarksText').textContent = sub.remarks || 'কোনো মন্তব্য নেই';
+
+      const tbody = document.getElementById('confirmModalAnswersTable');
+      tbody.innerHTML = sub.questions.map((q, idx) => {
+        const val = sub.answers[q.id];
+        let displayVal = '';
+        if (q.type === 'currency') displayVal = '৳ ' + (typeof val === 'number' ? val.toLocaleString('bn-BD') : val);
+        else if (q.type === 'percentage') displayVal = val + '%';
+        else if (q.type === 'code' || q.type === 'text') displayVal = val || '-';
+        else displayVal = (typeof val === 'number' ? val.toLocaleString('bn-BD') : val) + (q.unit ? ' ' + q.unit : '');
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-2.5 font-mono text-slate-400 text-center w-8">${idx + 1}</td>
+            <td class="p-2.5 font-medium text-slate-700">${q.text}</td>
+            <td class="p-2.5 text-right font-bold text-emerald-700 font-mono">${displayVal}</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Show Step 1, hide Step 2
+      document.getElementById('dataConfirmStep1').classList.remove('hidden');
+      document.getElementById('dataConfirmStep2').classList.add('hidden');
+      document.getElementById('dataConfirmSlideModal').classList.remove('hidden');
+    }
+
+    function closeDataConfirmSlideModal() {
+      document.getElementById('dataConfirmSlideModal').classList.add('hidden');
+    }
+
+    function advanceToFinalSubmitStep() {
+      // Step 2: "আপনি কি নিশ্চিতভাবে এই ডাটা সাবমিট করতে চান?"
+      document.getElementById('dataConfirmStep1').classList.add('hidden');
+      document.getElementById('dataConfirmStep2').classList.remove('hidden');
+    }
+
+    function executeFinalDataSubmit() {
+      if (!pendingSubmission) return;
+      const { answers, selectedDate, remarks, targetLevel, form, user } = pendingSubmission;
+
+      // Check if user already submitted for this date: overwrite/update so only latest remains
       const existingIdx = appState.submissions.findIndex(s => s.userId === user.id && s.entryDate === selectedDate);
       let subToSave;
 
       if (existingIdx !== -1) {
         const existing = appState.submissions[existingIdx];
         existing.answers = answers;
-        existing.remarks = entryRemarksVal;
+        existing.remarks = remarks;
         existing.timestamp = new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
         existing.updatedAt = new Date().toISOString();
         existing.branchName = user.branchName;
@@ -2189,7 +2580,6 @@
         existing.level = targetLevel;
         existing.userName = user.name;
         subToSave = existing;
-        showToast("আজকের আগের ডাটা সর্বশেষ তথ্য দিয়ে সফলভাবে আপডেট করা হয়েছে!", "success");
       } else {
         subToSave = {
           id: "sub_" + Date.now(),
@@ -2201,31 +2591,59 @@
           entryDate: selectedDate,
           timestamp: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }),
           answers: answers,
-          remarks: entryRemarksVal,
+          remarks: remarks,
           createdAt: new Date().toISOString()
         };
         appState.submissions.unshift(subToSave);
-        showToast("নতুন ফিল্ড ডাটা সফলভাবে জমা হয়েছে!", "success");
       }
 
       saveState();
       syncSubmissionToCloud(subToSave);
-      form.reset();
-      showToast("আজকের তথ্য সফলভাবে ডাটাবেসে সংরক্ষিত হয়েছে!");
+
+      closeDataConfirmSlideModal();
+      pendingSubmission = null;
+
+      if (form) form.reset();
+      document.getElementById('entryRemarks').value = '';
+      const postingDateElem = document.getElementById('entryPostingDate');
+      if (postingDateElem) postingDateElem.value = new Date().toISOString().split('T')[0];
+      renderQuestionsForm();
+
+      // Show user success message as requested
+      alert("আপনার ডাটা সফল ভাবে সাবমিট হয়েছে");
+      showToast("আপনার ডাটা সফল ভাবে সাবমিট হয়েছে", "success");
     }
 
     function populateFilterDropdowns() {
       const branchSelect = document.getElementById('filterBranchSelect');
-      const currentBranchVal = branchSelect.value;
-      branchSelect.innerHTML = '<option value="all">সকল শাখা</option>' + 
-        appState.branches.map(b => `<option value="${b}">${b}</option>`).join('');
-      if (appState.branches.includes(currentBranchVal)) branchSelect.value = currentBranchVal;
+      if (branchSelect) {
+        const currentBranchVal = branchSelect.value;
+        branchSelect.innerHTML = '<option value="all">সকল শাখা</option>' + 
+          appState.branches.map(b => `<option value="${b}">${b}</option>`).join('');
+        if (appState.branches.includes(currentBranchVal)) branchSelect.value = currentBranchVal;
+      }
 
       const areaSelect = document.getElementById('filterAreaSelect');
-      const currentAreaVal = areaSelect.value;
-      areaSelect.innerHTML = '<option value="all">সকল এরিয়া</option>' + 
-        appState.areas.map(a => `<option value="${a}">${a}</option>`).join('');
-      if (appState.areas.includes(currentAreaVal)) areaSelect.value = currentAreaVal;
+      if (areaSelect) {
+        const currentAreaVal = areaSelect.value;
+        areaSelect.innerHTML = '<option value="all">সকল এরিয়া</option>' + 
+          appState.areas.map(a => `<option value="${a}">${a}</option>`).join('');
+        if (appState.areas.includes(currentAreaVal)) areaSelect.value = currentAreaVal;
+      }
+
+      const userSelect = document.getElementById('filterUserSelect');
+      if (userSelect) {
+        const currentSelectedUser = userSelect.value || 'all';
+        const usersForFilter = appState.users.filter(u => u.status !== 'disabled' || appState.submissions.some(s => s.userId === u.id));
+        userSelect.innerHTML = '<option value="all">👥 সকল কর্মকর্তা / ইউজার</option>' + 
+          usersForFilter.map(u => {
+            const roleStr = u.designation || (u.level === 0 ? 'প্রধান এডমিন' : (u.level ? `লেভেল ${u.level}` : 'কর্মী'));
+            return `<option value="${u.id}">${u.name} (${roleStr} - ${u.branchName || 'কোনো শাখা নেই'})</option>`;
+          }).join('');
+        if (usersForFilter.some(u => u.id === currentSelectedUser)) {
+          userSelect.value = currentSelectedUser;
+        }
+      }
     }
 
     function renderReportsTable() {
@@ -2233,12 +2651,15 @@
       const filterLevel = document.getElementById('filterLevel').value;
       const filterBranch = document.getElementById('filterBranchSelect').value;
       const filterArea = document.getElementById('filterAreaSelect').value;
+      const filterUserElem = document.getElementById('filterUserSelect');
+      const filterUser = filterUserElem ? filterUserElem.value : 'all';
 
       const filtered = appState.submissions.filter(sub => {
         if (filterDate && sub.entryDate !== filterDate) return false;
         if (filterLevel !== 'all' && sub.level.toString() !== filterLevel) return false;
         if (filterBranch !== 'all' && sub.branchName !== filterBranch) return false;
         if (filterArea !== 'all' && sub.areaName !== filterArea) return false;
+        if (filterUser !== 'all' && sub.userId !== filterUser) return false;
         return true;
       });
 
@@ -2262,24 +2683,7 @@
         if (s.answers['l2_q1']) totalSamityVisited += s.answers['l2_q1'];
       });
 
-      document.getElementById('reportSummaryCards').innerHTML = `
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div class="text-[11px] font-semibold text-slate-400">ফিল্টারকৃত মোট এন্ট্রি</div>
-          <div class="text-2xl font-bold text-slate-800 mt-1">${filtered.length} টি</div>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div class="text-[11px] font-semibold text-slate-400">আজকের নতুন ভর্তি</div>
-          <div class="text-2xl font-bold text-emerald-600 mt-1">${totalAdmitted} জন</div>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div class="text-[11px] font-semibold text-slate-400">আজকের খেলাপি আদায়</div>
-          <div class="text-2xl font-bold text-blue-600 mt-1">৳ ${totalOverdue.toLocaleString('bn-BD')}</div>
-        </div>
-        <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-          <div class="text-[11px] font-semibold text-slate-400">সমিতি পরিদর্শন</div>
-          <div class="text-2xl font-bold text-indigo-600 mt-1">${totalSamityVisited} টি</div>
-        </div>
-      `;
+      renderDashboardSummaryCards(filtered);
 
       // Determine questions to display as individual columns
       let questionsToShow = [];
@@ -2463,12 +2867,15 @@
       const filterLevel = document.getElementById('filterLevel').value;
       const filterBranch = document.getElementById('filterBranchSelect').value;
       const filterArea = document.getElementById('filterAreaSelect').value;
+      const filterUserElem = document.getElementById('filterUserSelect');
+      const filterUser = filterUserElem ? filterUserElem.value : 'all';
 
       const filtered = appState.submissions.filter(sub => {
         if (filterDate && sub.entryDate !== filterDate) return false;
         if (filterLevel !== 'all' && sub.level.toString() !== filterLevel) return false;
         if (filterBranch !== 'all' && sub.branchName !== filterBranch) return false;
         if (filterArea !== 'all' && sub.areaName !== filterArea) return false;
+        if (filterUser !== 'all' && sub.userId !== filterUser) return false;
         return true;
       });
 
@@ -2780,8 +3187,47 @@
 
     let showDisabledUsersView = false;
 
-    function toggleShowDisabledUsers() {
-      showDisabledUsersView = !showDisabledUsersView;
+    let currentStaffTab = 'active'; // 'active' or 'cancelled'
+    let staffSearchQuery = '';
+
+    function setStaffFilterTab(tab) {
+      currentStaffTab = tab;
+      const activeBtn = document.getElementById('staffTabActiveBtn');
+      const cancelledBtn = document.getElementById('staffTabCancelledBtn');
+      if (tab === 'active') {
+        if (activeBtn) {
+          activeBtn.className = "px-3 py-1.5 rounded-lg border font-bold text-xs transition flex items-center space-x-1.5 bg-emerald-600 text-white border-emerald-600 shadow-sm";
+        }
+        if (cancelledBtn) {
+          cancelledBtn.className = "px-3 py-1.5 rounded-lg border font-bold text-xs transition flex items-center space-x-1.5 bg-white text-slate-600 hover:bg-slate-100 border-slate-300";
+        }
+      } else {
+        if (activeBtn) {
+          activeBtn.className = "px-3 py-1.5 rounded-lg border font-bold text-xs transition flex items-center space-x-1.5 bg-white text-slate-600 hover:bg-slate-100 border-slate-300";
+        }
+        if (cancelledBtn) {
+          cancelledBtn.className = "px-3 py-1.5 rounded-lg border font-bold text-xs transition flex items-center space-x-1.5 bg-rose-600 text-white border-rose-600 shadow-sm";
+        }
+      }
+      renderUsersList();
+    }
+
+    function handleStaffSearchInput() {
+      const input = document.getElementById('staffSearchKeyword');
+      staffSearchQuery = input ? input.value.trim().toLowerCase() : '';
+      renderUsersList();
+    }
+
+    function executeStaffSearch() {
+      const input = document.getElementById('staffSearchKeyword');
+      staffSearchQuery = input ? input.value.trim().toLowerCase() : '';
+      renderUsersList();
+    }
+
+    function clearStaffSearch() {
+      staffSearchQuery = '';
+      const input = document.getElementById('staffSearchKeyword');
+      if (input) input.value = '';
       renderUsersList();
     }
 
@@ -2794,126 +3240,104 @@
       const activeUsers = appState.users.filter(u => u.status !== 'disabled');
       const disabledUsers = appState.users.filter(u => u.status === 'disabled');
 
-      // Users to display: active only by default, or all if showDisabledUsersView is true
-      const usersToDisplay = showDisabledUsersView ? appState.users : activeUsers;
+      // Update Tab Badges
+      const activeBadge = document.getElementById('staffActiveCountBadge');
+      const cancelledBadge = document.getElementById('staffCancelledCountBadge');
+      if (activeBadge) activeBadge.textContent = activeUsers.length.toString();
+      if (cancelledBadge) cancelledBadge.textContent = disabledUsers.length.toString();
 
-      let topBarHtml = `
-        <div class="col-span-full flex flex-wrap items-center justify-between gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl mb-1 text-xs">
-          <div class="flex items-center space-x-2">
-            <span class="font-bold text-slate-700">👥 মোট সক্রিয় কর্মী:</span>
-            <span class="px-2 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">${activeUsers.length} জন</span>
-          </div>
-          ${disabledUsers.length > 0 ? `
-            <button onclick="toggleShowDisabledUsers()" class="px-3 py-1.5 rounded-lg border font-bold transition flex items-center space-x-1.5 ${showDisabledUsersView ? 'bg-rose-100 text-rose-800 border-rose-300' : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-300'}">
-              <span>${showDisabledUsersView ? '👁️ বাতিলকৃতদের লুকান' : `🚫 বাতিলকৃত অ্যাকাউন্ট (${disabledUsers.length} জন দেখুন)`}</span>
-            </button>
-          ` : '<span class="text-[11px] text-slate-400">কোনো বাতিলকৃত আইডি নেই</span>'}
-        </div>
-      `;
+      // Filter by Active vs Cancelled Tab
+      let baseList = (currentStaffTab === 'cancelled') ? disabledUsers : activeUsers;
 
-      if (usersToDisplay.length === 0) {
-        container.innerHTML = topBarHtml + `
+      // Filter by Search Query
+      if (staffSearchQuery) {
+        baseList = baseList.filter(u => {
+          const name = (u.name || '').toLowerCase();
+          const username = (u.username || '').toLowerCase();
+          const designation = (u.designation || '').toLowerCase();
+          const branch = (u.branchName || '').toLowerCase();
+          const area = (u.areaName || '').toLowerCase();
+          return name.includes(staffSearchQuery) || 
+                 username.includes(staffSearchQuery) || 
+                 designation.includes(staffSearchQuery) || 
+                 branch.includes(staffSearchQuery) || 
+                 area.includes(staffSearchQuery);
+        });
+      }
+
+      if (baseList.length === 0) {
+        const emptyMsg = staffSearchQuery 
+          ? `🔍 "${staffSearchQuery}" দিয়ে কোনো ${currentStaffTab === 'cancelled' ? 'বাতিলকৃত' : 'সক্রিয়'} সদস্য পাওয়া যায়নি।`
+          : (currentStaffTab === 'cancelled' ? 'বর্তমানে কোনো বাতিলকৃত কর্মী নেই।' : 'বর্তমানে কোনো সক্রিয় কর্মী নেই।');
+        container.innerHTML = `
           <div class="col-span-full py-8 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-xs">
-            কোনো সক্রিয় ইউজার নেই।
+            ${emptyMsg}
           </div>
         `;
         return;
       }
 
-      container.innerHTML = topBarHtml + usersToDisplay.map(u => {
+      const usersToDisplay = baseList;
+
+      container.innerHTML = usersToDisplay.map(u => {
         const isActive = u.status !== 'disabled';
         const isTargetHead = isHeadAdmin(u);
         const isTargetCo = isCoAdmin(u);
-        const isMod = (u.role === 'moderator' || u.level === 'moderator');
+        const isTargetMod = (u.role === 'moderator' || u.level === 'moderator');
 
-        let levelBadge = '';
-        let locationText = '';
+        let levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">লেভেল ${u.level}</span>`;
+        if (isTargetHead) levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">👑 প্রধান এডমিন</span>`;
+        else if (isTargetCo) levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-teal-100 text-teal-800">🛡️ সহ-এডমিন</span>`;
+        else if (isTargetMod) levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">🛡️ মডারেটর</span>`;
+        else if (u.level === 2) levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">লেভেল ২ (শাখা ব্য.)</span>`;
+        else if (u.level === 3) levelBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">লেভেল ৩ (এরিয়া ব্য.)</span>`;
 
-        if (isTargetHead) {
-          levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-red-100 text-red-800 border border-red-200">👑 প্রধান এডমিন</span>';
-          locationText = `
-            <div class="text-xs text-red-800 font-semibold mt-1">
-              🏛️ অঞ্চল: <b>${u.region || 'Khulna Region'}</b> <span class="text-[11px] text-slate-400 font-normal">(শাখা প্রযোজ্য নয়)</span>
-            </div>
-          `;
-        } else if (isTargetCo) {
-          levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-teal-100 text-teal-800 border border-teal-300">🛡️ সহ-এডমিন</span>';
-          locationText = `
-            <div class="text-xs text-teal-900 font-semibold mt-1">
-              পদবী: <b>${u.designation || 'সহকারী এডমিন'}</b> • অঞ্চল: <b>${u.region || 'Khulna Region'}</b>
-            </div>
-            <div class="text-[10px] text-slate-400">অনুমতি: ইউজার তৈরি ও প্রশ্ন পরিচালনা</div>
-          `;
-        } else if (isMod) {
-          levelBadge = '<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-amber-100 text-amber-900 border border-amber-300">🛡️ মডারেটর</span>';
-          locationText = `
-            <div class="text-xs text-slate-700 font-medium mt-1">
-              পদবী: <b class="text-amber-900">${u.designation || 'মনিটরিং অফিসার'}</b> • অঞ্চল: <b class="text-slate-800">${u.region || 'Khulna Region'}</b>
-            </div>
-            <div class="text-[10px] text-slate-400">অনুমতি: শুধুমাত্র সার্বিক রিপোর্ট পরিদর্শন</div>
-          `;
-        } else {
-          let levelTitle = `লেভেল ${u.level}`;
-          const lvlObj = appState.levels.find(l => l.id === u.level);
-          if (lvlObj) levelTitle += ` (${lvlObj.name})`;
-          levelBadge = `<span class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">${levelTitle}</span>`;
-          locationText = `
-            <div class="text-xs text-slate-600 mt-1">
-              শাখা: <b class="text-slate-800">${u.branchName}</b> • এরিয়া: <b class="text-slate-800">${u.areaName}</b>
+        // Action permissions
+        const canManageTarget = isLoggedHead || (isLoggedCo && !isTargetHead && !isTargetCo);
+
+        let actionBtns = '';
+        if (canManageTarget) {
+          actionBtns = `
+            <div class="flex items-center space-x-1.5 pt-2 border-t border-slate-100">
+              <button onclick="openEditUserModal('${u.id}')" class="flex-1 py-1.5 text-center text-[11px] font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition" title="পদবী ও পোস্টিং পরিবর্তন">
+                ✏️ পোস্টিং
+              </button>
+              <button onclick="openAdminResetModal('${u.id}')" class="flex-1 py-1.5 text-center text-[11px] font-bold text-amber-700 bg-amber-50 hover:bg-amber-100 rounded-lg transition" title="পাসওয়ার্ড রিসেট">
+                🔑 পাসওয়ার্ড
+              </button>
+              ${!isTargetHead ? `
+                <button onclick="toggleUserStatus('${u.id}')" class="py-1.5 px-2.5 text-center text-[11px] font-bold rounded-lg transition ${isActive ? 'text-rose-700 bg-rose-50 hover:bg-rose-100' : 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'}" title="${isActive ? 'আইডি বাতিল করুন' : 'পুনরায় সক্রিয় করুন'}">
+                  ${isActive ? '🚫 বাতিল' : '♻️ সক্রিয়'}
+                </button>
+              ` : ''}
             </div>
           `;
         }
 
-        // Action permissions:
-        // Co-Admin cannot edit or reset password of Head Admin or other Co-Admins
-        const canManageThisUser = isLoggedHead || (isLoggedCo && !isTargetHead && !isTargetCo);
-
         return `
-          <div class="border ${isActive ? 'border-slate-200 bg-white' : 'border-rose-200 bg-rose-50/40 opacity-75'} rounded-2xl p-4 hover:border-emerald-300 shadow-sm transition space-y-3">
-            <div class="flex items-start justify-between">
-              <div>
-                <div class="flex items-center space-x-2">
-                  <span class="font-bold text-slate-800 text-sm">${u.name}</span>
-                  ${levelBadge}
-                  <span class="text-[10px] px-2 py-0.5 rounded font-semibold ${isActive ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">
-                    ${isActive ? 'সক্রিয়' : 'বাতিল'}
-                  </span>
+          <div class="p-3.5 rounded-xl border ${isActive ? 'bg-white border-slate-200 shadow-sm' : 'bg-rose-50/40 border-rose-200'} space-y-2 transition">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full ${isActive ? 'bg-slate-100 text-slate-700' : 'bg-rose-100 text-rose-700'} flex items-center justify-center font-bold text-xs">
+                  ${u.name ? u.name.charAt(0) : 'U'}
                 </div>
-                ${locationText}
+                <div>
+                  <div class="font-bold text-xs text-slate-800 flex items-center space-x-1">
+                    <span>${u.name}</span>
+                    ${!isActive ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-rose-200 text-rose-800 font-bold">বাতিলকৃত</span>' : ''}
+                  </div>
+                  <div class="text-[10px] text-slate-400 font-mono">@${u.username}</div>
+                </div>
               </div>
-
-              <!-- Password Display Box -->
-              <div class="text-right">
-                <span class="text-[10px] text-slate-400 block font-semibold">পাসওয়ার্ড:</span>
-                <span class="text-xs font-mono font-bold text-red-700 bg-red-50 border border-red-200 px-2 py-0.5 rounded inline-block mt-0.5">
-                  ${canManageThisUser ? u.password : '••••'}
-                </span>
-              </div>
+              <div>${levelBadge}</div>
             </div>
 
-            <!-- Action Controls -->
-            <div class="pt-2.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-1.5">
-              <span class="text-[11px] text-slate-500 font-mono">আইডি: @${u.username}</span>
-              <div class="flex items-center space-x-1.5 flex-wrap gap-1">
-                ${canManageThisUser ? `
-                  <!-- Edit Level & Posting Button -->
-                  <button onclick="openEditUserModal('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-300 transition flex items-center space-x-1" title="লেভেল ও পোস্টিং পরিবর্তন">
-                    <span>✏️ লেভেল পরিবর্তন</span>
-                  </button>
-
-                  <!-- Password Reset Button -->
-                  <button onclick="openAdminResetModal('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition flex items-center space-x-1" title="পাসওয়ার্ড পরিবর্তন/রিসেট">
-                    <span>🔑 পাসওয়ার্ড</span>
-                  </button>
-
-                  ${!isTargetHead ? `
-                    <button onclick="toggleUserStatus('${u.id}')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition ${isActive ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200'}" title="${isActive ? 'আইডি বাতিল করুন' : 'আইডি পুনরায় সক্রিয় করুন'}">
-                      ${isActive ? '🚫 বাতিল' : '✅ সক্রিয়'}
-                    </button>
-                  ` : ''}
-                ` : '<span class="text-[10px] text-slate-400 font-bold px-2 py-1">সুরক্ষিত একাউন্ট</span>'}
-              </div>
+            <div class="text-[11px] text-slate-500 space-y-0.5 bg-slate-50 p-2 rounded-lg">
+              <div>পদবী: <b class="text-slate-700">${u.designation || 'কর্মী'}</b></div>
+              <div>শাখা: <b class="text-slate-700">${u.branchName || 'কোনো শাখা নেই'}</b> | এরিয়া: <b class="text-slate-700">${u.areaName || 'কোনো এরিয়া নেই'}</b></div>
             </div>
+
+            ${actionBtns}
           </div>
         `;
       }).join('');
@@ -3174,12 +3598,14 @@
       const type = document.getElementById('newQuestionType').value;
       const unit = document.getElementById('newQuestionUnit').value.trim();
 
+      const isOpt = document.getElementById('newQuestionOptional') ? document.getElementById('newQuestionOptional').checked : false;
       const newQ = {
         id: `custom_q_${Date.now()}`,
         level: lvl,
         text: text,
         type: type,
         unit: unit,
+        isOptional: isOpt,
         isActive: true
       };
 
@@ -3527,7 +3953,7 @@
       const isAdmin = isHeadAdmin(user) || isCoAdmin(user);
       const userNotifs = isAdmin 
         ? appState.notifications.slice(0, 50)
-        : appState.notifications.filter(n => n.toUserId === user.id);
+        : appState.notifications.filter(n => n.toUserId === user.id || n.toUserId === 'all');
 
       const listContainer = document.getElementById('notificationsList');
       if (userNotifs.length === 0) {
@@ -3542,9 +3968,14 @@
 
       listContainer.innerHTML = userNotifs.map(n => {
         const isUnread = !n.isRead;
-        const typeBadge = n.remarkType === 'am' 
-          ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">লেভেল-৩ মন্তব্য</span>`
-          : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">এডমিন মন্তব্য</span>`;
+        let typeBadge = '';
+        if (n.remarkType === 'broadcast') {
+          typeBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300">📢 কেন্দ্রীয় ঘোষণা</span>';
+        } else if (n.remarkType === 'am') {
+          typeBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-800">লেভেল-৩ মন্তব্য</span>';
+        } else {
+          typeBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800">এডমিন মন্তব্য</span>';
+        }
 
         return `
           <div class="p-3 rounded-xl border ${isUnread ? 'bg-amber-50/70 border-amber-200 shadow-sm' : 'bg-slate-50 border-slate-200/80'} transition space-y-1.5">
@@ -3613,7 +4044,7 @@
       if (!user) return;
       if (!appState.notifications) appState.notifications = [];
 
-      const userNotifs = appState.notifications.filter(n => n.toUserId === user.id);
+      const userNotifs = appState.notifications.filter(n => n.toUserId === user.id || n.toUserId === 'all');
       const unreadCount = userNotifs.filter(n => !n.isRead).length;
 
       const badge = document.getElementById('unreadNotifBadge');
@@ -3625,6 +4056,208 @@
           badge.classList.add('hidden');
         }
       }
+    }
+
+
+    
+    // ==========================================
+    // DASHBOARD CARDS CUSTOMIZATION & METRICS
+    // ==========================================
+    function getSelectedDashboardCardKeys() {
+      try {
+        const stored = localStorage.getItem('dashboard_selected_cards');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+      // Default initial 4 cards
+      return ['total_entries', 'l1_q1', 'l1_q2', 'l2_q1'];
+    }
+
+    function setSelectedDashboardCardKeys(keys) {
+      try {
+        localStorage.setItem('dashboard_selected_cards', JSON.stringify(keys));
+      } catch (e) {}
+    }
+
+    function openDashboardCardsFilterModal() {
+      const selectedKeys = getSelectedDashboardCardKeys();
+      const checklistContainer = document.getElementById('dashboardCardsChecklist');
+
+      // Metric options: total entries + all active questions
+      const options = [
+        { id: 'total_entries', text: 'ফিল্টারকৃত মোট এন্ট্রি সংখ্যা', unit: 'টি', level: 0 }
+      ];
+
+      appState.questions.filter(q => q.isActive).forEach(q => {
+        options.push({
+          id: q.id,
+          text: q.text,
+          unit: q.unit || (q.type === 'currency' ? 'টাকা' : q.type === 'percentage' ? '%' : 'সংখ্যা'),
+          level: q.level
+        });
+      });
+
+      checklistContainer.innerHTML = options.map(opt => {
+        const isChecked = selectedKeys.includes(opt.id);
+        const lvlBadge = opt.level === 0 
+          ? '<span class="text-[10px] px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-bold">সামগ্রিক</span>'
+          : `<span class="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">লেভেল ${opt.level}</span>`;
+
+        return `
+          <label class="flex items-center justify-between p-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer">
+            <div class="flex items-center space-x-2.5">
+              <input type="checkbox" value="${opt.id}" class="dash-card-checkbox w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500" ${isChecked ? 'checked' : ''}>
+              <span class="text-xs font-semibold text-slate-800">${opt.text}</span>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="text-[11px] text-slate-400 font-mono">(${opt.unit})</span>
+              ${lvlBadge}
+            </div>
+          </label>
+        `;
+      }).join('');
+
+      document.getElementById('dashboardCardsFilterModal').classList.remove('hidden');
+    }
+
+    function closeDashboardCardsFilterModal() {
+      document.getElementById('dashboardCardsFilterModal').classList.add('hidden');
+    }
+
+    function toggleAllDashboardCards(check) {
+      const checkboxes = document.querySelectorAll('.dash-card-checkbox');
+      checkboxes.forEach(cb => cb.checked = check);
+    }
+
+    function saveDashboardCardsSelection() {
+      const checkboxes = document.querySelectorAll('.dash-card-checkbox');
+      const selected = [];
+      checkboxes.forEach(cb => {
+        if (cb.checked) selected.push(cb.value);
+      });
+
+      if (selected.length === 0) {
+        alert("অনুগ্রহ করে কমপক্ষে ১টি কার্ড নির্বাচন করুন।");
+        return;
+      }
+
+      setSelectedDashboardCardKeys(selected);
+      closeDashboardCardsFilterModal();
+      renderReportsTable();
+      showToast("ড্যাশবোর্ড কার্ড ফিল্টার সফলভাবে সংরক্ষিত হয়েছে!");
+    }
+
+    function renderDashboardSummaryCards(filtered) {
+      const container = document.getElementById('reportSummaryCards');
+      if (!container) return;
+
+      const selectedKeys = getSelectedDashboardCardKeys();
+      const activeQuestions = appState.questions.filter(q => q.isActive);
+
+      let cardsHtml = '';
+      selectedKeys.forEach(key => {
+        if (key === 'total_entries') {
+          cardsHtml += `
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-emerald-300 transition">
+              <div class="text-[11px] font-semibold text-slate-400">ফিল্টারকৃত মোট এন্ট্রি</div>
+              <div class="text-2xl font-bold text-slate-800 mt-1">${filtered.length} টি</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">রিপোর্টের সর্বমোট সংখ্যা</div>
+            </div>
+          `;
+        } else {
+          const q = activeQuestions.find(item => item.id === key);
+          if (q) {
+            let total = 0;
+            let countWithVal = 0;
+            filtered.forEach(s => {
+              const val = s.answers[q.id];
+              if (val !== undefined && val !== null && val !== '') {
+                if (typeof val === 'number') total += val;
+                else if (!isNaN(parseFloat(val))) total += parseFloat(val);
+                countWithVal++;
+              }
+            });
+
+            let displayVal = '';
+            if (q.type === 'currency') displayVal = '৳ ' + total.toLocaleString('bn-BD');
+            else if (q.type === 'percentage') displayVal = (countWithVal > 0 ? (total / countWithVal).toFixed(1) : '0') + '% (গড়)';
+            else if (q.type === 'code' || q.type === 'text') displayVal = countWithVal + ' টি এন্ট্রি';
+            else displayVal = total.toLocaleString('bn-BD') + (q.unit ? ' ' + q.unit : '');
+
+            cardsHtml += `
+              <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm hover:border-emerald-300 transition">
+                <div class="text-[11px] font-semibold text-slate-500 truncate" title="${q.text}">${q.text}</div>
+                <div class="text-xl font-bold text-emerald-700 mt-1 truncate">${displayVal}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5 flex items-center justify-between">
+                  <span>লেভেল ${q.level}</span>
+                  <span>${countWithVal} টি রিপোর্টে তথ্য</span>
+                </div>
+              </div>
+            `;
+          }
+        }
+      });
+
+      if (!cardsHtml) {
+        cardsHtml = `<div class="col-span-full py-4 text-center text-xs text-slate-400">কোনো ড্যাশবোর্ড কার্ড নির্বাচিত নেই। [⚙️ ড্যাশবোর্ড কার্ড ফিল্টার] এ ক্লিক করে যুক্ত করুন।</div>`;
+      }
+
+      container.innerHTML = cardsHtml;
+    }
+
+    // ==========================================
+    // ADMIN BROADCAST NOTIFICATION SENDER
+    // ==========================================
+    function sendAdminBroadcast() {
+      const user = getLoggedInUser();
+      if (!user || (!isHeadAdmin(user) && !isCoAdmin(user))) {
+        alert("ঘোষণা প্রেরণের এখতিয়ার শুধুমাত্র এডমিন ও সহ-এডমিনের রয়েছে।");
+        return;
+      }
+
+      const titleInput = document.getElementById('adminBroadcastTitle');
+      const msgInput = document.getElementById('adminBroadcastMessage');
+
+      const title = titleInput ? titleInput.value.trim() : '';
+      const message = msgInput ? msgInput.value.trim() : '';
+
+      if (!message) {
+        alert("অনুগ্রহ করে বার্তার বিবরণ লিখুন।");
+        return;
+      }
+
+      const senderRole = isHeadAdmin(user) ? "প্রধান এডমিন" : "সহ-এডমিন";
+
+      const broadcastNotif = {
+        id: "notif_broadcast_" + Date.now(),
+        toUserId: "all",
+        toUserName: "সকল কর্মকর্তা ও স্টাফ",
+        fromUserId: user.id,
+        fromUserName: `${user.name} (${senderRole})`,
+        senderRole: senderRole,
+        title: title || "জরুরি নির্দেশনা ও ঘোষণা",
+        remarkType: "broadcast",
+        remarkText: message,
+        createdAt: new Date().toISOString(),
+        timeDisplay: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' }) + ', ' + new Date().toLocaleDateString('bn-BD'),
+        isRead: false
+      };
+
+      if (!appState.notifications) appState.notifications = [];
+      appState.notifications.unshift(broadcastNotif);
+      saveState();
+
+      if (firebaseDb) {
+        firebaseDb.collection("notifications").doc(broadcastNotif.id).set(broadcastNotif).catch(err => {
+          console.error("Cloud broadcast notification error:", err);
+        });
+      }
+
+      if (titleInput) titleInput.value = '';
+      if (msgInput) msgInput.value = '';
+
+      updateNotificationBadge();
+      alert("ঘোষণাটি সফলভাবে কেন্দ্রীয়ভাবে সকল ইউজারের নিকট প্রেরণ করা হয়েছে!");
+      showToast("ঘোষণা সফলভাবে সকল ইউজারের নিকট পাঠানো হয়েছে!", "success");
     }
 
 
