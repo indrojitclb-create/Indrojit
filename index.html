@@ -20,6 +20,63 @@
                   radial-gradient(circle at 85% 85%, #dc2626 0%, transparent 40%),
                   linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%);
     }
+  
+    /* Official Caritas Leave Form Styling & Print Rules */
+    .caritas-capsule {
+      display: inline-block;
+      background-color: #111827;
+      color: #ffffff;
+      padding: 4px 28px;
+      border-radius: 9999px;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .caritas-table th, .caritas-table td {
+      border: 1px solid #1f2937 !important;
+      padding: 3px 5px !important;
+      line-height: 1.25;
+    }
+    .caritas-field-line {
+      border-bottom: 1px dotted #4b5563;
+      padding-bottom: 2px;
+      display: inline-block;
+      min-width: 120px;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #printableLeaveSheet, #printableLeaveSheet * {
+        visibility: visible !important;
+      }
+      #printableLeaveSheet {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 8mm 12mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Times New Roman', Times, serif, Arial, sans-serif !important;
+        box-shadow: none !important;
+        border: none !important;
+        page-break-inside: avoid !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 6mm 8mm;
+      }
+    }
+
   </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased">
@@ -181,7 +238,11 @@
             <span>📝 দৈনিক ডাটা এন্ট্রি</span>
           </button>
           <button id="tabBtnReports" onclick="switchTab('reports')" class="tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold text-emerald-100 hover:bg-emerald-700/50 transition flex items-center space-x-1.5">
-            <span>📊 সার্বিক রিপোর্ট (ফিল্টার ও ওপেনিং)</span>
+            <span>📊 সার্বিক রিপোর্ট ও কার্যাবলী</span>
+          </button>
+          <button id="tabBtnLeave" onclick="switchTab('leave')" class="hidden tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold text-emerald-100 hover:bg-emerald-700/50 transition flex items-center space-x-1.5">
+            <span>🌴 ছুটির আবেদন ও অনুমোদন</span>
+            <span id="leavePendingBadge" class="hidden text-[10px] px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-900 font-bold ml-1">0</span>
           </button>
           <button id="tabBtnAdmin" onclick="switchTab('admin')" class="hidden tab-btn px-4 py-2 rounded-t-lg text-sm font-semibold text-emerald-100 hover:bg-emerald-700/50 transition flex items-center space-x-1.5">
             <span>⚙️ এডমিন কন্ট্রোল সেন্টার</span>
@@ -311,7 +372,7 @@
           </div>
         </div>
 
-        <div id="openingDataSummaryCard" class="bg-gradient-to-r from-emerald-800 to-teal-900 rounded-2xl shadow-sm p-5 text-white">
+        <div id="openingDataSummaryCard" class="hidden">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/10 pb-3 mb-3">
             <div class="flex items-center space-x-2">
               <span class="text-xl">🎯</span>
@@ -355,6 +416,35 @@
         </div>
       </section>
 
+
+      <!-- TAB 4: LEAVE MANAGEMENT & APPROVAL WORKFLOW -->
+      <section id="tabContentLeave" class="hidden space-y-6">
+        <!-- Top Banner -->
+        <div class="bg-gradient-to-r from-teal-800 to-emerald-900 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="text-2xl">🌴</span>
+              <h2 class="text-xl font-bold">ডিজিটাল ছুটির আবেদন ও অনুমোদন ব্যবস্থাপনা</h2>
+            </div>
+            <p class="text-xs text-emerald-200">সিও ➔ শাখা ব্যবস্থাপক (যাচাই ও সুপারিশ) ➔ এরিয়া ম্যানেজার (চূড়ান্ত অনুমোদন ও প্রিন্ট সংরক্ষণ)</p>
+          </div>
+          <div class="flex items-center space-x-2" id="leaveTopActionButtons">
+            <!-- Dynamically populated per user level -->
+          </div>
+        </div>
+
+        <!-- Sub Tabs Container -->
+        <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 overflow-x-auto" id="leaveSubTabNav">
+          <!-- Dynamically populated per user role -->
+        </div>
+
+        <!-- Sub Tab Views Container -->
+        <div id="leaveViewContainer" class="space-y-4">
+          <!-- Dynamically rendered via renderLeaveSection() -->
+        </div>
+      </section>
+
+
       <!-- TAB 3: ADMIN MANAGEMENT PANEL (LOCKED) -->
       <section id="tabContentAdmin" class="hidden space-y-6">
         <div class="bg-gradient-to-r from-red-50 to-amber-50 border border-red-200 rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -362,7 +452,7 @@
             <span class="text-3xl">🛡️</span>
             <div>
               <h3 class="text-sm font-bold text-red-900">এডমিন কন্ট্রোল সেন্টার (লকড - শুধুমাত্র Indrojit)</h3>
-              <p class="text-xs text-red-700">নতুন শাখা/এরিয়া তৈরি, ওপেনিং ডাটা ইনপুট, ইউজারদের পাসওয়ার্ড রিসেট/পরিবর্তন এবং প্রশ্ন পরিচালনা করুন।</p>
+              <p class="text-xs text-red-700">নতুন শাখা/এরিয়া তৈরি, ইউজারদের পাসওয়ার্ড রিসেট/পরিবর্তন এবং প্রশ্ন পরিচালনা করুন।</p>
             </div>
           </div>
           <button id="resetToDefaultDataBtn" onclick="resetToDefaultData()" class="text-xs bg-red-100 hover:bg-red-200 text-red-800 font-bold px-3 py-1.5 rounded-lg transition border border-red-300 w-fit">
@@ -485,8 +575,8 @@
             </div>
           </div>
 
-          <!-- Opening Data Configuration (6 cols) -->
-          <div class="lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-4">
+          <!-- Opening Data Configuration (Hidden as per user request) -->
+          <div class="hidden lg:col-span-6 bg-white rounded-2xl shadow-sm border border-slate-200/80 p-6 space-y-4">
             <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
               <div>
                 <h3 class="text-base font-bold text-slate-800">ওপেনিং / প্রারম্ভিক ডাটা ইনপুট</h3>
@@ -725,6 +815,391 @@
       <div class="p-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-2">
         <button type="button" onclick="closeDashboardCardsFilterModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-200 rounded-xl transition">বাতিল</button>
         <button type="button" onclick="saveDashboardCardsSelection()" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow transition">কার্ড সেভ করুন</button>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- Modal: Leave Application Form Modal -->
+    <!-- Modal: Leave Application Form Modal (Caritas Format Input) -->
+  <div id="leaveApplicationModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-100">
+      <div class="p-4 bg-gradient-to-r from-emerald-800 to-teal-900 text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2.5">
+          <span class="text-2xl">📝</span>
+          <div>
+            <h3 class="text-base font-bold" id="leaveModalTitle">ছুটির আবেদন ফরম (Leave Application)</h3>
+            <p class="text-[11px] text-emerald-200" id="leaveModalSubtitle">কারিতাস বাংলাদেশ • খুলনা আঞ্চলিক অফিস নির্ধারিত ফরম্যাট</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeLeaveApplicationModal()" class="text-white/80 hover:text-white text-xl">✕</button>
+      </div>
+
+      <form onsubmit="handleLeaveFormSubmit(event)" class="flex-1 overflow-y-auto p-5 space-y-3.5 text-xs">
+        <!-- Applicant Details -->
+        <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-2 gap-2 text-slate-700">
+          <div>আবেদনকারী (Name): <strong id="leaveApplicantName" class="text-slate-900">-</strong></div>
+          <div>পদবী (Designation): <strong id="leaveApplicantDesig" class="text-slate-900">-</strong></div>
+          <div>শাখা / বিভাগ (Department): <strong id="leaveApplicantBranch" class="text-slate-900">-</strong></div>
+          <div>অঞ্চল / এরিয়া: <strong id="leaveApplicantArea" class="text-slate-900">-</strong></div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">প্রকল্প / কর্মসূচি (Project Section):</label>
+          <input type="text" id="leaveProjectSectionInput" required value="Microfinance Programme" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">ছুটির ধরণ (Particulars):</label>
+            <select id="leaveTypeInput" required class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+              <option value="CL">Casual Leave (CL) - নৈমিত্তিক ছুটি</option>
+              <option value="AL">Annual Leave (AL) - বার্ষিক অর্জিত ছুটি</option>
+              <option value="SL">Sick Leave (SL) - অসুস্থতাজনিত ছুটি</option>
+              <option value="ML">Maternity Leave with pay (ML) - মাতৃত্বকালীন ছুটি</option>
+              <option value="PL">Paternity Leave with pay (PL) - পিতৃত্বকালীন ছুটি</option>
+              <option value="LWP">Leave without pay (LWP) - বিনাবেতনে ছুটি</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">মোট ছুটির দিন (Total Days):</label>
+            <div class="px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl font-bold text-emerald-800 flex items-center justify-between">
+              <span>গণনাকৃত দিন:</span>
+              <span id="leaveCalculatedDaysBadge" class="text-sm">১ দিন</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">ছুটি শুরুর তারিখ (From):</label>
+            <input type="date" id="leaveStartDateInput" required onchange="calculateLeaveDays()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">ছুটি শেষের তারিখ (To):</label>
+            <input type="date" id="leaveEndDateInput" required onchange="calculateLeaveDays()" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none font-semibold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">ছুটির সুনির্দিষ্ট কারণ (Reason for Leave):</label>
+          <textarea id="leaveReasonInput" rows="2" required placeholder="ছুটি নেওয়ার সুনির্দিষ্ট কারণ লিখুন..." class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">বিকল্প দায়িত্বপ্রাপ্ত কর্মী (Reliever Name):</label>
+            <input type="text" id="leaveRelieverNameInput" required placeholder="বিকল্প কর্মীর নাম" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold text-slate-700 mb-1">বিকল্প কর্মীর পদবী (Designation):</label>
+            <input type="text" id="leaveRelieverDesigInput" required placeholder="সিও / সহকারী" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">ছুতিকালীন যোগাযোগের ঠিকানা ও ফোন নম্বর (Contact Address & Phone):</label>
+          <input type="text" id="leaveContactAddressInput" required placeholder="গ্রাম/বাসা, ডাকঘর, থানা, জেলা ও সচল মোবাইল নম্বর (017...)" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div class="p-2.5 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 flex items-center space-x-1.5">
+          <span>🕒</span>
+          <span>সাবমিট করার সাথে সাথে আপনার নাম ও বর্তমান তারিখ-সময় ডিজিটাল সিলমোহর হিসেবে যুক্ত হয়ে পরবর্তী ধাপে চলে যাবে।</span>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeLeaveApplicationModal()" class="px-5 py-2 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-semibold transition">
+            বাতিল
+          </button>
+          <button type="submit" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition flex items-center space-x-1.5">
+            <span>🚀 ছুটির আবেদন জমা দিন</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="viewCompleteLeaveModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[96vh] flex flex-col shadow-2xl overflow-hidden border border-slate-300">
+      
+      <!-- Top Modal Toolbar (Hidden in Print) -->
+      <div class="p-3.5 bg-slate-900 text-white flex items-center justify-between no-print border-b border-slate-700">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">📄</span>
+          <div>
+            <h3 class="text-sm font-bold text-emerald-400">ছুটির অফিসিয়াল আবেদন ফরম ও অনুমোদন পত্র</h3>
+            <p class="text-[11px] text-slate-300" id="leaveModalHeaderStatusInfo">কারিতাস বাংলাদেশ • খুলনা আঞ্চলিক অফিস ফরম্যাট</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-2">
+          <button type="button" onclick="printCurrentLeaveForm()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-md">
+            <span>🖨️ প্রিন্ট করুন</span>
+          </button>
+          <button type="button" onclick="closeViewCompleteLeaveModal()" class="text-slate-300 hover:text-white text-xl px-2 py-0.5 rounded-lg hover:bg-slate-800 transition">✕</button>
+        </div>
+      </div>
+
+      <!-- Printable Document Sheet (100% Exact to Scanned Paper Form) -->
+      <div class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-3.5 bg-white text-slate-900 text-[12px] leading-tight font-serif" id="printableLeaveSheet">
+        
+        <!-- TOP SECTION: HEADER -->
+        <div class="text-center space-y-0.5">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-wider text-black font-sans uppercase">CARITAS</h1>
+          <p class="text-xs font-medium text-slate-800 font-sans">Regional Office: Rupsha Strand Road, Khulna-9100</p>
+          <div class="pt-1.5 pb-2">
+            <span class="caritas-capsule">LEAVE APPLICATION</span>
+          </div>
+        </div>
+
+        <!-- TOP SECTION: APPLICANT BASIC PARTICULARS -->
+        <div class="space-y-1.5 font-sans text-[12px]">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <span class="font-bold text-black">Name :</span>
+              <span id="sheetApplicantName" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">-</span>
+            </div>
+            <div>
+              <span class="font-bold text-black">Designation :</span>
+              <span id="sheetApplicantDesig" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">-</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <span class="font-bold text-black">Department :</span>
+              <span id="sheetApplicantDept" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">-</span>
+            </div>
+            <div>
+              <span class="font-bold text-black">Project Section :</span>
+              <span id="sheetApplicantProject" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">Microfinance Programme</span>
+            </div>
+          </div>
+
+          <div>
+            <span class="font-bold text-black">Reason for Leave :</span>
+            <span id="sheetReasonForLeave" class="italic text-slate-900 caritas-field-line w-[80%] pl-1">-</span>
+          </div>
+
+          <div>
+            <span class="font-bold text-black">Contact Address during Leave with Phone No :</span>
+            <span id="sheetContactDetails" class="font-medium text-slate-900 caritas-field-line w-[62%] pl-1">-</span>
+          </div>
+        </div>
+
+        <!-- MIDDLE SECTION: OFFICIAL 7-ROW LEAVE PARTICULARS TABLE -->
+        <div class="pt-1 overflow-x-auto">
+          <table class="caritas-table w-full border-collapse border border-black text-[11px] font-sans">
+            <thead>
+              <tr class="bg-slate-100 font-bold text-black text-center">
+                <th rowspan="2" class="w-[30%] text-left pl-2">Particulars</th>
+                <th colspan="3" class="w-[28%]">No. of days applied for</th>
+                <th colspan="4" class="w-[42%] text-[10px]">To be field up by the RD's Secretary Section</th>
+              </tr>
+              <tr class="bg-slate-50 font-semibold text-black text-center text-[10px]">
+                <th class="w-[10%]">Total No.<br>of days</th>
+                <th class="w-[9%]">From</th>
+                <th class="w-[9%]">To</th>
+                <th class="w-[10%]">Unavailed<br>leave<br>position</th>
+                <th class="w-[10%]">Leave<br>roster<br>position</th>
+                <th class="w-[11%]">Leave Availed<br>during this<br>year</th>
+                <th class="w-[11%]">Comments<br>of HR<br>section</th>
+              </tr>
+            </thead>
+            <tbody id="caritasTableBody" class="text-center font-medium">
+              <!-- Dynamically populated rows for AL, CL, SL, ML, PL, Leave without pay, Total -->
+              <tr id="row_AL">
+                <td class="text-left pl-2 font-semibold">Annual Leave (AL)</td>
+                <td id="col_days_AL">-</td>
+                <td id="col_from_AL">-</td>
+                <td id="col_to_AL">-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+              <tr id="row_CL">
+                <td class="text-left pl-2 font-semibold">Casual Leave (CL)</td>
+                <td id="col_days_CL">-</td>
+                <td id="col_from_CL">-</td>
+                <td id="col_to_CL">-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+              <tr id="row_SL">
+                <td class="text-left pl-2 font-semibold">Sick Leave (SL)</td>
+                <td id="col_days_SL">-</td>
+                <td id="col_from_SL">-</td>
+                <td id="col_to_SL">-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+              <tr id="row_ML">
+                <td class="text-left pl-2 font-semibold">Maternity Leave with pay (ML)</td>
+                <td id="col_days_ML">-</td>
+                <td id="col_from_ML">-</td>
+                <td id="col_to_ML">-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+              <tr id="row_PL">
+                <td class="text-left pl-2 font-semibold">Paternity Leave with pay (PL)</td>
+                <td id="col_days_PL">-</td>
+                <td id="col_from_PL">-</td>
+                <td id="col_to_PL">-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+              <tr id="row_LWP">
+                <td class="text-left pl-2 font-semibold">Leave without pay</td>
+                <td id="col_days_LWP">-</td>
+                <td id="col_from_LWP">-</td>
+                <td id="col_to_LWP">-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+              <tr id="row_TOTAL" class="font-bold bg-slate-50 border-t-2 border-black">
+                <td class="text-left pl-2 font-bold">Total :</td>
+                <td id="col_days_TOTAL">-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- RELIEVER & APPLICANT SIGNATURE -->
+        <div class="space-y-1 font-sans text-[11px] pt-1">
+          <div class="font-semibold text-slate-800">
+            During the leave period, who will be responsible for his/her duties :
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+            <div>
+              <span class="font-bold text-black">Name:</span>
+              <span id="sheetRelieverName" class="font-semibold text-slate-900 caritas-field-line min-w-[100px] pl-1">-</span>
+            </div>
+            <div>
+              <span class="font-bold text-black">Designation:</span>
+              <span id="sheetRelieverDesig" class="font-semibold text-slate-900 caritas-field-line min-w-[100px] pl-1">-</span>
+            </div>
+            <div class="text-right sm:text-left">
+              <span class="font-bold text-black">Signature of Applicant:</span>
+              <span id="sheetApplicantSignature" class="font-bold font-mono text-emerald-800 caritas-field-line min-w-[110px] pl-1 text-[10px]">[Signed Electronic]</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DEPARTMENTAL HEAD (BRANCH MANAGER) COMMENTS -->
+        <div class="space-y-1 font-sans text-[11px] pt-1 border-t border-slate-200">
+          <div class="flex items-start">
+            <span class="font-bold text-black whitespace-nowrap mr-2">Comments by the Departmental Head :</span>
+            <div id="sheetBMCommentsDisplay" class="flex-1 font-medium italic text-slate-800 border-b border-dotted border-slate-500 pb-1 min-h-[22px]">
+              -
+            </div>
+          </div>
+        </div>
+
+        <!-- REGIONAL DIRECTOR (AREA MANAGER) DECISION -->
+        <div class="space-y-1 font-sans text-[11px] pt-1 border-t border-slate-200">
+          <div class="flex items-start">
+            <span class="font-bold text-black whitespace-nowrap mr-2">Decision of the Regional Director :</span>
+            <div id="sheetRDDecisionDisplay" class="flex-1 font-medium italic text-slate-800 border-b border-dotted border-slate-500 pb-1 min-h-[22px]">
+              -
+            </div>
+          </div>
+        </div>
+
+        <!-- PERFORATED TEAR-OFF LINE (CUT HERE) -->
+        <div class="pt-3 pb-2 text-center text-slate-400 select-none">
+          <div class="flex items-center justify-center space-x-2">
+            <span class="text-sm">✂️</span>
+            <div class="border-b-2 border-dotted border-slate-400 w-full"></div>
+            <span class="text-[10px] font-sans whitespace-nowrap text-slate-500 px-1 font-bold">অফিস সংরক্ষণ ও অনুমোদন স্লিপ (Approval Slip)</span>
+            <div class="border-b-2 border-dotted border-slate-400 w-full"></div>
+            <span class="text-sm">✂️</span>
+          </div>
+        </div>
+
+        <!-- LOWER SECTION: APPROVAL OF LEAVE (OFFICIAL COUNTERFOIL) -->
+        <div class="space-y-2 font-sans text-[12px] pt-1">
+          <div class="text-center pb-1">
+            <span class="caritas-capsule">Approval of Leave</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <span class="font-bold text-black">Name :</span>
+              <span id="sheetSlipName" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">-</span>
+            </div>
+            <div>
+              <span class="font-bold text-black">Designation :</span>
+              <span id="sheetSlipDesig" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">-</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div>
+              <span class="font-bold text-black">Department :</span>
+              <span id="sheetSlipDept" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">-</span>
+            </div>
+            <div>
+              <span class="font-bold text-black">Project :</span>
+              <span id="sheetSlipProject" class="font-semibold text-slate-900 caritas-field-line min-w-[170px] pl-1">Microfinance</span>
+            </div>
+          </div>
+
+          <div class="pt-1">
+            <span class="font-bold text-black">Has been aproved leave from :</span>
+            <span id="sheetSlipFrom" class="font-bold text-emerald-900 caritas-field-line min-w-[90px] pl-1 text-center">-</span>
+            <span class="font-bold text-black mx-1">to</span>
+            <span id="sheetSlipTo" class="font-bold text-emerald-900 caritas-field-line min-w-[90px] pl-1 text-center">-</span>
+            <span class="font-bold text-black mx-1">(</span>
+            <span id="sheetSlipDays" class="font-extrabold text-emerald-900 px-1">-</span>
+            <span class="font-bold text-black">) Days</span>
+          </div>
+
+          <div class="pt-1">
+            <span class="font-bold text-black">for AL / CL / SL / ML / PL / LWP :</span>
+            <span id="sheetSlipType" class="font-extrabold text-blue-900 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 ml-1">-</span>
+          </div>
+
+          <!-- Bottom Signature / Seal -->
+          <div class="pt-4 flex justify-between items-end">
+            <div class="text-[10px] text-slate-500 font-sans">
+              <div>স্মারক/অনুমোদন আইডি: <b id="sheetApprovalRef" class="font-mono text-slate-700">-</b></div>
+              <div>ইলেকট্রনিক অনুমোদন তারিখ: <b id="sheetApprovedTimestamp" class="text-slate-700">-</b></div>
+            </div>
+
+            <div class="text-right space-y-0.5 font-sans">
+              <div class="font-bold text-black text-[11px]">Approved by :</div>
+              <div id="sheetApprovedSealBox" class="inline-block py-1 px-3 border border-emerald-600 bg-emerald-50/50 rounded text-center my-0.5">
+                <div class="text-[10px] font-bold text-emerald-800">✓ VERIFIED & APPROVED</div>
+                <div id="sheetApproverName" class="text-[11px] font-extrabold text-slate-900 font-serif">-</div>
+              </div>
+              <div class="font-extrabold text-black text-[12px] leading-tight">Regional Director / Area Manager</div>
+              <div class="text-[11px] text-slate-800 font-medium leading-tight">Caritas, Khulna</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Panel inside Modal for BM & AM Actions (Hidden in Print) -->
+      <div id="leaveModalActionPanel" class="p-3 bg-slate-50 border-t border-slate-200 no-print flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <!-- Dynamically injected for BM recommendation or AM approval -->
       </div>
     </div>
   </div>
@@ -1628,6 +2103,7 @@
     let unsubscribeSubs = null;
     let unsubscribeConfig = null;
     let unsubscribeNotifs = null;
+    let unsubscribeLeaves = null;
 
     function setupCloudListeners() {
       if (!firebaseDb || isListenersAttached) return;
@@ -1682,7 +2158,13 @@
             syncMasterConfigToCloud();
           }
         }
-      }, err => console.error("Config sync error:", err));
+      }, err => {
+          console.error("Config sync error:", err);
+          if (err.code === 'permission-denied' || String(err).includes('insufficient permissions')) {
+            updateCloudStatusUI(false, "🔴 সার্ভার লকড (রুলস মেয়াদোত্তীর্ণ)");
+            showRulesExpiredBanner();
+          }
+        });
 
       // 2. Listen to Users (Admin, Moderator, COs, BMs, AMs)
       unsubscribeUsers = firebaseDb.collection("users").onSnapshot(snapshot => {
@@ -1692,30 +2174,52 @@
             cloudUsers.push(doc.data());
           });
 
-          // Ensure default admin Indrojit & moderator present
-          let admin = cloudUsers.find(u => u.username === 'indrojit' || u.level === 0);
+          // Smart merge: Never lose existing active users if cloud returns partial list
+          const existingMap = new Map();
+          (appState.users || []).forEach(u => existingMap.set(u.id, u));
+          cloudUsers.forEach(u => existingMap.set(u.id, u));
+
+          let mergedUsers = Array.from(existingMap.values());
+          let admin = mergedUsers.find(u => u.username === 'indrojit' || u.level === 0);
           if (!admin) {
-            cloudUsers.unshift(defaultData.users[0]);
+            mergedUsers.unshift(defaultData.users[0]);
             if (firebaseDb) firebaseDb.collection("users").doc(defaultData.users[0].id).set(defaultData.users[0]);
           }
 
-          appState.users = cloudUsers;
+          appState.users = mergedUsers;
           localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
           refreshActiveViews();
           updateLastSyncTime();
-        } else {
-          // Seed default users to cloud
-          syncAllUsersToCloud();
         }
-      }, err => console.error("Users sync error:", err));
+      }, err => {
+        console.warn("Users sync note:", err);
+        if (err.code === 'resource-exhausted' || String(err).includes('Quota exceeded')) {
+          updateCloudStatusUI(false, "🟡 ক্লাউড কোটা পূর্ণ (অফলাইন মোড সচল)");
+          showQuotaExhaustedBanner();
+        }
+      });
 
-      // 3. Listen to Submissions (Field Reports) - সম্পূর্ণ আনলিমিটেড (সকল ডাটা আজীবন সংরক্ষিত)
-      unsubscribeSubs = firebaseDb.collection("submissions").onSnapshot(snapshot => {
+      // 3. Listen to Submissions (Field Reports) - সম্পূর্ণ আনলিমিটেড ও স্মার্ট রিকভারি সিঙ্ক
+      unsubscribeSubs = firebaseDb.collection("submissions").orderBy("entryDate", "desc").limit(200).onSnapshot(snapshot => {
         if (!snapshot.empty) {
           const cloudSubs = [];
+          const cloudIdSet = new Set();
           snapshot.forEach(doc => {
-            cloudSubs.push(doc.data());
+            const d = doc.data();
+            cloudSubs.push(d);
+            cloudIdSet.add(d.id);
           });
+
+          // SMART RECOVERY FOR UNSYNCED LOCAL SUBMISSIONS (e.g. from 24/11/2026 lock period)
+          const localUnsynced = (appState.submissions || []).filter(s => s && s.id && !cloudIdSet.has(s.id));
+          if (localUnsynced.length > 0) {
+            console.log(`স্মার্ট রিকভারি: লোকাল মেমরিতে থাকা ${localUnsynced.length}টি পেন্ডিং রিপোর্ট কেন্দ্রীয় সার্ভারে পাঠানো হচ্ছে...`);
+            localUnsynced.forEach(s => {
+              firebaseDb.collection("submissions").doc(s.id).set(s, { merge: true }).catch(err => console.warn("Recovery upload err:", err));
+              cloudSubs.push(s);
+            });
+          }
+
           // Sort: Latest date and timestamp first
           cloudSubs.sort((a, b) => {
             const dateComp = (b.entryDate || '').localeCompare(a.entryDate || '');
@@ -1727,7 +2231,16 @@
           refreshActiveViews();
           updateLastSyncTime();
         }
-      }, err => console.error("Submissions sync error:", err));
+      }, err => {
+          console.warn("Submissions sync note:", err);
+          if (err.code === 'resource-exhausted' || String(err).includes('Quota exceeded') || String(err).includes('RESOURCE_EXHAUSTED')) {
+            updateCloudStatusUI(false, "🟡 ক্লাউড দৈনিক কোটা পূর্ণ (দুপুর ২টায় রিসেট হবে)");
+            showQuotaExhaustedBanner();
+          } else if (err.code === 'permission-denied' || String(err).includes('insufficient permissions')) {
+            updateCloudStatusUI(false, "🔴 সার্ভার লকড (রুলস মেয়াদোত্তীর্ণ)");
+            showRulesExpiredBanner();
+          }
+        });
 
       // 4. Listen to Notifications in Real-time with Audio Alert (আনলিমিটেড)
       unsubscribeNotifs = firebaseDb.collection("notifications").onSnapshot(snapshot => {
@@ -1769,12 +2282,40 @@
 
           isInitialNotificationLoadDone = true;
           updateNotificationBadge();
+      updateLeaveBadge();
           const notifModal = document.getElementById('notificationsModal');
           if (notifModal && !notifModal.classList.contains('hidden')) {
             renderNotificationsList();
           }
         }
       }, err => console.warn("Notifications listener note:", err));
+
+      // 5. Listen to Leaves Collection (ছুটির আবেদন ও অনুমোদন)
+      unsubscribeLeaves = firebaseDb.collection("leaves").onSnapshot(snapshot => {
+        if (!snapshot.empty) {
+          const cloudLeaves = [];
+          snapshot.forEach(doc => {
+            cloudLeaves.push(doc.data());
+          });
+          cloudLeaves.sort((a, b) => (b.appliedTimestamp || 0) - (a.appliedTimestamp || 0));
+          appState.leaves = cloudLeaves;
+          localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+          if (activeTab === 'leave') renderLeaveSection();
+          updateHeaderAndRoleUI();
+        }
+      }, err => console.warn("Leaves listener note:", err));
+    }
+
+    
+    
+    function showQuotaExhaustedBanner() {
+      const banner = document.getElementById('cloudQuotaBanner');
+      if (banner) banner.classList.remove('hidden');
+    }
+
+    function showRulesExpiredBanner() {
+      const banner = document.getElementById('cloudRulesExpiredBanner');
+      if (banner) banner.classList.remove('hidden');
     }
 
     function updateLastSyncTime() {
@@ -1800,10 +2341,67 @@
 
     function syncSubmissionToCloud(sub) {
       if (firebaseDb) {
-        firebaseDb.collection("submissions").doc(sub.id).set(sub).catch(err => {
+        firebaseDb.collection("submissions").doc(sub.id).set(sub).then(() => {
+          console.log("Cloud submission successful:", sub.id);
+          updateCloudStatusUI(true, "সরাসরি ক্লাউড ডাটাবেসের সাথে সংযুক্ত", firebaseDb.app.options.projectId);
+        }).catch(err => {
           console.error("Cloud submission upload error:", err);
+          if (err.code === 'permission-denied' || String(err).includes('insufficient permissions')) {
+            updateCloudStatusUI(false, "🔴 ক্লাউড সার্ভার লকড! ফায়ারবেস সিকিউরিটি রুলসের মেয়াদ ২৩/১১/২০২৬ তারিখে শেষ হয়েছে।");
+            alert("⚠️ জরুরি ক্লাউড নোটিশ:\n\nআপনার রিপোর্টটি লোকাল ব্রাউজারে সংরক্ষিত হয়েছে, কিন্তু কেন্দ্রীয় ফায়ারবেস সার্ভারে জমা হয়নি!\n\nকারণ: ফায়ারবেস সিকিউরিটি রুলসের ৩০ দিনের মেয়াদ ২৩/১১/২০২৬ তারিখে শেষ হয়েছে।\n\nঅনুগ্রহ করে কেন্দ্রীয় এডমিনকে (ইন্দ্রজিৎ) ফায়ারবেস কনসোলে গিয়ে Rules আপডেট (Publish) করার জন্য বলুন।");
+          } else {
+            showToast("ক্লাউড সিঙ্ক সতর্কতা: " + err.message, "warning");
+          }
         });
       }
+    }
+
+    // Function to bulk sync all local submissions to cloud once rules are fixed
+    function syncAllSubmissionsToCloud() {
+      if (!firebaseDb) {
+        alert("ফায়ারবেস ডাটাবেস সংযুক্ত নেই!");
+        return;
+      }
+      const subs = appState.submissions || [];
+      if (subs.length === 0) {
+        alert("সিঙ্ক করার মতো কোনো লোকাল রিপোর্ট নেই।");
+        return;
+      }
+
+      const syncBtn = document.getElementById('btnSyncAllSubmissions');
+      if (syncBtn) {
+        syncBtn.disabled = true;
+        syncBtn.textContent = "⏳ ক্লাউডে ডাটা পাঠানো হচ্ছে...";
+      }
+
+      let successCount = 0;
+      let failCount = 0;
+      let isPermissionBlocked = false;
+
+      const batchPromises = subs.map(sub => {
+        return firebaseDb.collection("submissions").doc(sub.id).set(sub)
+          .then(() => { successCount++; })
+          .catch(err => {
+            failCount++;
+            if (err.code === 'permission-denied' || String(err).includes('insufficient permissions')) {
+              isPermissionBlocked = true;
+            }
+          });
+      });
+
+      Promise.all(batchPromises).then(() => {
+        if (syncBtn) {
+          syncBtn.disabled = false;
+          syncBtn.textContent = "🔄 সকল রিপোর্ট ক্লাউডে সিঙ্ক করুন";
+        }
+        if (isPermissionBlocked) {
+          updateCloudStatusUI(false, "🔴 সার্ভার লকড! সিকিউরিটি রুলস মেয়াদোত্তীর্ণ।");
+          alert("⚠️ ক্লাউড সিঙ্ক ব্যর্থ হয়েছে!\n\nফায়ারবেস সিকিউরিটি রুলস এখনও আপডেট করা হয়নি (Permission Denied)।\nদয়া করে Firebase Console এ গিয়ে Rules এ allow read, write: if true; লিখে Publish করুন।");
+        } else {
+          updateCloudStatusUI(true, "সরাসরি ক্লাউড ডাটাবেসের সাথে সংযুক্ত", firebaseDb.app.options.projectId);
+          alert(`🎉 সফলভাবে ${successCount} টি রিপোর্ট কেন্দ্রীয় সার্ভারে সিঙ্ক হয়েছে!${failCount > 0 ? ` (${failCount} টিতে ত্রুটি)` : ''}`);
+        }
+      });
     }
 
     function syncUserToCloud(user) {
@@ -1860,20 +2458,31 @@
         return;
       }
 
-      try {
-        // 1. Sync master config
-        syncMasterConfigToCloud();
-        // 2. Sync all users
-        syncAllUsersToCloud();
-        // 3. Sync all submissions
-        appState.submissions.forEach(s => {
-          firebaseDb.collection("submissions").doc(s.id).set(s, { merge: true });
-        });
+      showToast("ক্লাউড ডাটাবেসে ডাটা পাঠানো হচ্ছে...", "info");
+
+      // 1. Sync master config
+      syncMasterConfigToCloud();
+      // 2. Sync all users
+      syncAllUsersToCloud();
+
+      // 3. Sync all submissions with proper promise error handling
+      const subs = appState.submissions || [];
+      const promises = subs.map(s => firebaseDb.collection("submissions").doc(s.id).set(s, { merge: true }));
+
+      Promise.all(promises).then(() => {
         updateLastSyncTime();
-        showToast("ক্লাউড ডাটাবেসে সকল তথ্য (ইউজার, রিপোর্ট ও শাখা) সফলভাবে আপলোড হয়েছে!", "☁️");
-      } catch(err) {
-        alert("ডাটা আপলোডে সমস্যা: " + err.message);
-      }
+        updateCloudStatusUI(true, "সরাসরি ক্লাউড ডাটাবেসের সাথে সংযুক্ত", firebaseDb.app.options.projectId);
+        alert("🎉 সফলভাবে " + subs.length + " টি রিপোর্ট এবং সকল কনফিগারেশন কেন্দ্রীয় সার্ভারে সংরক্ষিত হয়েছে!");
+        showToast("ক্লাউড ডাটাবেসে সকল তথ্য সফলভাবে সংরক্ষিত হয়েছে!", "success");
+      }).catch(err => {
+        console.error("Cloud bulk sync error:", err);
+        if (err.code === 'permission-denied' || String(err).includes('insufficient permissions')) {
+          updateCloudStatusUI(false, "🔴 সার্ভার লকড (রুলস মেয়াদোত্তীর্ণ)");
+          alert("🚨 ফায়ারবেস ক্লাউড সিকিউরিটি ত্রুটি!\n\nফায়ারবেস সিকিউরিটি রুলসের ৩০ দিনের মেয়াদ ২৩/১১/২০২৬ তারিখে শেষ হয়েছে।\n\nদয়া করে Firebase Console এ গিয়ে Firestore Database -> Rules এ allow read, write: if true; লিখে Publish করুন।");
+        } else {
+          alert("ডাটা আপলোডে সমস্যা: " + err.message);
+        }
+      });
     }
 
     function openCloudConfigModal() {
@@ -2177,6 +2786,11 @@
       const user = getLoggedInUser();
       if (!user) return;
 
+      if (tab === 'leave' && !isHeadAdmin(user)) {
+        alert("অ্যাক্সেস সংরক্ষিত! ছুটির তথ্য ও আবেদন বর্তমানে শুধুমাত্র প্রধান এডমিন (ইন্দ্রজিৎ) দেখতে পারবেন।");
+        return;
+      }
+
       if (tab === 'admin' && !canAccessAdmin(user)) {
         alert("অ্যাক্সেস অস্বীকৃত! শুধুমাত্র প্রধান এডমিন ও সহ-এডমিন এই প্যানেলে প্রবেশ করতে পারেন।");
         return;
@@ -2190,11 +2804,14 @@
       activeTab = tab;
       document.getElementById('tabContentEntry').classList.toggle('hidden', tab !== 'entry');
       document.getElementById('tabContentReports').classList.toggle('hidden', tab !== 'reports');
+      const leaveContent = document.getElementById('tabContentLeave');
+      if (leaveContent) leaveContent.classList.toggle('hidden', tab !== 'leave');
       document.getElementById('tabContentAdmin').classList.toggle('hidden', tab !== 'admin');
 
       const tabs = [
         { id: 'tabBtnEntry', name: 'entry' },
         { id: 'tabBtnReports', name: 'reports' },
+        { id: 'tabBtnLeave', name: 'leave' },
         { id: 'tabBtnAdmin', name: 'admin' }
       ];
 
@@ -2212,6 +2829,9 @@
       if (tab === 'reports') {
         populateFilterDropdowns();
         renderReportsTable();
+      }
+      if (tab === 'leave') {
+        renderLeaveSection();
       }
       if (tab === 'admin') {
         renderAdminView();
@@ -2242,6 +2862,19 @@
       const isAdminOrCo = isHead || isCo;
       const isModerator = (user.role === 'moderator' || user.level === 'moderator');
       const locationDiv = document.getElementById('headerLocationInfo');
+
+      // Leave Tab Visibility: Strictly Main Admin (Indrojit) ONLY
+      const leaveTabBtn = document.getElementById('tabBtnLeave');
+      if (leaveTabBtn) {
+        if (isHead) {
+          leaveTabBtn.classList.remove('hidden');
+        } else {
+          leaveTabBtn.classList.add('hidden');
+          if (activeTab === 'leave') {
+            switchTab(isModerator ? 'reports' : 'entry');
+          }
+        }
+      }
 
       // Profile Photo Display in Header
       const headerAvatar = document.getElementById('headerUserAvatar');
@@ -2874,13 +3507,16 @@
     }
 
     function renderOpeningDataCard(selectedBranch) {
+      const card = document.getElementById('openingDataSummaryCard');
+      if (card) card.classList.add('hidden');
+      return; // Opening View Board completely disabled as per user instruction
       const label = document.getElementById('openingBranchLabel');
       const grid = document.getElementById('openingMetricsGrid');
 
-      let branchKey = selectedBranch !== 'all' ? selectedBranch : appState.branches[0];
-      label.textContent = selectedBranch !== 'all' ? `নির্বাচিত শাখা: ${branchKey}` : `সামগ্রিক / প্রধান শাখা: ${branchKey}`;
+      let branchKey = selectedBranch !== 'all' ? selectedBranch : (appState.branches ? appState.branches[0] : '');
+      if (label) label.textContent = selectedBranch !== 'all' ? `নির্বাচিত শাখা: ${branchKey}` : `সামগ্রিক / প্রধান শাখা: ${branchKey}`;
 
-      const op = appState.openingData[branchKey] || { members: 0, overdue: 0, portfolio: 0, target: 0 };
+      const op = (appState.openingData && appState.openingData[branchKey]) ? appState.openingData[branchKey] : { members: 0, overdue: 0, portfolio: 0, target: 0 };
 
       grid.innerHTML = `
         <div class="bg-white/10 rounded-xl p-3 border border-white/10">
@@ -4410,7 +5046,793 @@
     }
 
 
-    function initApp() {
+
+function updateLeaveBadge() {
+  const user = getLoggedInUser();
+  const badge = document.getElementById('leavePendingBadge');
+  if (!user || !badge) return;
+  if (!isHeadAdmin(user)) {
+    badge.classList.add('hidden');
+    return;
+  }
+  if (!appState.leaves) appState.leaves = [];
+
+  let count = 0;
+  if (user.level === 1) {
+    count = appState.leaves.filter(l => l.applicantId === user.id && (l.status === 'pending_bm' || l.status === 'pending_am')).length;
+  } else if (user.level === 2) {
+    count = appState.leaves.filter(l => l.applicantBranch === user.branchName && l.status === 'pending_bm').length;
+  } else if (user.level === 3) {
+    count = appState.leaves.filter(l => (l.applicantArea === user.areaName || l.applicantRegion === user.region) && l.status === 'pending_am').length;
+  } else if (isHeadAdmin(user) || isCoAdmin(user)) {
+    count = appState.leaves.filter(l => l.status === 'pending_bm' || l.status === 'pending_am').length;
+  }
+
+  if (count > 0) {
+    badge.textContent = count;
+    badge.classList.remove('hidden');
+  } else {
+    badge.classList.add('hidden');
+  }
+}
+
+
+
+// ==============================================================================
+// LEAVE MANAGEMENT & APPROVAL SYSTEM (CARITAS KHULNA FORMAT)
+// ==============================================================================
+let currentViewingLeaveId = null;
+let activeLeaveSubTab = 'default';
+
+function getLeaveTypeName(code) {
+  const map = {
+    'CL': 'Casual Leave (CL)',
+    'AL': 'Annual Leave (AL)',
+    'SL': 'Sick Leave (SL)',
+    'ML': 'Maternity Leave with pay (ML)',
+    'PL': 'Paternity Leave with pay (PL)',
+    'LWP': 'Leave without pay (LWP)'
+  };
+  return map[code] || code || 'Casual Leave (CL)';
+}
+
+function calculateLeaveDays() {
+  const startInput = document.getElementById('leaveStartDateInput');
+  const endInput = document.getElementById('leaveEndDateInput');
+  const badge = document.getElementById('leaveCalculatedDaysBadge');
+  if (!startInput || !endInput || !badge) return;
+
+  const startVal = startInput.value;
+  const endVal = endInput.value;
+  if (!startVal || !endVal) {
+    badge.textContent = '১ দিন';
+    return;
+  }
+
+  const d1 = new Date(startVal);
+  const d2 = new Date(endVal);
+  if (d2 < d1) {
+    badge.textContent = 'ত্রুটি (শেষ তারিখ আগে)';
+    badge.className = "text-sm text-red-600 font-bold";
+    return;
+  }
+
+  const diffTime = Math.abs(d2 - d1);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  badge.textContent = diffDays + ' দিন';
+  badge.className = "text-sm text-emerald-800 font-bold";
+}
+
+function openLeaveApplicationModal(mode) {
+  const user = getLoggedInUser();
+  if (!user) {
+    alert("অনুগ্রহ করে প্রথমে লগইন করুন!");
+    return;
+  }
+
+  const modal = document.getElementById('leaveApplicationModal');
+  if (!modal) return;
+
+  // Populate user info
+  const nameEl = document.getElementById('leaveApplicantName');
+  const desigEl = document.getElementById('leaveApplicantDesig');
+  const branchEl = document.getElementById('leaveApplicantBranch');
+  const areaEl = document.getElementById('leaveApplicantArea');
+  const modalTitle = document.getElementById('leaveModalTitle');
+
+  if (nameEl) nameEl.textContent = user.name || user.username;
+  if (desigEl) desigEl.textContent = user.designation || (user.level === 1 ? "সিও (ক্রেডিট অফিসার)" : (user.level === 2 ? "শাখা ব্যবস্থাপক" : "মাঠ কর্মকর্তা"));
+  if (branchEl) branchEl.textContent = user.branchName || "মিরপুর শাখা";
+  if (areaEl) areaEl.textContent = user.areaName || user.region || "খুলনা অঞ্চল";
+
+  if (modalTitle) {
+    if (mode === 'self_bm') {
+      modalTitle.textContent = "শাখা ব্যবস্থাপকের (BM) নিজস্ব ছুটির আবেদন ফরম";
+    } else {
+      modalTitle.textContent = "ছুটির আবেদন ফরম (Leave Application)";
+    }
+  }
+
+  // Set default dates
+  const today = new Date().toISOString().split('T')[0];
+  const startInput = document.getElementById('leaveStartDateInput');
+  const endInput = document.getElementById('leaveEndDateInput');
+  if (startInput) startInput.value = today;
+  if (endInput) endInput.value = today;
+  calculateLeaveDays();
+
+  modal.classList.remove('hidden');
+}
+
+function closeLeaveApplicationModal() {
+  const modal = document.getElementById('leaveApplicationModal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function handleLeaveFormSubmit(e) {
+  e.preventDefault();
+  const user = getLoggedInUser();
+  if (!user) return;
+
+  const startVal = document.getElementById('leaveStartDateInput').value;
+  const endVal = document.getElementById('leaveEndDateInput').value;
+  if (!startVal || !endVal) {
+    alert("দয়া করে ছুটির শুরুর ও শেষের তারিখ নির্বাচন করুন!");
+    return;
+  }
+
+  const d1 = new Date(startVal);
+  const d2 = new Date(endVal);
+  if (d2 < d1) {
+    alert("ছুটির শেষের তারিখ শুরুর তারিখের পূর্ববর্তী হতে পারে না!");
+    return;
+  }
+
+  const diffTime = Math.abs(d2 - d1);
+  const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+  const isBM = (user.level === 2);
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString('en-GB') + " " + now.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
+
+  const leaveObj = {
+    id: "leave_" + Date.now() + "_" + Math.random().toString(36).substr(2, 4),
+    applicantId: user.id,
+    applicantName: user.name || user.username,
+    applicantUsername: user.username,
+    applicantDesig: user.designation || (user.level === 1 ? "সিও (ক্রেডিট অফিসার)" : (user.level === 2 ? "শাখা ব্যবস্থাপক" : "মাঠ কর্মকর্তা")),
+    applicantLevel: user.level,
+    applicantBranch: user.branchName || "মিরপুর শাখা",
+    applicantArea: user.areaName || "ঢাকা উত্তর",
+    applicantRegion: user.region || "Khulna Region",
+    projectSection: document.getElementById('leaveProjectSectionInput').value.trim() || "Microfinance Programme",
+    leaveType: document.getElementById('leaveTypeInput').value,
+    startDate: startVal,
+    endDate: endVal,
+    totalDays: totalDays,
+    reason: document.getElementById('leaveReasonInput').value.trim(),
+    relieverName: document.getElementById('leaveRelieverNameInput').value.trim(),
+    relieverDesig: document.getElementById('leaveRelieverDesigInput').value.trim(),
+    contactDetails: document.getElementById('leaveContactAddressInput').value.trim(),
+    appliedAt: formattedDate,
+    appliedTimestamp: Date.now(),
+    status: isBM ? 'pending_am' : 'pending_bm',
+    bmComments: '',
+    bmName: '',
+    bmRecommendedAt: '',
+    rdDecision: '',
+    rdName: '',
+    rdApprovedAt: '',
+    approvalRef: ''
+  };
+
+  if (!appState.leaves) appState.leaves = [];
+  appState.leaves.unshift(leaveObj);
+  localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+
+  // Sync to Firestore
+  if (firebaseDb) {
+    firebaseDb.collection("leaves").doc(leaveObj.id).set(leaveObj).catch(err => {
+      console.error("Firestore leave save error:", err);
+    });
+  }
+
+  // Create notification for supervisor
+  if (isBM) {
+    // Notify Area Manager (Level 3)
+    const amUser = (appState.users || []).find(u => u.level === 3 && (u.areaName === user.areaName || u.region === user.region));
+    if (amUser && firebaseDb) {
+      const notif = {
+        id: "notif_" + Date.now(),
+        toUserId: amUser.id,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        message: `শাখা ব্যবস্থাপক ${user.name} (${user.branchName}) ছুটির আবেদন করেছেন। আপনার অনুমোদনের অপেক্ষায়।`,
+        timestamp: Date.now(),
+        isRead: false,
+        remarkType: "leave_pending_am",
+        leaveId: leaveObj.id
+      };
+      firebaseDb.collection("notifications").doc(notif.id).set(notif);
+    }
+  } else {
+    // Notify Branch Manager (Level 2)
+    const bmUser = (appState.users || []).find(u => u.level === 2 && u.branchName === user.branchName);
+    if (bmUser && firebaseDb) {
+      const notif = {
+        id: "notif_" + Date.now(),
+        toUserId: bmUser.id,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        message: `কর্মী ${user.name} একটি নতুন ছুটির আবেদন জমা দিয়েছেন। অনুগ্রহ করে যাচাই ও সুপারিশ করুন।`,
+        timestamp: Date.now(),
+        isRead: false,
+        remarkType: "leave_pending_bm",
+        leaveId: leaveObj.id
+      };
+      firebaseDb.collection("notifications").doc(notif.id).set(notif);
+    }
+  }
+
+  closeLeaveApplicationModal();
+  renderLeaveSection();
+  updateHeaderAndRoleUI();
+
+  alert("✅ আপনার ছুটির আবেদনটি সফলভাবে দাখিল হয়েছে!\n\nবর্তমান অবস্থা: " + (isBM ? "এরিয়া ম্যানেজারের অনুমোদনের অপেক্ষায়" : "শাখা ব্যবস্থাপকের (BM) সুপারিশের অপেক্ষায়"));
+}
+
+function openViewCompleteLeaveModal(leaveId) {
+  if (!appState.leaves) appState.leaves = [];
+  const leave = appState.leaves.find(l => l.id === leaveId);
+  if (!leave) {
+    alert("ছুটির তথ্যাদি পাওয়া যায়নি!");
+    return;
+  }
+  currentViewingLeaveId = leaveId;
+
+  // Header info
+  const statusInfo = document.getElementById('leaveModalHeaderStatusInfo');
+  if (statusInfo) {
+    let statusText = "কারিতাস বাংলাদেশ • খুলনা আঞ্চলিক অফিস ফরম্যাট";
+    if (leave.status === 'pending_bm') statusText += " • ⏳ শাখা ব্যবস্থাপক সুপারিশের অপেক্ষায়";
+    else if (leave.status === 'pending_am') statusText += " • ⏳ আঞ্চলিক পরিচালক অনুমোদনের অপেক্ষায়";
+    else if (leave.status === 'approved') statusText += " • ✅ চূড়ান্তভাবে অনুমোদিত";
+    else if (leave.status === 'rejected') statusText += " • ❌ নামঞ্জুর/বাতিল";
+    statusInfo.textContent = statusText;
+  }
+
+  // 1. Applicant Particulars
+  document.getElementById('sheetApplicantName').textContent = leave.applicantName || '-';
+  document.getElementById('sheetApplicantDesig').textContent = leave.applicantDesig || '-';
+  document.getElementById('sheetApplicantDept').textContent = leave.applicantBranch || '-';
+  document.getElementById('sheetApplicantProject').textContent = leave.projectSection || 'Microfinance Programme';
+  document.getElementById('sheetReasonForLeave').textContent = leave.reason || '-';
+  document.getElementById('sheetContactDetails').textContent = leave.contactDetails || '-';
+
+  // 2. 7-Row Official Table
+  const types = ['AL', 'CL', 'SL', 'ML', 'PL', 'LWP'];
+  types.forEach(t => {
+    const dEl = document.getElementById('col_days_' + t);
+    const fEl = document.getElementById('col_from_' + t);
+    const tEl = document.getElementById('col_to_' + t);
+    const rEl = document.getElementById('row_' + t);
+    if (dEl) dEl.textContent = '-';
+    if (fEl) fEl.textContent = '-';
+    if (tEl) tEl.textContent = '-';
+    if (rEl) rEl.className = '';
+  });
+
+  const targetType = leave.leaveType || 'CL';
+  const targetDays = document.getElementById('col_days_' + targetType);
+  const targetFrom = document.getElementById('col_from_' + targetType);
+  const targetTo = document.getElementById('col_to_' + targetType);
+  const targetRow = document.getElementById('row_' + targetType);
+
+  if (targetDays) targetDays.textContent = leave.totalDays;
+  if (targetFrom) targetFrom.textContent = leave.startDate;
+  if (targetTo) targetTo.textContent = leave.endDate;
+  if (targetRow) targetRow.className = 'bg-yellow-100/60 font-bold';
+
+  const totalCol = document.getElementById('col_days_TOTAL');
+  if (totalCol) totalCol.textContent = leave.totalDays;
+
+  // 3. Reliever & Applicant Signature
+  document.getElementById('sheetRelieverName').textContent = leave.relieverName || '-';
+  document.getElementById('sheetRelieverDesig').textContent = leave.relieverDesig || '-';
+  document.getElementById('sheetApplicantSignature').textContent = (leave.applicantName || 'Applicant') + ' [' + (leave.appliedAt || '') + ']';
+
+  // 4. Departmental Head (BM) Comments
+  const bmCommentsDiv = document.getElementById('sheetBMCommentsDisplay');
+  if (leave.bmComments) {
+    bmCommentsDiv.innerHTML = `<span class="text-blue-900 font-bold">✓ সুপারিশকৃত:</span> "${leave.bmComments}" <span class="text-[10px] text-slate-600 block pt-0.5">— ${leave.bmName || 'শাখা ব্যবস্থাপক'} [${leave.bmRecommendedAt || ''}]</span>`;
+  } else {
+    bmCommentsDiv.textContent = leave.status === 'pending_bm' ? 'শাখা ব্যবস্থাপকের (BM) সুপারিশের অপেক্ষায়...' : '-';
+  }
+
+  // 5. Regional Director (AM) Decision
+  const rdDecisionDiv = document.getElementById('sheetRDDecisionDisplay');
+  if (leave.rdDecision) {
+    const isApp = (leave.status === 'approved');
+    rdDecisionDiv.innerHTML = `<span class="${isApp ? 'text-emerald-900 font-bold' : 'text-red-900 font-bold'}">${isApp ? '✓ চূড়ান্ত সিদ্ধান্ত (অনুমোদিত):' : '❌ চূড়ান্ত সিদ্ধান্ত (নামঞ্জুর):'}</span> "${leave.rdDecision}" <span class="text-[10px] text-slate-600 block pt-0.5">— ${leave.rdName || 'আঞ্চলিক পরিচালক'} [${leave.rdApprovedAt || ''}]</span>`;
+  } else {
+    rdDecisionDiv.textContent = leave.status === 'pending_am' ? 'আঞ্চলিক পরিচালক / এরিয়া ম্যানেজারের (AM) চূড়ান্ত সিদ্ধান্তের অপেক্ষায়...' : '-';
+  }
+
+  // 6. Bottom Counterfoil: Approval of Leave Slip
+  document.getElementById('sheetSlipName').textContent = leave.applicantName || '-';
+  document.getElementById('sheetSlipDesig').textContent = leave.applicantDesig || '-';
+  document.getElementById('sheetSlipDept').textContent = leave.applicantBranch || '-';
+  document.getElementById('sheetSlipProject').textContent = leave.projectSection || 'Microfinance';
+  document.getElementById('sheetSlipFrom').textContent = leave.startDate || '-';
+  document.getElementById('sheetSlipTo').textContent = leave.endDate || '-';
+  document.getElementById('sheetSlipDays').textContent = leave.totalDays || '1';
+  document.getElementById('sheetSlipType').textContent = getLeaveTypeName(leave.leaveType);
+  document.getElementById('sheetApprovalRef').textContent = leave.approvalRef || 'প্রক্রিয়াধীন (Pending)';
+  document.getElementById('sheetApprovedTimestamp').textContent = leave.rdApprovedAt || 'স্বাক্ষরের অপেক্ষায়';
+  document.getElementById('sheetApproverName').textContent = leave.rdName || 'Regional Director';
+
+  const sealBox = document.getElementById('sheetApprovedSealBox');
+  if (sealBox) {
+    if (leave.status === 'approved') {
+      sealBox.className = 'inline-block py-1 px-3 border-2 border-emerald-700 bg-emerald-50 rounded text-center my-0.5';
+      sealBox.innerHTML = `
+        <div class="text-[9px] font-extrabold text-emerald-800 tracking-wider">✓ OFFICIAL DIGITAL APPROVAL</div>
+        <div class="text-[11px] font-extrabold text-slate-900 font-serif">${leave.rdName || 'Regional Director'}</div>
+        <div class="text-[9px] text-slate-600 font-mono">${leave.rdApprovedAt || ''}</div>
+      `;
+    } else {
+      sealBox.className = 'inline-block py-1 px-3 border border-slate-300 bg-slate-50 rounded text-center my-0.5';
+      sealBox.innerHTML = `
+        <div class="text-[10px] font-bold text-slate-500">⏳ অনুমোদনের অপেক্ষায় (Pending)</div>
+      `;
+    }
+  }
+
+  // 7. Dynamic Action Panel inside Modal for BM & AM
+  const user = getLoggedInUser();
+  const actionPanel = document.getElementById('leaveModalActionPanel');
+  let actionHtml = '';
+
+  const isHead = isHeadAdmin(user);
+  const isCo = isCoAdmin(user);
+  const isAM = (user.level === 3 || isHead || isCo);
+  const isBM = (user.level === 2 || isHead || isCo);
+
+  if (leave.status === 'pending_bm' && isBM && (user.branchName === leave.applicantBranch || isHead || isCo)) {
+    // BM Review & Recommendation Panel (Specifically satisfies user request: "Bm ar Form dekhar apsion thakbe")
+    actionHtml = `
+      <div class="w-full space-y-2 bg-blue-50/80 p-3 rounded-xl border border-blue-200">
+        <div class="font-bold text-blue-900 flex items-center justify-between text-xs">
+          <span>✍️ শাখা ব্যবস্থাপকের (BM) সুপারিশ ও মন্তব্য:</span>
+          <span class="text-[10px] text-blue-800 bg-blue-100 px-2 py-0.5 rounded font-bold">ধাপ ১: শাখা পর্যায়ে যাচাই</span>
+        </div>
+        <input type="text" id="bmCommentInput" value="আবেদনকারীর ছুটির কারণ যথাযথ থাকায় মঞ্জুর করার সুপারিশ করা হলো।" placeholder="শাখা ব্যবস্থাপকের মন্তব্য লিখুন..." class="w-full px-3 py-2 border border-blue-300 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-blue-500">
+        <div class="flex items-center justify-end space-x-2 pt-1">
+          <button type="button" onclick="submitBMRecommendation('${leave.id}', 'rejected')" class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-lg transition text-xs">
+            ❌ অসুপারিশ/বাতিল
+          </button>
+          <button type="button" onclick="submitBMRecommendation('${leave.id}', 'recommended')" class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition flex items-center space-x-1 text-xs">
+            <span>✓ সুপারিশ করুন ও এরিয়া ডিরেক্টরের নিকট প্রেরণ</span>
+          </button>
+        </div>
+      </div>
+    `;
+  } else if (leave.status === 'pending_am' && isAM && (user.areaName === leave.applicantArea || user.region === leave.applicantRegion || isHead || isCo)) {
+    // AM / Regional Director Final Approval Panel
+    actionHtml = `
+      <div class="w-full space-y-2 bg-emerald-50/80 p-3 rounded-xl border border-emerald-300">
+        <div class="font-bold text-emerald-900 flex items-center justify-between text-xs">
+          <span>👑 আঞ্চলিক পরিচালক / এরিয়া ম্যানেজারের (AM) চূড়ান্ত সিদ্ধান্ত ও অনুমোদন:</span>
+          <span class="text-[10px] text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded font-bold">ধাপ ২: চূড়ান্ত অনুমোদন</span>
+        </div>
+        <input type="text" id="rdDecisionInput" value="আবেদন ও শাখা ব্যবস্থাপকের সুপারিশ পর্যালোচনাপূর্বক ছুটি মঞ্জুর ও চূড়ান্ত অনুমোদন করা হলো।" placeholder="আঞ্চলিক পরিচালকের সিদ্ধান্ত বা মন্তব্য লিখুন..." class="w-full px-3 py-2 border border-emerald-300 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-500">
+        <div class="flex items-center justify-end space-x-2 pt-1">
+          <button type="button" onclick="submitAMApproval('${leave.id}', 'rejected')" class="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-lg transition text-xs">
+            ❌ ছুটি নামঞ্জুর/বাতিল
+          </button>
+          <button type="button" onclick="submitAMApproval('${leave.id}', 'approved')" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow transition flex items-center space-x-1 text-xs">
+            <span>✓ চূড়ান্ত অনুমোদন মঞ্জুর করুন (Approve Leave)</span>
+          </button>
+        </div>
+      </div>
+    `;
+  } else if (leave.status === 'approved') {
+    actionHtml = `
+      <div class="w-full flex items-center justify-between">
+        <div class="flex items-center space-x-2 text-emerald-800 font-bold text-xs">
+          <span class="text-base">✅</span>
+          <span>ছুটির আবেদনটি চূড়ান্তভাবে অনুমোদিত। সংশ্লিষ্ট কর্মী ও শাখা অফিস কপি প্রিন্ট ও সংরক্ষণ করতে পারবেন।</span>
+        </div>
+        <button type="button" onclick="printCurrentLeaveForm()" class="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow transition flex items-center space-x-1 text-xs">
+          <span>🖨️ প্রিন্ট করুন</span>
+        </button>
+      </div>
+    `;
+  } else if (leave.status === 'rejected') {
+    actionHtml = `
+      <div class="w-full text-center text-red-700 font-bold py-1 text-xs">
+        ❌ এই ছুটির আবেদনটি নামঞ্জুর/বাতিল করা হয়েছে।
+      </div>
+    `;
+  } else {
+    actionHtml = `
+      <div class="w-full text-center text-slate-500 text-xs py-1">
+        ${leave.status === 'pending_bm' ? '⏳ শাখা ব্যবস্থাপকের (BM) যাচাই ও সুপারিশের অপেক্ষায়...' : '⏳ আঞ্চলিক পরিচালক / এরিয়া ম্যানেজারের (AM) চূড়ান্ত অনুমোদনের অপেক্ষায়...'}
+      </div>
+    `;
+  }
+
+  if (actionPanel) actionPanel.innerHTML = actionHtml;
+
+  const modal = document.getElementById('viewCompleteLeaveModal');
+  if (modal) modal.classList.remove('hidden');
+}
+
+function closeViewCompleteLeaveModal() {
+  const modal = document.getElementById('viewCompleteLeaveModal');
+  if (modal) modal.classList.add('hidden');
+  currentViewingLeaveId = null;
+}
+
+function submitBMRecommendation(leaveId, decision) {
+  const user = getLoggedInUser();
+  if (!user) return;
+
+  const leave = (appState.leaves || []).find(l => l.id === leaveId);
+  if (!leave) return;
+
+  const commentInput = document.getElementById('bmCommentInput');
+  const comment = commentInput ? commentInput.value.trim() : '';
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString('en-GB') + " " + now.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
+
+  if (decision === 'recommended') {
+    leave.status = 'pending_am';
+    leave.bmComments = comment || 'ছুটি মঞ্জুর করার সুপারিশ করা হলো।';
+    leave.bmName = user.name || user.username;
+    leave.bmRecommendedAt = formattedDate;
+
+    // Send notification to Area Manager
+    const amUser = (appState.users || []).find(u => u.level === 3 && (u.areaName === leave.applicantArea || u.region === leave.applicantRegion));
+    if (amUser && firebaseDb) {
+      const notif = {
+        id: "notif_" + Date.now(),
+        toUserId: amUser.id,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        message: `শাখা ব্যবস্থাপক ${user.name} (${leave.applicantBranch}) কর্মী ${leave.applicantName}-এর ছুটির আবেদন সুপারিশ করেছেন। আপনার অনুমোদনের অপেক্ষায়।`,
+        timestamp: Date.now(),
+        isRead: false,
+        remarkType: "leave_pending_am",
+        leaveId: leave.id
+      };
+      firebaseDb.collection("notifications").doc(notif.id).set(notif);
+    }
+    alert("✅ ছুটির আবেদনটি সফলভাবে সুপারিশকৃত হয়েছে এবং এরিয়া ম্যানেজারের নিকট প্রেরিত হয়েছে!");
+  } else {
+    leave.status = 'rejected';
+    leave.bmComments = comment || 'শাখা ব্যবস্থাপক কর্তৃক অসুপারিশকৃত/বাতিল';
+    leave.bmName = user.name || user.username;
+    leave.bmRecommendedAt = formattedDate;
+
+    // Send notification to Applicant
+    if (firebaseDb) {
+      const notif = {
+        id: "notif_" + Date.now(),
+        toUserId: leave.applicantId,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        message: `আপনার ছুটির আবেদনটি শাখা ব্যবস্থাপক কর্তৃক নামঞ্জুর/বাতিল করা হয়েছে। মন্তব্য: ${leave.bmComments}`,
+        timestamp: Date.now(),
+        isRead: false,
+        remarkType: "leave_rejected",
+        leaveId: leave.id
+      };
+      firebaseDb.collection("notifications").doc(notif.id).set(notif);
+    }
+    alert("আবেদনটি নামঞ্জুর/বাতিল করা হয়েছে।");
+  }
+
+  localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+  if (firebaseDb) {
+    firebaseDb.collection("leaves").doc(leave.id).set(leave).catch(err => console.error(err));
+  }
+
+  closeViewCompleteLeaveModal();
+  renderLeaveSection();
+  updateHeaderAndRoleUI();
+}
+
+function submitAMApproval(leaveId, decision) {
+  const user = getLoggedInUser();
+  if (!user) return;
+
+  const leave = (appState.leaves || []).find(l => l.id === leaveId);
+  if (!leave) return;
+
+  const decisionInput = document.getElementById('rdDecisionInput');
+  const decisionNote = decisionInput ? decisionInput.value.trim() : '';
+  const now = new Date();
+  const formattedDate = now.toLocaleDateString('en-GB') + " " + now.toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' });
+
+  if (decision === 'approved') {
+    leave.status = 'approved';
+    leave.rdDecision = decisionNote || 'ছুটি মঞ্জুর ও চূড়ান্ত অনুমোদন করা হলো।';
+    leave.rdName = user.name || user.username;
+    leave.rdApprovedAt = formattedDate;
+    leave.approvalRef = "CARITAS/KHN/MF/LV-" + now.getFullYear() + "/" + Math.floor(1000 + Math.random() * 9000);
+
+    // 1. Notify Applicant
+    if (firebaseDb) {
+      const notif1 = {
+        id: "notif_" + Date.now() + "_1",
+        toUserId: leave.applicantId,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        message: `অভিনন্দন! আপনার ছুটির আবেদনটি চূড়ান্তভাবে অনুমোদিত হয়েছে। স্মারক নং: ${leave.approvalRef}। আপনি এখন অফিস কপি প্রিন্ট করতে পারেন।`,
+        timestamp: Date.now(),
+        isRead: false,
+        remarkType: "leave_approved",
+        leaveId: leave.id
+      };
+      firebaseDb.collection("notifications").doc(notif1.id).set(notif1);
+
+      // 2. Notify Branch Manager for Office Archive & Printing (Satisfies user request)
+      const bmUser = (appState.users || []).find(u => u.level === 2 && u.branchName === leave.applicantBranch);
+      if (bmUser && bmUser.id !== leave.applicantId) {
+        const notif2 = {
+          id: "notif_" + Date.now() + "_2",
+          toUserId: bmUser.id,
+          fromUserId: user.id,
+          fromUserName: user.name,
+          message: `আপনার শাখার কর্মী ${leave.applicantName}-এর ছুটির আবেদন অনুমোদিত হয়েছে। অফিস কপি প্রিন্ট ও সংরক্ষণ করুন।`,
+          timestamp: Date.now() + 5,
+          isRead: false,
+          remarkType: "leave_approved_bm",
+          leaveId: leave.id
+        };
+        firebaseDb.collection("notifications").doc(notif2.id).set(notif2);
+      }
+    }
+
+    if (typeof playNotificationAlert === 'function') {
+      playNotificationAlert("তোমার ছুটির আবেদনটি অনুমোদিত হয়েছে");
+    }
+    alert("🎉 ছুটির আবেদনটি চূড়ান্তভাবে অনুমোদিত হয়েছে!\n\nস্মারক নং: " + leave.approvalRef + "\nআবেদনকারী এবং শাখা ব্যবস্থাপক উভয়ের কাছেই স্বয়ংক্রিয়ভাবে অনুমোদিত প্রিন্ট কপি পৌঁছে গেছে।");
+  } else {
+    leave.status = 'rejected';
+    leave.rdDecision = decisionNote || 'আঞ্চলিক অফিস কর্তৃক নামঞ্জুর/বাতিল';
+    leave.rdName = user.name || user.username;
+    leave.rdApprovedAt = formattedDate;
+
+    if (firebaseDb) {
+      const notif = {
+        id: "notif_" + Date.now(),
+        toUserId: leave.applicantId,
+        fromUserId: user.id,
+        fromUserName: user.name,
+        message: `আপনার ছুটির আবেদনটি আঞ্চলিক অফিস কর্তৃক নামঞ্জুর করা হয়েছে। কারণ: ${leave.rdDecision}`,
+        timestamp: Date.now(),
+        isRead: false,
+        remarkType: "leave_rejected",
+        leaveId: leave.id
+      };
+      firebaseDb.collection("notifications").doc(notif.id).set(notif);
+    }
+    alert("আবেদনটি নামঞ্জুর করা হয়েছে।");
+  }
+
+  localStorage.setItem(STORAGE_KEY_APP, JSON.stringify(appState));
+  if (firebaseDb) {
+    firebaseDb.collection("leaves").doc(leave.id).set(leave).catch(err => console.error(err));
+  }
+
+  closeViewCompleteLeaveModal();
+  renderLeaveSection();
+  updateHeaderAndRoleUI();
+}
+
+function printCurrentLeaveForm() {
+  window.print();
+}
+
+function renderLeaveSection() {
+  const user = getLoggedInUser();
+  if (!user) return;
+  if (!appState.leaves) appState.leaves = [];
+
+  const isHead = isHeadAdmin(user);
+  const isCo = isCoAdmin(user);
+  const isCO = (user.level === 1);
+  const isBM = (user.level === 2);
+  const isAM = (user.level === 3);
+  const isAdmin = isHead || isCo;
+
+  // 1. Populate Top Action Buttons
+  const topActions = document.getElementById('leaveTopActionButtons');
+  if (topActions) {
+    let btnHtml = '';
+    if (isCO) {
+      btnHtml = `
+        <button type="button" onclick="openLeaveApplicationModal('co')" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl shadow transition flex items-center space-x-1.5 text-xs">
+          <span>➕ ছুটির আবেদন ফরম পূরণ করুন</span>
+        </button>
+      `;
+    } else if (isBM) {
+      btnHtml = `
+        <button type="button" onclick="openLeaveApplicationModal('self_bm')" class="px-4 py-2 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold rounded-xl shadow transition flex items-center space-x-1.5 text-xs">
+          <span>➕ বিএম-এর নিজস্ব ছুটির আবেদন</span>
+        </button>
+      `;
+    } else if (isAdmin) {
+      btnHtml = `
+        <button type="button" onclick="openLeaveApplicationModal('admin')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow transition flex items-center space-x-1.5 text-xs">
+          <span>➕ নতুন ছুটির আবেদন (এডমিন)</span>
+        </button>
+      `;
+    }
+    topActions.innerHTML = btnHtml;
+  }
+
+  // 2. Determine Subtabs per Role
+  const subNav = document.getElementById('leaveSubTabNav');
+  const viewContainer = document.getElementById('leaveViewContainer');
+  if (!subNav || !viewContainer) return;
+
+  const branchLeaves = appState.leaves.filter(l => l.applicantBranch === user.branchName);
+  const myLeaves = appState.leaves.filter(l => l.applicantId === user.id);
+  const pendingBMLeaves = branchLeaves.filter(l => l.status === 'pending_bm');
+  const approvedBranchLeaves = branchLeaves.filter(l => l.status === 'approved');
+  const pendingAMLeaves = appState.leaves.filter(l => (l.applicantArea === user.areaName || l.applicantRegion === user.region || isAdmin) && l.status === 'pending_am');
+  const approvedAMLeaves = appState.leaves.filter(l => (l.applicantArea === user.areaName || l.applicantRegion === user.region || isAdmin) && l.status === 'approved');
+
+  let tabs = [];
+  if (isCO) {
+    tabs = [
+      { id: 'my_leaves', label: `📋 আমার ছুটির আবেদনসমূহ (${myLeaves.length})` },
+      { id: 'approved_leaves', label: `✅ অনুমোদিত কপি ও প্রিন্ট (${myLeaves.filter(l=>l.status==='approved').length})` }
+    ];
+  } else if (isBM) {
+    tabs = [
+      { id: 'bm_pending', label: `📥 ফিল্ড কর্মীদের আবেদন (সুপারিশের অপেক্ষায়) (${pendingBMLeaves.length})` },
+      { id: 'bm_approved', label: `🖨️ অনুমোদিত কপি ও প্রিন্ট সংরক্ষণ (${approvedBranchLeaves.length})` },
+      { id: 'bm_self', label: `📋 আমার নিজের ছুটির আবেদন (${myLeaves.length})` }
+    ];
+  } else if (isAM) {
+    tabs = [
+      { id: 'am_pending', label: `📥 এরিয়া পেন্ডিং অনুমোদন (${pendingAMLeaves.length})` },
+      { id: 'am_approved', label: `✅ সকল অনুমোদিত ছুটির রেকর্ড (${approvedAMLeaves.length})` }
+    ];
+  } else {
+    // Admin
+    tabs = [
+      { id: 'admin_all', label: `🌐 সর্বমোট ছুটির ডাটাবেজ (${appState.leaves.length})` },
+      { id: 'admin_pending_bm', label: `⏳ বিএম পেন্ডিং (${appState.leaves.filter(l=>l.status==='pending_bm').length})` },
+      { id: 'admin_pending_am', label: `⏳ এএম পেন্ডিং (${appState.leaves.filter(l=>l.status==='pending_am').length})` },
+      { id: 'admin_approved', label: `✅ অনুমোদিত (${appState.leaves.filter(l=>l.status==='approved').length})` }
+    ];
+  }
+
+  if (activeLeaveSubTab === 'default' || !tabs.find(t => t.id === activeLeaveSubTab)) {
+    activeLeaveSubTab = tabs[0].id;
+  }
+
+  // Render Subnav Buttons
+  let navHtml = '';
+  tabs.forEach(t => {
+    const isActive = (t.id === activeLeaveSubTab);
+    navHtml += `
+      <button type="button" onclick="setLeaveSubTab('${t.id}')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition whitespace-nowrap ${isActive ? 'bg-emerald-700 text-white shadow-sm' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}">
+        ${t.label}
+      </button>
+    `;
+  });
+  subNav.innerHTML = navHtml;
+
+  // Filter leaves based on activeLeaveSubTab
+  let displayList = [];
+  if (activeLeaveSubTab === 'my_leaves') displayList = myLeaves;
+  else if (activeLeaveSubTab === 'approved_leaves') displayList = myLeaves.filter(l => l.status === 'approved');
+  else if (activeLeaveSubTab === 'bm_pending') displayList = pendingBMLeaves;
+  else if (activeLeaveSubTab === 'bm_approved') displayList = approvedBranchLeaves;
+  else if (activeLeaveSubTab === 'bm_self') displayList = myLeaves;
+  else if (activeLeaveSubTab === 'am_pending') displayList = pendingAMLeaves;
+  else if (activeLeaveSubTab === 'am_approved') displayList = approvedAMLeaves;
+  else if (activeLeaveSubTab === 'admin_all') displayList = appState.leaves;
+  else if (activeLeaveSubTab === 'admin_pending_bm') displayList = appState.leaves.filter(l => l.status === 'pending_bm');
+  else if (activeLeaveSubTab === 'admin_pending_am') displayList = appState.leaves.filter(l => l.status === 'pending_am');
+  else if (activeLeaveSubTab === 'admin_approved') displayList = appState.leaves.filter(l => l.status === 'approved');
+
+  // Render Display List
+  if (displayList.length === 0) {
+    viewContainer.innerHTML = `
+      <div class="bg-white rounded-2xl p-10 text-center border border-slate-200 space-y-3">
+        <span class="text-4xl">🌴</span>
+        <h4 class="text-base font-bold text-slate-700">কোনো ছুটির আবেদন পাওয়া যায়নি</h4>
+        <p class="text-xs text-slate-500">এই বিভাগে বর্তমানে কোনো আবেদন অপেক্ষমান বা সংরক্ষিত নেই।</p>
+      </div>
+    `;
+    return;
+  }
+
+  let tableRows = '';
+  displayList.forEach((l, idx) => {
+    let statusBadge = '';
+    if (l.status === 'pending_bm') {
+      statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">⏳ বিএম সুপারিশের অপেক্ষায়</span>';
+    } else if (l.status === 'pending_am') {
+      statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-300">⏳ এএম অনুমোদনের অপেক্ষায়</span>';
+    } else if (l.status === 'approved') {
+      statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">✅ অনুমোদিত (Approved)</span>';
+    } else {
+      statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-300">❌ নামঞ্জুর (Rejected)</span>';
+    }
+
+    tableRows += `
+      <tr class="hover:bg-slate-50 transition border-b border-slate-100 text-xs">
+        <td class="p-3 text-center font-bold text-slate-600">${idx + 1}</td>
+        <td class="p-3 font-semibold text-slate-900">
+          <div>${l.applicantName}</div>
+          <div class="text-[11px] text-slate-500 font-normal">${l.applicantDesig || '-'} • ${l.applicantBranch || '-'}</div>
+        </td>
+        <td class="p-3">
+          <span class="font-bold text-blue-900 bg-blue-50 px-2 py-0.5 rounded text-[11px] border border-blue-200">${getLeaveTypeName(l.leaveType)}</span>
+        </td>
+        <td class="p-3 font-medium text-slate-700">
+          <div>${l.startDate} থেকে ${l.endDate}</div>
+          <div class="text-[11px] font-bold text-emerald-700">${l.totalDays} দিন</div>
+        </td>
+        <td class="p-3 text-[11px] text-slate-500 font-mono">
+          ${l.appliedAt || '-'}
+        </td>
+        <td class="p-3 text-center">
+          ${statusBadge}
+        </td>
+        <td class="p-3 text-center space-x-1.5 whitespace-nowrap">
+          <button type="button" onclick="openViewCompleteLeaveModal('${l.id}')" class="px-3 py-1 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-bold transition inline-flex items-center space-x-1 shadow-sm" title="সম্পূর্ণ ফরম ও সুপারিশ পর্যালোচনা">
+            <span>👁️ ফরম দেখুন</span>
+          </button>
+          ${l.status === 'approved' ? `
+            <button type="button" onclick="openViewCompleteLeaveModal('${l.id}'); setTimeout(printCurrentLeaveForm, 400);" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition inline-flex items-center space-x-1 shadow-sm" title="অফিস কপি প্রিন্ট">
+              <span>🖨️ প্রিন্ট</span>
+            </button>
+          ` : ''}
+        </td>
+      </tr>
+    `;
+  });
+
+  viewContainer.innerHTML = `
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 uppercase text-[11px] font-bold border-b border-slate-200">
+              <th class="p-3 text-center w-12">নং</th>
+              <th class="p-3">আবেদনকারী ও শাখা</th>
+              <th class="p-3">ছুটির ধরণ</th>
+              <th class="p-3">সময়কাল ও দিন</th>
+              <th class="p-3">আবেদনের সময়</th>
+              <th class="p-3 text-center">বর্তমান অবস্থা</th>
+              <th class="p-3 text-center">অ্যাকশন</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+function setLeaveSubTab(tabId) {
+  activeLeaveSubTab = tabId;
+  renderLeaveSection();
+}
+
+
+        function initApp() {
       initFirebaseDatabase();
       setAutoDate();
       updateHeaderAndRoleUI();
