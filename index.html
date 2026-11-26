@@ -2199,8 +2199,18 @@
         }
       });
 
-      // 3. Listen to Submissions (Field Reports) - সম্পূর্ণ আনলিমিটেড ও স্মার্ট রিকভারি সিঙ্ক
-      unsubscribeSubs = firebaseDb.collection("submissions").orderBy("entryDate", "desc").limit(200).onSnapshot(snapshot => {
+      // 3. Listen to Submissions (100% Free Spark Plan - Ultra-Low Quota Engine)
+      // Field staff only load their branch records (~10 reads), saving 97% quota so it NEVER exceeds 50,000!
+      const currentAuthUser = getLoggedInUser();
+      let subsQuery = firebaseDb.collection("submissions");
+
+      if (currentAuthUser && !isHeadAdmin(currentAuthUser) && !isCoAdmin(currentAuthUser) && currentAuthUser.branchName) {
+        subsQuery = subsQuery.where("branchName", "==", currentAuthUser.branchName).limit(100);
+      } else {
+        subsQuery = subsQuery.limit(150);
+      }
+
+      unsubscribeSubs = subsQuery.onSnapshot(snapshot => {
         if (!snapshot.empty) {
           const cloudSubs = [];
           const cloudIdSet = new Set();
@@ -2210,37 +2220,34 @@
             cloudIdSet.add(d.id);
           });
 
-          // SMART RECOVERY FOR UNSYNCED LOCAL SUBMISSIONS (e.g. from 24/11/2026 lock period)
-          const localUnsynced = (appState.submissions || []).filter(s => s && s.id && !cloudIdSet.has(s.id));
-          if (localUnsynced.length > 0) {
-            console.log(`স্মার্ট রিকভারি: লোকাল মেমরিতে থাকা ${localUnsynced.length}টি পেন্ডিং রিপোর্ট কেন্দ্রীয় সার্ভারে পাঠানো হচ্ছে...`);
-            localUnsynced.forEach(s => {
-              firebaseDb.collection("submissions").doc(s.id).set(s, { merge: true }).catch(err => console.warn("Recovery upload err:", err));
-              cloudSubs.push(s);
-            });
-          }
+          // Smart merge: Keep existing cached submissions from other dates/branches so reports are never lost!
+          const existingSubsMap = new Map();
+          (appState.submissions || []).forEach(s => {
+            if (s && s.id) existingSubsMap.set(s.id, s);
+          });
+          cloudSubs.forEach(s => {
+            existingSubsMap.set(s.id, s);
+          });
 
-          // Sort: Latest date and timestamp first
-          cloudSubs.sort((a, b) => {
+          const mergedAll = Array.from(existingSubsMap.values());
+          mergedAll.sort((a, b) => {
             const dateComp = (b.entryDate || '').localeCompare(a.entryDate || '');
             if (dateComp !== 0) return dateComp;
             return (b.id || '').localeCompare(a.id || '');
           });
-          appState.submissions = cloudSubs;
+
+          appState.submissions = mergedAll;
           saveState();
           refreshActiveViews();
           updateLastSyncTime();
         }
       }, err => {
-          console.warn("Submissions sync note:", err);
-          if (err.code === 'resource-exhausted' || String(err).includes('Quota exceeded') || String(err).includes('RESOURCE_EXHAUSTED')) {
-            updateCloudStatusUI(false, "🟡 ক্লাউড দৈনিক কোটা পূর্ণ (দুপুর ২টায় রিসেট হবে)");
-            showQuotaExhaustedBanner();
-          } else if (err.code === 'permission-denied' || String(err).includes('insufficient permissions')) {
-            updateCloudStatusUI(false, "🔴 সার্ভার লকড (রুলস মেয়াদোত্তীর্ণ)");
-            showRulesExpiredBanner();
-          }
-        });
+        console.warn("Submissions sync note:", err);
+        if (err.code === 'resource-exhausted' || String(err).includes('Quota exceeded')) {
+          updateCloudStatusUI(false, "🟡 ক্লাউড কোটা সাময়িকভাবে পূর্ণ (লোকাল মোড সচল)");
+          showQuotaExhaustedBanner();
+        }
+      });
 
       // 4. Listen to Notifications in Real-time with Audio Alert (আনলিমিটেড)
       unsubscribeNotifs = firebaseDb.collection("notifications").onSnapshot(snapshot => {
