@@ -1236,6 +1236,20 @@
     </div>
   </div>
 
+    <!-- Persistent Alert Floating Banner (Appears when repeating sound is active) -->
+  <div id="activeNotificationAlertBanner" class="hidden fixed top-4 right-4 left-4 sm:left-auto sm:w-96 z-50 bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 text-white p-3.5 rounded-2xl shadow-2xl border-2 border-white/80 flex items-center justify-between space-x-3 cursor-pointer transition-all duration-300 animate-pulse hover:scale-[1.02]" onclick="openNotificationsModalFromBanner()">
+    <div class="flex items-center space-x-2.5">
+      <span class="text-2xl animate-bounce">🔔</span>
+      <div>
+        <h4 class="text-xs font-black tracking-wide" id="alertBannerTitle">নতুন নোটিফিকেশন এসেছে!</h4>
+        <p class="text-[11px] text-rose-100 font-medium" id="alertBannerSub">দেখতে এখানে ক্লিক করুন (শব্দ বন্ধ হবে)</p>
+      </div>
+    </div>
+    <button type="button" onclick="event.stopPropagation(); stopNotificationAlertLoop();" class="text-[10px] font-bold bg-white/20 hover:bg-white/30 text-white px-2.5 py-1.5 rounded-lg border border-white/40 transition flex-shrink-0">
+      শব্দ বন্ধ ✕
+    </button>
+  </div>
+
   <!-- Modal: Notifications / Remarks Modal -->
   <div id="notificationsModal" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
@@ -1253,8 +1267,8 @@
       <div class="p-3.5 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between flex-wrap gap-2">
         <div class="flex items-center space-x-2">
           <span class="text-xs font-semibold text-slate-700">সকল প্রাপ্ত বার্তা ও পর্যবেক্ষণ</span>
-          <button type="button" onclick="playNotificationAlert('তোমার একটি ফিড ব্যাক এসেছে')" class="text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold px-2.5 py-1 rounded-lg border border-amber-300 transition flex items-center space-x-1 shadow-sm" title="নোটিফিকেশন সাউন্ড বাজিয়ে পরীক্ষা করুন">
-            <span>🔊 সাউন্ড শুনুন</span>
+          <button type="button" onclick="playLoudNotificationAlertDirect('তোমার একটি ফিড ব্যাক এসেছে')" class="text-xs bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-lg border border-amber-600 transition flex items-center space-x-1.5 shadow-md" title="উচ্চ ভলিউম সাউন্ড বাজিয়ে পরীক্ষা করুন">
+            <span>🔊 উচ্চ সাউন্ড টেস্ট</span>
           </button>
         </div>
         <button onclick="markAllNotificationsAsRead()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline">
@@ -2268,24 +2282,39 @@
             let hasNewlyArrived = false;
             let alertVoiceMessage = "তোমার একটি ফিড ব্যাক এসেছে";
 
-            incomingNotifs.forEach(n => {
-              if (!seenNotificationIds.has(n.id)) {
-                seenNotificationIds.add(n.id);
-                // Trigger sound only on live incoming notifications (after initial page load)
-                if (isInitialNotificationLoadDone) {
+            if (!isInitialNotificationLoadDone) {
+              // On initial load, record IDs and arm repeating alert on user's first touch/click if unread exist
+              incomingNotifs.forEach(n => seenNotificationIds.add(n.id));
+              if (incomingNotifs.length > 0) {
+                const firstNotif = incomingNotifs[0];
+                const initMsg = firstNotif.remarkType === 'broadcast' 
+                  ? "তোমার একটি নতুন ঘোষণা এসেছে" 
+                  : (firstNotif.remarkType && firstNotif.remarkType.includes('leave') 
+                      ? "তোমার ছুটির আবেদন সংক্রান্ত নোটিফিকেশন এসেছে" 
+                      : "তোমার একটি ফিড ব্যাক এসেছে");
+                setupPendingUnreadAlert(initMsg);
+              }
+              isInitialNotificationLoadDone = true;
+            } else {
+              incomingNotifs.forEach(n => {
+                if (!seenNotificationIds.has(n.id)) {
+                  seenNotificationIds.add(n.id);
                   hasNewlyArrived = true;
                   if (n.remarkType === 'broadcast') {
                     alertVoiceMessage = "তোমার একটি নতুন ঘোষণা এসেছে";
+                  } else if (n.remarkType && n.remarkType.includes('leave')) {
+                    alertVoiceMessage = "তোমার ছুটির আবেদন সংক্রান্ত নোটিফিকেশন এসেছে";
                   } else {
                     alertVoiceMessage = "তোমার একটি ফিড ব্যাক এসেছে";
                   }
                 }
-              }
-            });
+              });
 
-            if (hasNewlyArrived) {
-              playNotificationAlert(alertVoiceMessage);
-              showToast(`🔔 ${alertVoiceMessage}!`, "info");
+              if (hasNewlyArrived) {
+                // High-volume 3-4 times repeating alert if user does not view
+                startNotificationAlertLoop(alertVoiceMessage, 4);
+                showToast(`🔔 ${alertVoiceMessage}!`, "info");
+              }
             }
           }
 
@@ -4620,86 +4649,142 @@
 
 
     // ==========================================
-    // NOTIFICATION SOUND & VOICE ALERT ENGINE
+    // NOTIFICATION SOUND & VOICE ALERT ENGINE (HIGH-VOLUME & 3-4X REPEAT)
     // ==========================================
     let audioCtx = null;
     let isAudioUnlocked = false;
     let seenNotificationIds = new Set();
     let isInitialNotificationLoadDone = false;
+    let notificationAlertTimer = null;
+    let notificationAlertCount = 0;
+    let isNotificationAlertActive = false;
+    let currentAlertMessage = "তোমার একটি ফিড ব্যাক এসেছে";
+    let pendingUnreadVoiceText = null;
+    let hasAlertedPendingUnread = false;
 
-    function unlockAudioPlayback() {
-      if (!audioCtx) {
+    function getOrCreateAudioContext() {
+      try {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) {
+        if (!AudioContextClass) return null;
+        if (!audioCtx) {
           audioCtx = new AudioContextClass();
         }
+        if (audioCtx && audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      } catch (e) {
+        console.warn("AudioContext error:", e);
+        return null;
       }
-      if (audioCtx && audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
-      isAudioUnlocked = true;
     }
 
-    // Attach user gesture listeners to comply with browser autoplay policies
-    document.addEventListener('click', unlockAudioPlayback, { once: false });
-    document.addEventListener('keydown', unlockAudioPlayback, { once: false });
-    document.addEventListener('touchstart', unlockAudioPlayback, { once: false });
+    function unlockAudioPlayback() {
+      try {
+        const ctx = getOrCreateAudioContext();
+        if (ctx && ctx.state === 'suspended') {
+          ctx.resume();
+        }
+        isAudioUnlocked = true;
+      } catch (e) {
+        console.warn("Audio unlock notice:", e);
+      }
+    }
 
-    // Synthesize a gentle 3-tone notification chime (D5 -> A5 -> D6 bell chime)
+    // Attach user gesture listeners to comply with all browser autoplay policies (Mobile & Desktop)
+    function handleUserGestureForAudio() {
+      unlockAudioPlayback();
+      if (pendingUnreadVoiceText && !hasAlertedPendingUnread) {
+        hasAlertedPendingUnread = true;
+        const msg = pendingUnreadVoiceText;
+        pendingUnreadVoiceText = null;
+        setTimeout(() => {
+          startNotificationAlertLoop(msg, 4);
+        }, 350);
+      }
+    }
+
+    ['click', 'touchstart', 'touchend', 'pointerdown', 'keydown'].forEach(evt => {
+      document.addEventListener(evt, handleUserGestureForAudio, { passive: true });
+    });
+
+    // Synthesize an ULTRA-LOUD, piercing multi-harmonic notification chime (Ding-Dong-Ring!)
     function playChimeTone() {
       try {
         unlockAudioPlayback();
-        if (!audioCtx) return;
+        const ctx = getOrCreateAudioContext();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
 
-        const now = audioCtx.currentTime;
+        const now = ctx.currentTime;
 
-        // Tone 1: 587.33 Hz (D5)
-        const osc1 = audioCtx.createOscillator();
-        const gain1 = audioCtx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(587.33, now);
-        gain1.gain.setValueAtTime(0.25, now);
-        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
-        osc1.connect(gain1);
-        gain1.connect(audioCtx.destination);
-        osc1.start(now);
-        osc1.stop(now + 0.35);
+        // Dynamics Compressor: maximizes perceived loudness across phone & laptop speakers without clipping
+        const compressor = ctx.createDynamicsCompressor();
+        compressor.threshold.setValueAtTime(-14, now);
+        compressor.knee.setValueAtTime(30, now);
+        compressor.ratio.setValueAtTime(12, now);
+        compressor.attack.setValueAtTime(0.003, now);
+        compressor.release.setValueAtTime(0.20, now);
+        compressor.connect(ctx.destination);
 
-        // Tone 2: 880 Hz (A5)
-        const osc2 = audioCtx.createOscillator();
-        const gain2 = audioCtx.createGain();
-        osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(880, now + 0.12);
-        gain2.gain.setValueAtTime(0.3, now + 0.12);
-        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
-        osc2.connect(gain2);
-        gain2.connect(audioCtx.destination);
-        osc2.start(now + 0.12);
-        osc2.stop(now + 0.55);
+        // Master Gain Node set to MAXIMUM volume (1.0)
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(1.0, now);
+        masterGain.connect(compressor);
 
-        // Tone 3: 1174.66 Hz (D6 - High bell)
-        const osc3 = audioCtx.createOscillator();
-        const gain3 = audioCtx.createGain();
-        osc3.type = 'sine';
-        osc3.frequency.setValueAtTime(1174.66, now + 0.25);
-        gain3.gain.setValueAtTime(0.35, now + 0.25);
-        gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
-        osc3.connect(gain3);
-        gain3.connect(audioCtx.destination);
-        osc3.start(now + 0.25);
-        osc3.stop(now + 0.85);
+        // Helper to synthesize sharp penetrating harmonic tones
+        function addTone(freq, startTime, duration, type, gainLevel) {
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.type = type || 'triangle';
+          osc.frequency.setValueAtTime(freq, startTime);
+
+          // Instant attack, sustained piercing body, clean exponential decay
+          gainNode.gain.setValueAtTime(0.001, startTime);
+          gainNode.gain.linearRampToValueAtTime(gainLevel, startTime + 0.015);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+
+          osc.connect(gainNode);
+          gainNode.connect(masterGain);
+          osc.start(startTime);
+          osc.stop(startTime + duration);
+        }
+
+        // Chime Pulse 1 (Ding!) - High Pitch Sharp Harmonic Chord
+        addTone(1046.50, now, 0.32, 'triangle', 0.95); // C6
+        addTone(1318.51, now, 0.32, 'square', 0.45);   // E6 (piercing harmonic)
+        addTone(2093.00, now, 0.32, 'sine', 0.85);     // C7
+
+        // Chime Pulse 2 (Dong!) - High Resonant Chord
+        addTone(1567.98, now + 0.16, 0.42, 'triangle', 0.95); // G6
+        addTone(1975.53, now + 0.16, 0.42, 'square', 0.40);   // B6
+        addTone(2637.02, now + 0.16, 0.42, 'sine', 0.85);     // E7
+
+        // Chime Pulse 3 (Attention Chime Ring!)
+        addTone(2093.00, now + 0.34, 0.55, 'triangle', 1.0);  // C7
+        addTone(3135.96, now + 0.34, 0.55, 'sine', 0.70);      // G7
+
+        // Hardware vibration on Android / mobile devices
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          try {
+            navigator.vibrate([350, 150, 350, 150, 500]);
+          } catch (ve) {}
+        }
       } catch (err) {
-        console.warn("Chime tone synthesis note:", err);
+        console.warn("Loud chime tone error:", err);
       }
     }
 
-    // Natural Bengali Speech Synthesis: "তোমার একটি ফিড ব্যাক এসেছে"
+    // Natural Bengali Speech Synthesis at MAXIMUM Volume
     function speakBengaliNotice(textToSpeak) {
       if ('speechSynthesis' in window) {
         try {
           window.speechSynthesis.cancel();
           const utterance = new SpeechSynthesisUtterance(textToSpeak || "তোমার একটি ফিড ব্যাক এসেছে");
           utterance.lang = 'bn-BD';
+          utterance.volume = 1.0; // 100% maximum volume
           utterance.rate = 0.92;
           utterance.pitch = 1.05;
 
@@ -4714,18 +4799,116 @@
       }
     }
 
-    // Master function: Plays chime tone then voice announcement
+    // Single Notification Alert (Loud Chime Tone + Bengali Voice)
     function playNotificationAlert(voiceText) {
       playChimeTone();
       setTimeout(() => {
         speakBengaliNotice(voiceText || "তোমার একটি ফিড ব্যাক এসেছে");
-      }, 350);
+      }, 380);
     }
 
-        // ==========================================
+    // Direct High-Volume Test Button
+    function playLoudNotificationAlertDirect(voiceText) {
+      unlockAudioPlayback();
+      playNotificationAlert(voiceText || "তোমার একটি ফিড ব্যাক এসেছে");
+      showToast("🔊 উচ্চ সাউন্ড ও ভয়েস টেস্ট সফলভাবে বাজানো হয়েছে!", "success");
+    }
+
+    // Show persistent visual alert banner while repeating loop is sounding
+    function showActiveAlertBanner(message, cycle, maxCycles) {
+      const banner = document.getElementById('activeNotificationAlertBanner');
+      if (!banner) return;
+      const title = document.getElementById('alertBannerTitle');
+      const sub = document.getElementById('alertBannerSub');
+      if (title) title.textContent = `🔔 ${message}! (${cycle}/${maxCycles})`;
+      if (sub) sub.textContent = "দেখতে এখানে ক্লিক করুন (শব্দ বন্ধ হবে)";
+      banner.classList.remove('hidden');
+    }
+
+    function hideActiveAlertBanner() {
+      const banner = document.getElementById('activeNotificationAlertBanner');
+      if (banner) banner.classList.add('hidden');
+    }
+
+    // Repeating Alert Engine: Sounds 3-4 times every 8.5 seconds until user views notification
+    function startNotificationAlertLoop(voiceText, maxCycles = 4) {
+      // If modal is currently open, user is already viewing; sound once and do not repeat
+      const modal = document.getElementById('notificationsModal');
+      if (modal && !modal.classList.contains('hidden')) {
+        playNotificationAlert(voiceText);
+        return;
+      }
+
+      stopNotificationAlertLoop(); // cancel any active loop
+      currentAlertMessage = voiceText || "তোমার একটি ফিড ব্যাক এসেছে";
+      isNotificationAlertActive = true;
+      notificationAlertCount = 0;
+
+      function runCycle() {
+        // If modal was opened in the meantime, stop immediately
+        const m = document.getElementById('notificationsModal');
+        if (m && !m.classList.contains('hidden')) {
+          stopNotificationAlertLoop();
+          return;
+        }
+
+        // Check if there are unread notifications remaining
+        const user = getLoggedInUser();
+        if (user && appState.notifications) {
+          const hasUnread = appState.notifications.some(n => (n.toUserId === user.id || n.toUserId === 'all') && !n.isRead);
+          if (!hasUnread) {
+            stopNotificationAlertLoop();
+            return;
+          }
+        }
+
+        notificationAlertCount++;
+        playNotificationAlert(currentAlertMessage);
+        showActiveAlertBanner(currentAlertMessage, notificationAlertCount, maxCycles);
+
+        if (notificationAlertCount < maxCycles) {
+          // Repeat cycle after 8.5 seconds (gives time for chime + voice utterance + pause)
+          notificationAlertTimer = setTimeout(runCycle, 8500);
+        } else {
+          // Reached max cycles (4 times); stop loop automatically
+          notificationAlertTimer = setTimeout(() => {
+            stopNotificationAlertLoop();
+          }, 5000);
+        }
+      }
+
+      runCycle();
+    }
+
+    // Stop repeating alert loop immediately (called on modal open, modal close, mark as read, or banner click)
+    function stopNotificationAlertLoop() {
+      if (notificationAlertTimer) {
+        clearTimeout(notificationAlertTimer);
+        notificationAlertTimer = null;
+      }
+      isNotificationAlertActive = false;
+      notificationAlertCount = 0;
+      if ('speechSynthesis' in window) {
+        try { window.speechSynthesis.cancel(); } catch (e) {}
+      }
+      hideActiveAlertBanner();
+    }
+
+    function openNotificationsModalFromBanner() {
+      stopNotificationAlertLoop();
+      toggleNotificationsModal();
+    }
+
+    function setupPendingUnreadAlert(voiceText) {
+      if (hasAlertedPendingUnread) return;
+      pendingUnreadVoiceText = voiceText;
+    }
+
+    // ==========================================
     // NOTIFICATIONS SYSTEM
     // ==========================================
     function toggleNotificationsModal() {
+      stopNotificationAlertLoop();
       const modal = document.getElementById('notificationsModal');
       if (modal.classList.contains('hidden')) {
         renderNotificationsList();
@@ -4736,6 +4919,7 @@
     }
 
     function closeNotificationsModal() {
+      stopNotificationAlertLoop();
       document.getElementById('notificationsModal').classList.add('hidden');
     }
 
@@ -4800,6 +4984,7 @@
     }
 
     function markNotificationAsRead(notifId) {
+      stopNotificationAlertLoop();
       if (!appState.notifications) return;
       const notif = appState.notifications.find(n => n.id === notifId);
       if (notif) {
@@ -4814,6 +4999,7 @@
     }
 
     function markAllNotificationsAsRead() {
+      stopNotificationAlertLoop();
       const user = getLoggedInUser();
       if (!user || !appState.notifications) return;
 
