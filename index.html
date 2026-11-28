@@ -2220,6 +2220,8 @@
             cloudIdSet.add(d.id);
           });
 
+          // Rogue write loop completely removed to protect 20,000 daily write limit!
+
           // Smart merge: Keep existing cached submissions from other dates/branches so reports are never lost!
           const existingSubsMap = new Map();
           (appState.submissions || []).forEach(s => {
